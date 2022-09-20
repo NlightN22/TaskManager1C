@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import space.active.taskmanager1c.data.remote.DemoData
 import space.active.taskmanager1c.data.utils.GsonParserImpl
@@ -23,8 +24,5 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
-
-        val data = DemoData().getDemoData(context = this, jsonParser = GsonParserImpl(Gson()))
-        Log.e(TAG, "data: $data")
     }
 }
