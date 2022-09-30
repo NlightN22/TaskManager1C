@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.data.local.db.entity
+package space.active.taskmanager1c.data.local.db.TasksFromRemote.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

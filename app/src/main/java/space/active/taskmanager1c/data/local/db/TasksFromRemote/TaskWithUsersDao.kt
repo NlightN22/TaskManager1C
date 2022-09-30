@@ -1,12 +1,10 @@
-package space.active.taskmanager1c.data.local.db
+package space.active.taskmanager1c.data.local.db.TasksFromRemote
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import space.active.taskmanager1c.data.local.db.entity.MessageDb
-import space.active.taskmanager1c.data.local.db.entity.TaskDb
-import space.active.taskmanager1c.data.local.db.entity.UserDb
+import androidx.room.*
+import space.active.taskmanager1c.data.local.db.TasksFromRemote.entity.MessageDb
+import space.active.taskmanager1c.data.local.db.TasksFromRemote.entity.TaskDb
+import space.active.taskmanager1c.data.local.db.TasksFromRemote.entity.UserDb
+import space.active.taskmanager1c.data.local.db.TasksFromRemote.relations.TaskAndMessages
 import space.active.taskmanager1c.data.remote.dto.UserDto
 
 @Dao
@@ -26,13 +24,18 @@ interface TaskWithUsersDao {
     @Query("DELETE FROM MessageDb WHERE :messageId")
     suspend fun deleteMessage(messageId: String)
 
+    @Transaction
+    @Query("SELECT * FROM TaskDb WHERE id = :taskId")
+    suspend fun getTaskAndMessages(taskId: String): TaskAndMessages
     @Query("SELECT * FROM TaskDb")
     suspend fun getTasks(): List<TaskDb>
-    @Query("SELECT * FROM TaskDb WHERE :taskId")
+    @Query("SELECT * FROM TaskDb WHERE id = :taskId")
     suspend fun getTask(taskId: String): TaskDb
-    @Query("SELECT * FROM UserDb WHERE :userId")
+    @Query("SELECT * FROM UserDb")
+    suspend fun getUsers(): List<UserDb>
+    @Query("SELECT * FROM UserDb WHERE id = :userId")
     suspend fun getUser(userId: String): UserDb
-    @Query("SELECT * FROM MessageDb WHERE :messageId")
+    @Query("SELECT * FROM MessageDb WHERE id = :messageId")
     suspend fun getMessage(messageId: String): MessageDb
 
 }

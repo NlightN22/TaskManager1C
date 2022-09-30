@@ -1,9 +1,9 @@
-package space.active.taskmanager1c.data.local.db.entity.relations
+package space.active.taskmanager1c.data.local.db.TasksFromRemote.relations
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import space.active.taskmanager1c.data.local.db.entity.TaskDb
-import space.active.taskmanager1c.data.local.db.entity.UserDb
+import space.active.taskmanager1c.data.local.db.TasksFromRemote.entity.TaskDb
+import space.active.taskmanager1c.data.local.db.TasksFromRemote.entity.UserDb
 
 data class AuthorAndTasks(
     @Embedded

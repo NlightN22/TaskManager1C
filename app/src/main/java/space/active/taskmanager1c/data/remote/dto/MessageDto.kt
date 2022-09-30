@@ -1,6 +1,6 @@
 package space.active.taskmanager1c.data.remote.dto
 
-import space.active.taskmanager1c.data.local.db.entity.MessageDb
+import space.active.taskmanager1c.data.local.db.TasksFromRemote.entity.MessageDb
 
 data class MessageDto(
     val authorId: String,

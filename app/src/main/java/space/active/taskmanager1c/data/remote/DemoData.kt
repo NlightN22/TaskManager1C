@@ -1,8 +1,8 @@
 package space.active.taskmanager1c.data.remote
 
+import space.active.taskmanager1c.data.remote.dto.ExampleData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import space.active.taskmanager1c.data.remote.dto.ExampleData
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.TaskListDto
 import space.active.taskmanager1c.data.utils.GsonParserImpl
