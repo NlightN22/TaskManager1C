@@ -1,20 +1,24 @@
-package space.active.taskmanager1c.data.remote.dto.new
+package space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities
 
-data class Task(
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class TaskInput(
     val authorId: String,
     val coPerformers: List<String>,
     val date: String,
     val description: String,
     val endDate: String,
+    @PrimaryKey(autoGenerate = false)
     val id: String,
     val mainTaskId: String,
-    val messages: List<Message>,
     val name: String,
     val number: String,
     val objName: String,
-    val observers: List<Any>,
+    val observers: List<String>,
     val performerId: String,
-    val photos: List<Any>,
+    val photos: List<String>,
     val priority: String,
     val status: String
 )

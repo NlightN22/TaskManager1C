@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.data.remote
+package space.active.taskmanager1c.data.repository
 
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.TaskListDto

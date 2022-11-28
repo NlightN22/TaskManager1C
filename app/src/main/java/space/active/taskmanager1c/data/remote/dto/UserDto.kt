@@ -1,13 +1,13 @@
 package space.active.taskmanager1c.data.remote.dto
 
-import space.active.taskmanager1c.data.local.db.TasksFromRemote.entity.UserDb
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 
 data class UserDto(
     val id: String,
     val name: String?
 ) {
-    fun toUserDb(): UserDb {
-        return UserDb(
+    fun toUserDb(): UserInput {
+        return UserInput(
             id = id,
             name = name?: ""
         )

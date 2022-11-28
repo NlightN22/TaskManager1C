@@ -1,6 +1,6 @@
 package space.active.taskmanager1c.data.remote.dto
 
-import space.active.taskmanager1c.data.local.db.TasksFromRemote.entity.MessageDb
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.MessageInput
 
 data class MessageDto(
     val authorId: String,
@@ -8,8 +8,8 @@ data class MessageDto(
     val id: String,
     val text: String
 ) {
-    fun toMessageDb(taskId: String): MessageDb {
-        return MessageDb(
+    fun toMessageDb(taskId: String): MessageInput {
+        return MessageInput(
             authorId = authorId,
             date = date,
             id = id,
