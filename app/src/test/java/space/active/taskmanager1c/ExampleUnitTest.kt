@@ -20,13 +20,13 @@ class ExampleUnitTest {
 
 //    @Test
 //    fun test_suspends() = runBlocking {
-//        var job1 = launch(Dispatchers.Unconfined) { start_auto()}
+//        var job1 = launch(AppDispatchers.Unconfined) { start_auto()}
 //        delay(500L)
 //        start_manual()
 //        delay(500L)
 //        if (!job1.isActive) {
 //            println("Job1 start new one")
-//            job1 = launch(Dispatchers.Unconfined) { start_auto() }
+//            job1 = launch(AppDispatchers.Unconfined) { start_auto() }
 //        }
 //    }
 //

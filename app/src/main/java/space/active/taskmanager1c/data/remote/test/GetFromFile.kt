@@ -7,7 +7,7 @@ class GetFromFile(
 )
 {
     operator fun invoke(): String {
-        val inputStream = context.assets.open("demo_json/md4_original_cut.json")
+        val inputStream = context.assets.open("demo_json/md4_original_cut.json") // demo_json
         val size: Int = inputStream.available()
         val buffer = ByteArray(size)
         inputStream.read(buffer)

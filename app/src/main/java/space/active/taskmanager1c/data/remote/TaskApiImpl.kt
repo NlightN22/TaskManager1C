@@ -1,6 +1,9 @@
 package space.active.taskmanager1c.data.remote
 
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.TaskListDto
 import space.active.taskmanager1c.data.remote.test.GetFromFile
@@ -11,13 +14,19 @@ class TaskApiImpl(
     private val jsonParser: JsonParser,
     private val getFromFile: GetFromFile
 ): TaskApi {
-    override suspend fun getTaskList(): TaskListDto {
-
-        return jsonParser
-            .fromJson<TaskListDto>(
-                getFromFile.invoke(),
-                object : TypeToken<TaskListDto>(){}.type
-            ) ?: TaskListDto()
+    override suspend fun getTaskList(): Flow<Request<TaskListDto>> = flow {
+        emit(PendingRequest())
+        try {
+            emit(PendingRequest())
+            val result = jsonParser
+                .fromJson<TaskListDto>(
+                    getFromFile.invoke(),
+                    object : TypeToken<TaskListDto>(){}.type
+                ) ?: throw NullAnswerFromServer()
+            emit(SuccessRequest(result))
+        } catch ( e: Exception) {
+            emit(ErrorRequest(e))
+        }
     }
 
     override suspend fun sendTaskChanges(task: TaskDto) {
