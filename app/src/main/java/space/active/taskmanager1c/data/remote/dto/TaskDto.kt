@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.data.remote.dto
 
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.UsersInTask
 
 data class TaskDto(
     val authorId: String,
@@ -22,8 +23,12 @@ data class TaskDto(
 ) {
     fun toTaskDb(): TaskInput {
         return TaskInput(
-            authorId = authorId,
-            coPerformers = coPerformers,
+            usersInTask = UsersInTask(
+                authorId = authorId,
+                coPerformers = coPerformers ?: emptyList(),
+                observers = observers ?: emptyList(),
+                performerId = performerId
+            ),
             date = date,
             description = description ?: "",
             endDate = endDate ?: "",
@@ -32,8 +37,6 @@ data class TaskDto(
             name = name ?: "",
             number = number ?: "",
             objName = objName ?: "",
-            observers = observers ?: emptyList(),
-            performerId = performerId,
             photos = photos?: emptyList(),
             priority = priority,
             status = status,

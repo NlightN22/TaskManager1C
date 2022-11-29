@@ -5,7 +5,7 @@ import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.repository.TasksRepository
 
-class TaskRepositoryImpl(
+class MergedTaskRepositoryImpl(
     val inputTask: InputTaskRepository,
     val outputTask: OutputTaskRepository
 ): TasksRepository {
