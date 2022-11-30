@@ -20,6 +20,17 @@ data class TaskInput(
     val priority: String,
     val status: String,
     @Embedded val usersInTask: UsersInTask
-)
-
-// todo: create an embeddable class users
+) {
+    companion object {
+        /**
+         * In params is list where we take items with unique ID and replace by them current list
+         * Return List with replaced items
+         */
+        fun List<TaskInput>.mapAndReplaceById(inputList: List<TaskInput>): List<TaskInput> {
+            val replacedList = this.map { list1Item ->
+                inputList.find { list2Item -> (list1Item.id == list2Item.id) } ?: list1Item
+            }
+            return replacedList
+        }
+    }
+}

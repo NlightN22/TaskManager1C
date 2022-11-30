@@ -1,9 +1,12 @@
 package space.active.taskmanager1c.data.repository
 
+import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.Request
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 interface OutputTaskRepository {
-    fun saveChangesAndSand(task: Task): Request<Boolean>
-    fun getOutputTasks(): Request<List<Task>>
+    val outputTask: Flow<Request<List<OutputTask>>>
+    fun saveChangesAndTrySend(task: OutputTask): Flow<Request<Any>>
+    suspend fun getTasks(): List<OutputTask>
+    suspend fun deleteTasks(outputTasks: List<OutputTask>)
 }

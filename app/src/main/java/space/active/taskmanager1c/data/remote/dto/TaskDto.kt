@@ -2,6 +2,7 @@ package space.active.taskmanager1c.data.remote.dto
 
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.UsersInTask
+import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 data class TaskDto(
     val authorId: String,
@@ -21,8 +22,7 @@ data class TaskDto(
     val priority: String,
     val status: String
 ) {
-    fun toTaskDb(): TaskInput {
-        return TaskInput(
+    fun toTaskInput(): TaskInput = TaskInput(
             usersInTask = UsersInTask(
                 authorId = authorId,
                 coPerformers = coPerformers ?: emptyList(),
@@ -40,6 +40,26 @@ data class TaskDto(
             photos = photos?: emptyList(),
             priority = priority,
             status = status,
+        )
+
+    companion object {
+        fun fromOutputTask(outputTask: OutputTask): TaskDto = TaskDto(
+            authorId = outputTask.taskInput.usersInTask.authorId,
+            coPerformers = outputTask.taskInput.usersInTask.coPerformers,
+            date = outputTask.taskInput.date,
+            description = outputTask.taskInput.description,
+            endDate = outputTask.taskInput.endDate,
+            id = outputTask.taskInput.id,
+            mainTaskId = outputTask.taskInput.mainTaskId,
+            messages = emptyList(), // TODO separate message to another request
+            name = outputTask.taskInput.name,
+            number = outputTask.taskInput.number,
+            objName = outputTask.taskInput.objName,
+            observers = outputTask.taskInput.usersInTask.observers,
+            performerId = outputTask.taskInput.usersInTask.performerId,
+            photos = emptyList(), // TODO separate photos to another request
+            priority = outputTask.taskInput.priority,
+            status = outputTask.taskInput.status
         )
     }
 }

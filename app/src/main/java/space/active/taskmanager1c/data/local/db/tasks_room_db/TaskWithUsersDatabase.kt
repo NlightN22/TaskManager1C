@@ -7,7 +7,7 @@ import space.active.taskmanager1c.data.local.db.Converters
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.MessageInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
-import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTasks
+import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 
 @Database(
@@ -15,7 +15,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
         TaskInput::class,
         UserInput::class,
         MessageInput::class,
-        OutputTasks::class
+        OutputTask::class
                ],
     version = 1,
 

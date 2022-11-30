@@ -14,7 +14,7 @@ class TaskApiImpl(
     private val jsonParser: JsonParser,
     private val getFromFile: GetFromFile
 ): TaskApi {
-    override suspend fun getTaskList(): Flow<Request<TaskListDto>> = flow {
+    override fun getTaskListFlow(): Flow<Request<TaskListDto>> = flow {
         emit(PendingRequest())
         try {
             emit(PendingRequest())
@@ -29,11 +29,15 @@ class TaskApiImpl(
         }
     }
 
-    override suspend fun sendTaskChanges(task: TaskDto) {
+    override suspend fun sendTaskChanges(task: TaskDto): Request<TaskDto> {
         TODO("Not yet implemented")
     }
 
     override suspend fun authUser(username: String, password: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getTaskList(): Request<TaskListDto> {
         TODO("Not yet implemented")
     }
 }

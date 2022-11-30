@@ -68,7 +68,7 @@ class MainViewModel @Inject constructor(
      */
 
     private suspend fun getTasksFromRepository() {
-        tmpApi.getTaskList().collect { request ->
+        tmpApi.getTaskListFlow().collect { request ->
             when (request) {
                 is SuccessRequest -> {
                     val listTaskName = request.data.tasks.map { it.name }
