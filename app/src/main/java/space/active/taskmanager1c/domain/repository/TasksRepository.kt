@@ -5,7 +5,7 @@ import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.domain.models.Task
 
 interface TasksRepository {
-    val listTasks: Flow<Request<List<Task>>>
+    val listTasksFlow: Flow<List<Task>>
     fun getTask(taskId: String): Flow<Request<Task>>
     fun editTask(task: Task): Flow<Request<Any>>
     fun createNewTask(task: Task): Flow<Request<Any>>

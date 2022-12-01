@@ -5,7 +5,7 @@ import java.lang.RuntimeException
 /*
 Class with all variant of exceptions in this application
  */
-sealed class AppExceptions: RuntimeException()
+sealed class AppExceptions: IllegalStateException()
 
 object AuthException: AppExceptions()
 object EmptyObject: AppExceptions()

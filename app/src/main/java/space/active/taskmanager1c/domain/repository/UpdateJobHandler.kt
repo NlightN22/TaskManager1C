@@ -5,5 +5,6 @@ import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.Request
 
 interface UpdateJobHandler {
-    fun updateJob(coroutineScope: CoroutineScope): Flow<Request<Any>>
+    fun updateJob(): Flow<Request<Any>>
+    suspend fun inputFetchJob(): Request<Any>
 }

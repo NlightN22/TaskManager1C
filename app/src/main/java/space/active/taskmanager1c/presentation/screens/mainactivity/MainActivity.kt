@@ -5,8 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.ActivityMainBinding
+import javax.inject.Inject
 
 private const val TAG = "MainActivity"
 
@@ -14,6 +17,8 @@ private const val TAG = "MainActivity"
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
     private lateinit var binding: ActivityMainBinding
+
+    @Inject lateinit var logger: Logger
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,8 +35,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun observers() {
         lifecycleScope.launchWhenStarted {
-            viewModel.testFlow.collectLatest {
-                binding.jobContent.text = it.toString()
+            viewModel.listTasks.collectLatest {
+                binding.jobContent.text = it
             }
         }
     }

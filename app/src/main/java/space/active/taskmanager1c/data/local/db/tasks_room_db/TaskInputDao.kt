@@ -14,7 +14,9 @@ interface TaskInputDao {
     @Query("SELECT * FROM TaskInput WHERE id = :taskId")
     fun getTaskAndMessages(taskId: String): Flow<TaskAndMessages>
     @Query("SELECT * FROM TaskInput")
-    fun getTasks(): Flow<List<TaskInput>>
+    fun getTasksFlow(): Flow<List<TaskInput>>
+    @Query("SELECT * FROM TaskInput")
+    fun getTasks(): List<TaskInput>
     @Query("SELECT * FROM TaskInput WHERE id = :taskId")
     fun getTask(taskId: String): TaskInput
     @Query("SELECT * FROM UserInput")
@@ -23,5 +25,7 @@ interface TaskInputDao {
     fun getUser(userId: String): UserInput
     @Query("SELECT * FROM MessageInput WHERE id = :messageId")
     fun getMessage(messageId: String): MessageInput
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertTask(taskInput: TaskInput)
 
 }

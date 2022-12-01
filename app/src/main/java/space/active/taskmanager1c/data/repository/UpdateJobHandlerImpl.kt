@@ -1,27 +1,32 @@
 package space.active.taskmanager1c.data.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import space.active.taskmanager1c.coreutils.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import space.active.taskmanager1c.coreutils.ErrorRequest
+import space.active.taskmanager1c.coreutils.PendingRequest
+import space.active.taskmanager1c.coreutils.Request
+import space.active.taskmanager1c.coreutils.SuccessRequest
+import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.domain.repository.UpdateJobHandler
 
+private const val TAG = "UpdateJobHandlerImpl"
+
+
 class UpdateJobHandlerImpl(
     private val inputTaskRepository: InputTaskRepository,
     private val outputTaskRepository: OutputTaskRepository,
-    private val taskApi: TaskApi
+    private val taskApi: TaskApi,
+    private val logger: Logger
 ) : UpdateJobHandler {
-
-//    private val inputTasks: Flow<Request<List<TaskInput>>> = inputTaskRepository.listTasks
-//    private val outputTask: Flow<Request<List<OutputTask>>> = outputTaskRepository.outputTask
 
     // TODO add IO Dispatcher to data layer
     // TODO add jobs class for emit request
 
-    override fun updateJob(coroutineScope: CoroutineScope): Flow<Request<Any>> = flow {
+    override fun updateJob(): Flow<Request<Any>> = flow {
         // Проверяем таблицу исходящих задач. С определенной переодичностью
         // Если в таблице исходящих есть задачи, то сравниваем их с таблицей входящих задач.
         // При совпадении исходящих и входящих задач удаляем совпадающие из таблицы исходящих.
@@ -31,11 +36,13 @@ class UpdateJobHandlerImpl(
         //  записываем задачу во входящие задачи и удаляем из исходящих отправленную
         // Далее запрашиваем с сервера входящие задачи. С определенной периодичностью.
         // Обновляем список входящих задач в таблице.
-        // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер
+        // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
         while (true) {
+            logger.log(TAG,"Job start")
             emit(outputSendJob())
             emit(inputFetchJob())
-            delay(100) // TODO add CONST DELAY
+            delay(1000) // TODO add CONST DELAY
+            logger.log(TAG,"Job end")
         }
     }
 
@@ -64,10 +71,10 @@ class UpdateJobHandlerImpl(
                 }
             }
         }
-        return PendingRequest()
+        return SuccessRequest(Any())
     }
 
-    private suspend fun inputFetchJob(): Request<Any> {
+    override suspend fun inputFetchJob(): Request<Any> {
         val result = taskApi.getTaskList()
         when (result) {
             is SuccessRequest -> {

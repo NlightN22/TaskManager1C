@@ -1,14 +1,15 @@
 package space.active.taskmanager1c.presentation.screens.mainactivity
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import space.active.taskmanager1c.coreutils.*
-import space.active.taskmanager1c.data.repository.TaskApi
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.domain.repository.TasksRepository
+import space.active.taskmanager1c.domain.repository.UpdateJobHandler
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -16,15 +17,18 @@ private const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val tmpApi: TaskApi
+//    private val tmpApi: TaskApi
+    private val repository: TasksRepository,
+    private val updateJobHandler: UpdateJobHandler
 ) : ViewModel() {
 
-    private val _testFlow = MutableStateFlow(0)
-    val testFlow = _testFlow.asStateFlow()
+    @Inject
+    lateinit var logger: Logger
 
-    private val _isAuthenticated = MutableStateFlow(true)
+    private var _listTasks: MutableStateFlow<String> = MutableStateFlow("")
+    var listTasks: StateFlow<String> = _listTasks
 
-    private val _taskList = MutableStateFlow<List<Task>>(emptyList<Task>())
+    private var runningJob: AtomicBoolean = AtomicBoolean(false)
 
     /**
      * Variable for stoppable job witch regular update data after user login
@@ -37,23 +41,33 @@ class MainViewModel @Inject constructor(
 
     fun updateJob() {
         val coroutineContext: CoroutineContext =
-            SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { context, exception -> }
+            SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { context, exception ->
+                logger.log(TAG, "updateJob CoroutineExceptionHandler ${exception.message}")
+            }
         updateJob = CoroutineScope(coroutineContext)
-        Log.d(TAG, "updateJob.isActive ${updateJob.isActive}")
+        logger.log(TAG, "updateJob.isActive ${updateJob.isActive}")
         updateJob.launch {
-            try {
-                Log.d(TAG, "updateJob launch")
-                while (true) {
+            if (runningJob.get()) {
+                logger.error(TAG, "Update Job already running")
+                return@launch
+            }
+            runningJob.compareAndSet(false, true)
+            while (true) {
+                try {
+                    logger.log(TAG, "updateJob launch")
+
                     /**
                     set update work here
                      */
-                    getTasksFromRepository()
-                    delay(1000) // TODO: delete
+                    updateJobHandler.updateJob().collectLatest {
+                        logger.log(TAG, it.toString())
+                    }
+                } catch (e: CancellationException) {
+                    logger.log(TAG, "updateJob CancellationException ${e.message}")
+                } catch (e: Exception) {
+                    logger.log(TAG, "updateJob Exception ${e.message}")
                 }
-            } catch (e: CancellationException) {
-                Log.d(TAG, "updateJob Exception ${e.message}")
-            } catch (e: Exception) {
-                Log.d(TAG, "updateJob Exception ${e.message}")
+                delay(1500) // TODO: delete
             }
         }
     }
@@ -67,33 +81,10 @@ class MainViewModel @Inject constructor(
      * - catch update timeouts and tries and when the threshold is exceeded show information to user
      */
 
-    private suspend fun getTasksFromRepository() {
-        tmpApi.getTaskListFlow().collect { request ->
-            when (request) {
-                is SuccessRequest -> {
-                    val listTaskName = request.data.tasks.map { it.name }
-                    Log.d(TAG, listTaskName.joinToString("\n"))
-                }
-                is PendingRequest -> {
-                    Log.d(TAG, "Loading")
-                }
-                is ErrorRequest -> {
-                    if (request.exception is NullAnswerFromServer) {
-                        Log.e(
-                            TAG,
-                            "Error: server not response. I'll try it again, but now we can show only cache"
-                        )
-                    } else {
-                        Log.e(TAG, "Error: ${request.exception.message}")
-                    }
-                }
-            }
-        }
-    }
-
     fun stopUpdateJob() {
-        Log.d(TAG, "stopUpdateData")
+        logger.log(TAG, "stopUpdateData")
         updateJob.cancel()
-        Log.d(TAG, "updateJob cancel")
+        runningJob.compareAndSet(true, false)
+        logger.log(TAG, "updateJob cancel")
     }
 }
