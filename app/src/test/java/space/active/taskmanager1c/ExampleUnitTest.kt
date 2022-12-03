@@ -3,6 +3,9 @@ package space.active.taskmanager1c
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaField
+import kotlin.reflect.jvm.javaGetter
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -11,6 +14,23 @@ import org.junit.Test
  */
 
 class ExampleUnitTest {
+
+    @Test
+    fun printValues() {
+        data class A(val a: String ="A", val b:String = "B")
+        val (valA, valB) = A()
+        println("valA: $valA")
+        println("valB: $valB")
+    }
+
+
+    @Test
+    fun getPropertiesFromList() {
+        class A(val p: Int)
+        println(A::p.javaGetter) // prints "public final int A.getP()"
+        println(A::p.javaField)  // prints "private final int A.p"
+    }
+
 
     @Test
     fun compareEqualsTwoDataClasses() {
@@ -51,7 +71,7 @@ class ExampleUnitTest {
             ),
             class2.copy(
                 id = "3",
-                combined1 = Combined1(id = "4", listStr = listOf("new_value"))
+                combined1 = Combined1(id = "", listStr = listOf("new_value"))
             ),
         )
         val expectedRes = true
@@ -94,7 +114,53 @@ class ExampleUnitTest {
 
     }
 
+    @Test
+    fun getClassParametersAndValues() {
+        val dataClass1 = ForGetParameters()
+
+        val instance = DataClassTest2("A", "B", "C", "D", "E")
+
+
+        var mapProp: MutableMap<String, String> = mutableMapOf()
+        DataClassTest2::class.memberProperties.forEach { member ->
+            val name = member.name
+            val value = member.get(instance) as String
+
+            mapProp += Pair(name,value)
+        }
+        val string = "wait"
+
+    }
+
+
+
 }
+
+
+data class DataClassTest2(val a: String, val b: String, val c: String, val d: String, val e: String): BaseData()
+
+data class ForGetParameters(
+    val id: String = "id1",
+    val strList: List<String> = listOf("val1","val2","val3")
+)
+
+open class BaseData {
+
+    fun getProperties(data: Any):  MutableMap<String, String> {
+        val mapProperties: MutableMap<String, String> = mutableMapOf()
+        Any::class.memberProperties.forEach { member ->
+            val name = member.name
+            val value = member.get(data) as String
+            mapProperties += Pair(name, value)
+        }
+        return mapProperties
+    }
+}
+
+
+
+
+
 
 private fun <T> List<T>.addNotContained(inputList: List<T>): List<T> {
     /**

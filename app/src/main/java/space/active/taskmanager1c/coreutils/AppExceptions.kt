@@ -1,14 +1,15 @@
 package space.active.taskmanager1c.coreutils
 
-import java.lang.RuntimeException
-
 /*
 Class with all variant of exceptions in this application
  */
-sealed class AppExceptions: IllegalStateException()
+sealed class AppExceptions(override val message: String?): Throwable()
 
-object AuthException: AppExceptions()
-object EmptyObject: AppExceptions()
-object ServerNoAnswer: AppExceptions()
-class NullAnswerFromServer: AppExceptions()
-object DbUnexpectedResult: AppExceptions()
+object AuthException: AppExceptions(message = "AuthException")
+object EmptyObject: AppExceptions(message = "EmptyObject")
+object ServerNoAnswer: AppExceptions(message = "ServerNoAnswer")
+class NullAnswerFromServer: AppExceptions(message = "NullAnswerFromServer")
+object DbUnexpectedResult: AppExceptions(message = "DbUnexpectedResult")
+object ThisTaskIsNotEdited: AppExceptions(message = "ThisTaskIsNotEdited")
+object ThisTaskIsNotNew: AppExceptions(message = "ThisTaskIsNotNew")
+object TaskIsNewAndInSendingState: AppExceptions(message = "TaskIsNewAndInSendingState")

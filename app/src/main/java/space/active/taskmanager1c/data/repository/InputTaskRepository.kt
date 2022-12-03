@@ -11,7 +11,8 @@ interface InputTaskRepository  {
     val listTasksRequest: Flow<Request<List<TaskInput>>>
     fun getTaskAndMessages(taskId: String): Flow<TaskAndMessages>
     suspend fun getTasks(): List<TaskInput>
-    suspend fun getTask(taskId: String): TaskInput
+    fun getTaskFlow(taskId: String): Flow<TaskInput?>
+    suspend fun getTask(taskId: String): TaskInput?
     suspend fun insertTask(taskInput: TaskInput)
     suspend fun insertTasks(taskInputList: List<TaskInput>)
     // todo: sorted, ordered, filtered tasks

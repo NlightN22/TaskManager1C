@@ -14,6 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="16dp"
+        android:maxLines="20"
         android:text="Job not started"
         />
 
@@ -27,7 +28,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Login"
+        android:text="Start Job"
         />
 
     <Button
@@ -37,8 +38,50 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/loginButton"
-        android:text="Logout"
+        android:text="Stop Job"
         />
+
+    <Button
+        android:id="@+id/readTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/saveNewButton"
+        app:layout_constraintTop_toBottomOf="@+id/logoutButton"
+        android:text="ReadTask"
+        />
+
+    <Button
+        android:id="@+id/saveNewButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/readTask"
+        app:layout_constraintEnd_toStartOf="@+id/editButton"
+        app:layout_constraintTop_toBottomOf="@+id/logoutButton"
+        android:text="SaveNewTask"
+        />
+
+    <Button
+        android:id="@+id/editButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/saveNewButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logoutButton"
+        android:text="EditTask"
+        />
+
+    <TextView
+        android:id="@+id/testCaseText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/saveNewButton"
+        android:layout_marginTop="16dp"
+        android:text="ReadTask"
+        />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

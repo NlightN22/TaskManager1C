@@ -6,6 +6,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.remote.TaskApiImpl
 import space.active.taskmanager1c.data.remote.test.GetFromFile
 import space.active.taskmanager1c.data.repository.TaskApi
@@ -19,10 +20,11 @@ class RemoteModule {
 
     @Provides
     @Singleton
-    fun provideTaskApi(app: Application): TaskApi {
+    fun provideTaskApi(app: Application, logger: Logger): TaskApi {
         return TaskApiImpl(
             jsonParser = GsonParserImpl(Gson()),
-            getFromFile = GetFromFile(app)
+            getFromFile = GetFromFile(app),
+            logger = logger
         )
     }
 

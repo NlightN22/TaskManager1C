@@ -8,7 +8,10 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.Tas
 @Entity
 data class OutputTask(
     @PrimaryKey(autoGenerate = true)
-    val outputId: Int,
+    val outputId: Int = 0,
+
+    val newTask: Boolean = false,
+
     @Embedded
     val taskInput: TaskInput
 )

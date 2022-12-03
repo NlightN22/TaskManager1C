@@ -11,22 +11,21 @@ import space.active.taskmanager1c.data.remote.dto.TaskListDto
 import space.active.taskmanager1c.data.remote.test.GetFromFile
 import space.active.taskmanager1c.data.repository.TaskApi
 import space.active.taskmanager1c.data.utils.JsonParser
-import java.security.spec.ECField
 import javax.inject.Inject
 
 private const val TAG = "TaskApiImpl"
 
-class TaskApiImpl(
+class TaskApiImpl @Inject constructor(
     private val jsonParser: JsonParser,
-    private val getFromFile: GetFromFile
+    private val getFromFile: GetFromFile,
+    private val logger: Logger
 ): TaskApi {
-
-    @Inject lateinit var logger: Logger
 
     override fun getTaskListFlow(): Flow<Request<TaskListDto>> = flow {
         emit(PendingRequest())
         try {
             emit(PendingRequest())
+//            val result = TaskListDto(tasks = emptyList(), users = emptyList())
             val result = jsonParser
                 .fromJson<TaskListDto>(
                     getFromFile.invoke(),
@@ -39,6 +38,7 @@ class TaskApiImpl(
     }
 
     override suspend fun sendTaskChanges(task: TaskDto): Request<TaskDto> {
+        // TODO mock replace to real impl
         return try {
             logger.log(TAG, task.toString())
             SuccessRequest(task)
@@ -52,6 +52,8 @@ class TaskApiImpl(
         TODO("Not yet implemented")
     }
 
+
+    // TODO Change to Flow
     override suspend fun getTaskList(): Request<TaskListDto> {
         return try {
             val result = getTaskListFlow().lastOrNull()

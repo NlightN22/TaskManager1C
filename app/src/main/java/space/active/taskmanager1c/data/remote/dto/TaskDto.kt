@@ -61,5 +61,24 @@ data class TaskDto(
             priority = outputTask.taskInput.priority,
             status = outputTask.taskInput.status
         )
+
+        fun fromInputTask(inputTask: TaskInput): TaskDto = TaskDto(
+            authorId = inputTask.usersInTask.authorId,
+            coPerformers = inputTask.usersInTask.coPerformers,
+            date = inputTask.date,
+            description = inputTask.description,
+            endDate = inputTask.endDate,
+            id = inputTask.id,
+            mainTaskId = inputTask.mainTaskId,
+            messages = emptyList(), // TODO separate message to another request
+            name = inputTask.name,
+            number = inputTask.number,
+            objName = inputTask.objName,
+            observers = inputTask.usersInTask.observers,
+            performerId = inputTask.usersInTask.performerId,
+            photos = emptyList(), // TODO separate photos to another request
+            priority = inputTask.priority,
+            status = inputTask.status
+        )
     }
 }

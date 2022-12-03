@@ -1,16 +1,17 @@
 package space.active.taskmanager1c.coreutils
 
 import kotlinx.coroutines.*
-
-fun CoroutineScope.resume (appDispatchers: AppDispatchers) {
-
-    val coroutineContext =
-        SupervisorJob() + appDispatchers + CoroutineExceptionHandler { context, exception -> }
-// TODO delete or impl
-    if (!this.isActive) {
-        this.newCoroutineContext(coroutineContext)
-//        val tmp = AppDispatchers()
-
-
-    }
-}
+//import space.active.taskmanager1c.di.AppDispatchersModule
+//
+//fun CoroutineScope.resume (appDispatchers: AppDispatchersModule) {
+//
+//    val coroutineContext =
+//        SupervisorJob() + appDispatchers + CoroutineExceptionHandler { context, exception -> }
+//// TODO delete or impl
+//    if (!this.isActive) {
+//        this.newCoroutineContext(coroutineContext)
+////        val tmp = AppDispatchersModule()
+//
+//
+//    }
+//}

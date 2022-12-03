@@ -1,32 +1,37 @@
-package space.active.taskmanager1c.data.repository
+package space.active.taskmanager1c.domain.use_case
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import space.active.taskmanager1c.coreutils.ErrorRequest
-import space.active.taskmanager1c.coreutils.PendingRequest
-import space.active.taskmanager1c.coreutils.Request
-import space.active.taskmanager1c.coreutils.SuccessRequest
+import kotlinx.coroutines.flow.flowOn
+import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.data.local.db.Converters
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.remote.dto.TaskDto
-import space.active.taskmanager1c.domain.repository.UpdateJobHandler
+import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
+import space.active.taskmanager1c.data.remote.dto.paramsToJsonStyle
+import space.active.taskmanager1c.data.repository.InputTaskRepository
+import space.active.taskmanager1c.data.repository.OutputTaskRepository
+import space.active.taskmanager1c.data.repository.TaskApi
+import space.active.taskmanager1c.di.IoDispatcher
+import javax.inject.Inject
 
-private const val TAG = "UpdateJobHandlerImpl"
+private const val TAG = "HandleJobForUpdateDb"
 
 
-class UpdateJobHandlerImpl(
+class HandleJobForUpdateDb
+@Inject constructor(
     private val inputTaskRepository: InputTaskRepository,
     private val outputTaskRepository: OutputTaskRepository,
     private val taskApi: TaskApi,
-    private val logger: Logger
-) : UpdateJobHandler {
-
-    // TODO add IO Dispatcher to data layer
-    // TODO add jobs class for emit request
-
-    override fun updateJob(): Flow<Request<Any>> = flow {
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val logger: Logger,
+    private val converters: Converters
+) {
+    fun updateJob(updateDelay: Long = 1000L): Flow<Request<Any>> = flow {
         // Проверяем таблицу исходящих задач. С определенной переодичностью
         // Если в таблице исходящих есть задачи, то сравниваем их с таблицей входящих задач.
         // При совпадении исходящих и входящих задач удаляем совпадающие из таблицы исходящих.
@@ -38,24 +43,55 @@ class UpdateJobHandlerImpl(
         // Обновляем список входящих задач в таблице.
         // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
         while (true) {
-            logger.log(TAG,"Job start")
+            logger.log(TAG, "Job start")
             emit(outputSendJob())
             emit(inputFetchJob())
-            delay(1000) // TODO add CONST DELAY
-            logger.log(TAG,"Job end")
+            delay(updateDelay)
+            logger.log(TAG, "Job end")
         }
-    }
+    }.flowOn(ioDispatcher)
 
     private suspend fun outputSendJob(): Request<Any> {
         val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
         val inputTasks: List<TaskInput> = inputTaskRepository.getTasks()
         if (outputTasks.isNotEmpty()) {
+            // find an delete the same tasks in output and input table
             val deleteOutputTaskList: List<OutputTask> =
                 getEqualOutputTasksInInputTasks(outputTasks, inputTasks)
             outputTaskRepository.deleteTasks(deleteOutputTaskList)
+            // get only not deleted output tasks
             val outputTasksAfterDelete: List<OutputTask> = outputTaskRepository.getTasks()
             outputTasksAfterDelete.forEach { outputTask ->
-                val result = taskApi.sendTaskChanges(TaskDto.fromOutputTask(outputTask))
+                // prepare to send changes
+                val existingInputTask = inputTaskRepository.getTask(outputTask.taskInput.id)
+                var result: Request<TaskDto>
+                // convert to DTO
+                val outToDTO = TaskDto.fromOutputTask(outputTask)
+                // find diffs with TaskInput if id in input table or send as is
+                if (existingInputTask != null) {
+                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited)
+                    // if task is not edited and existing in input table
+                    if (!outputTask.newTask) {
+                        // get taskDTO with id and only diffs params
+                        val outDTOWithoutId = outToDTO.copy(id = "")
+                        // get diff map key value
+                        val inputDTO = TaskDto.fromInputTask(existingInputTask)
+                        val diffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
+                        // send in Json style
+                        // {name=New task name in Edit Task, number=New number}
+                        val final = diffs.paramsToJsonStyle(converters)
+                        logger.log(TAG, final.toString())
+                    }
+                } else {
+                    // if task is not new
+                    result = ErrorRequest<TaskDto>(ThisTaskIsNotNew)
+                    // clear id for new tasks
+                    if (outputTask.newTask) {
+                        val withoutId = outToDTO.copy(id = "")
+                        // send all params
+                        result = taskApi.sendTaskChanges(withoutId)
+                    }
+                }
                 when (result) {
                     is SuccessRequest -> {
                         inputTaskRepository.insertTask(result.data.toTaskInput())
@@ -74,7 +110,7 @@ class UpdateJobHandlerImpl(
         return SuccessRequest(Any())
     }
 
-    override suspend fun inputFetchJob(): Request<Any> {
+    suspend fun inputFetchJob(): Request<Any> {
         val result = taskApi.getTaskList()
         when (result) {
             is SuccessRequest -> {
@@ -89,6 +125,23 @@ class UpdateJobHandlerImpl(
             }
         }
     }
+
+    fun inputFetchJobFlow() = flow<Request<Any>> {
+        taskApi.getTaskListFlow().collect { request ->
+            when (request) {
+                is SuccessRequest -> {
+                    inputTaskRepository.insertTasks(request.data.toTaskInputList())
+                    emit(SuccessRequest(Any()))
+                }
+                is ErrorRequest -> {
+                    emit(ErrorRequest(request.exception))
+                }
+                is PendingRequest -> {
+                    emit(PendingRequest())
+                }
+            }
+        }
+    }.flowOn(ioDispatcher)
 
     private fun getEqualOutputTasksInInputTasks(
         outputTasks: List<OutputTask>,

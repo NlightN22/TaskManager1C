@@ -22,7 +22,7 @@ class SuccessRequest<T>(
  * Operation has finished with error
  */
 class ErrorRequest<T>(
-    val exception: Exception
+    val exception: Throwable
 ) : Request<T>()
 
 /**

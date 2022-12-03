@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f6d0740c697107a8cddba020ca507c55",
+    "identityHash": "bbc457b98ad98344a00e33442ece97b7",
     "entities": [
       {
         "tableName": "TaskInput",
@@ -180,11 +180,17 @@
       },
       {
         "tableName": "OutputTask",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`outputId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT NOT NULL, `id` TEXT NOT NULL, `mainTaskId` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT NOT NULL, `photos` TEXT NOT NULL, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `observers` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`outputId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `newTask` INTEGER NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT NOT NULL, `id` TEXT NOT NULL, `mainTaskId` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT NOT NULL, `photos` TEXT NOT NULL, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `observers` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "outputId",
             "columnName": "outputId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "newTask",
+            "columnName": "newTask",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -292,7 +298,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f6d0740c697107a8cddba020ca507c55')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bbc457b98ad98344a00e33442ece97b7')"
     ]
   }
 }

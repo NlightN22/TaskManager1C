@@ -1,33 +1,60 @@
 package space.active.taskmanager1c.data.local.db.tasks_room_db
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import space.active.taskmanager1c.coreutils.EmptyObject
-import space.active.taskmanager1c.coreutils.ErrorRequest
-import space.active.taskmanager1c.coreutils.Request
-import space.active.taskmanager1c.coreutils.SuccessRequest
+import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.repository.OutputTaskRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class OutputTaskRepositoryImpl(
-    private val taskOutputDao: TaskOutputDao
-): OutputTaskRepository {
-    override val outputTask: Flow<List<OutputTask>> = taskOutputDao.getOutputTasksFlow()
-    //    override val outputTask: Flow<Request<List<OutputTask>>> = taskOutputDao.getOutputTasksFlow().map { listOutput ->
-//        if (listOutput.isNotEmpty()) {
-//            SuccessRequest(listOutput)
-//        } else {
-//            ErrorRequest(EmptyObject)
-//        }
-//    }
+private const val TAG = "OutputTaskRepositoryImpl"
 
-    override suspend fun insertTask(outputTask: OutputTask) = taskOutputDao.insertTask(outputTask)
+
+class OutputTaskRepositoryImpl (
+    private val taskOutputDao: TaskOutputDao,
+    private val logger: Logger
+) : OutputTaskRepository {
+    override val outputTaskList: Flow<List<OutputTask>> = taskOutputDao.getOutputTasksFlow()
+
+    override suspend fun insertTask(outputTask: OutputTask)  {
+        /**
+         * check for the same task in table by input taskId
+         */
+        val existingInTable = getTask(outputTask.taskInput.id)
+        if (existingInTable != null) {
+            /**
+             *  check the same without output task fields
+             */
+            val incomeWithoutId = outputTask.copy(outputId = 0)
+            val existingWithoutId = existingInTable.copy(outputId = 0)
+            if (incomeWithoutId == existingWithoutId) {
+                logger.error(
+                    TAG,
+                    "fun insertTask find existing task ${outputTask.taskInput.id} in table"
+                )
+            } else {
+                taskOutputDao.insertTask(outputTask)
+            }
+        } else {
+            taskOutputDao.insertTask(outputTask)
+        }
+    }
 
     override suspend fun getTasks(): List<OutputTask> = taskOutputDao.getOutputTasks()
+
+    override fun getTaskFlow(taskInputId: String): Flow<OutputTask?> =
+        taskOutputDao.getOutputTaskFlow(taskInputId)
+
+    override suspend fun getTask(taskInputId: String): OutputTask? =
+        taskOutputDao.getOutputTask(taskInputId)
 
     override suspend fun deleteTasks(outputTasks: List<OutputTask>) {
         outputTasks.forEach {
             taskOutputDao.deleteOutputTask(it.outputId)
         }
+    }
+
+    override suspend fun deleteTask(outputTask: OutputTask) {
+        taskOutputDao.deleteOutputTask(outputTask.outputId)
     }
 }

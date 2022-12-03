@@ -17,8 +17,12 @@ interface TaskInputDao {
     fun getTasksFlow(): Flow<List<TaskInput>>
     @Query("SELECT * FROM TaskInput")
     fun getTasks(): List<TaskInput>
+
     @Query("SELECT * FROM TaskInput WHERE id = :taskId")
-    fun getTask(taskId: String): TaskInput
+    fun getTaskFlow(taskId: String): Flow<TaskInput?>
+
+    @Query("SELECT * FROM TaskInput WHERE id = :taskId")
+    fun getTask(taskId: String): TaskInput?
     @Query("SELECT * FROM UserInput")
     fun getUsers(): List<UserInput>
     @Query("SELECT * FROM UserInput WHERE id = :userId")

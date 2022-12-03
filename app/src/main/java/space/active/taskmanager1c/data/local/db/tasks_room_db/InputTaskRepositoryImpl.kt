@@ -30,7 +30,10 @@ class InputTaskRepositoryImpl(
     override fun getTaskAndMessages(taskId: String): Flow<TaskAndMessages> =
         inputDao.getTaskAndMessages(taskId)
 
-    override suspend fun getTask(taskId: String): TaskInput = inputDao.getTask(taskId)
+    override fun getTaskFlow(taskId: String): Flow<TaskInput?> = inputDao.getTaskFlow(taskId)
+
+    override suspend fun getTask(taskId: String): TaskInput? = inputDao.getTask(taskId)
+
     override suspend fun getTasks(): List<TaskInput> = inputDao.getTasks()
 
     override suspend fun insertTask(taskInput: TaskInput) {

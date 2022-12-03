@@ -4,14 +4,16 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.InputTaskRepositoryImpl
 import space.active.taskmanager1c.data.local.db.tasks_room_db.OutputTaskRepositoryImpl
 import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskInputDao
 import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskOutputDao
-import space.active.taskmanager1c.data.repository.*
+import space.active.taskmanager1c.data.repository.InputTaskRepository
+import space.active.taskmanager1c.data.repository.MergedTaskRepositoryImpl
+import space.active.taskmanager1c.data.repository.OutputTaskRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
-import space.active.taskmanager1c.domain.repository.UpdateJobHandler
 import javax.inject.Singleton
 
 @Module
@@ -26,8 +28,8 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun providesOutputTaskRepository(outputDao: TaskOutputDao): OutputTaskRepository {
-        return OutputTaskRepositoryImpl(outputDao)
+    fun providesOutputTaskRepository(outputDao: TaskOutputDao, logger: Logger): OutputTaskRepository {
+        return OutputTaskRepositoryImpl(outputDao, logger)
     }
 
     @Provides
@@ -35,22 +37,9 @@ class RepositoryModule {
     fun providesTasksRepository(
         inputRepo: InputTaskRepository,
         outputRepo: OutputTaskRepository,
-        logger: Logger
+        logger: Logger,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): TasksRepository {
-        return MergedTaskRepositoryImpl(inputRepo, outputRepo, logger)
+        return MergedTaskRepositoryImpl(inputRepo, outputRepo, ioDispatcher, logger)
     }
-
-    @Provides
-    @Singleton
-    fun providesUpdateJobHandler(
-        inputRepo: InputTaskRepository,
-        outputRepo: OutputTaskRepository,
-        taskApi: TaskApi,
-        logger: Logger
-    ): UpdateJobHandler {
-        return UpdateJobHandlerImpl(inputRepo, outputRepo, taskApi, logger)
-    }
-
-
-
 }

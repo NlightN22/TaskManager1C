@@ -25,4 +25,8 @@ class Converters(
             object : TypeToken<ArrayList<String>>(){}.type
         ) ?: emptyList<String>()
     }
+
+    fun <T,R>mapToJson(map: Map<T,R>): String {
+        return jsonParser.toJsonSimple(map) ?: ""
+    }
 }

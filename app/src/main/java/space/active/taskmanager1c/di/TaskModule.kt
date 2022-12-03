@@ -1,21 +1,24 @@
 package space.active.taskmanager1c.di
 
-import android.app.Application
-import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import space.active.taskmanager1c.data.repository.TaskApi
-import space.active.taskmanager1c.data.remote.TaskApiImpl
-import space.active.taskmanager1c.data.remote.test.GetFromFile
-import space.active.taskmanager1c.data.utils.GsonParserImpl
+import space.active.taskmanager1c.domain.repository.TasksRepository
+import space.active.taskmanager1c.domain.use_case.HandleEmptyTaskList
+import space.active.taskmanager1c.domain.use_case.HandleJobForUpdateDb
 import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-object TaskModule {
-
-
-
-}
+//@Module
+//@InstallIn(SingletonComponent::class)
+//object TaskModule {
+//
+//    @Provides
+//    @Singleton
+//    fun provideHandleEmptyTaskList(
+//        repository: TasksRepository,
+//        updateJob: HandleJobForUpdateDb,
+//        dispatcher: IoDispatcher
+//    ): HandleEmptyTaskList = HandleEmptyTaskList(repository, updateJob)
+//
+//}

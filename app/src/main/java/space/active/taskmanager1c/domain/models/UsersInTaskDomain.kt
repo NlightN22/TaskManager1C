@@ -8,6 +8,14 @@ data class UsersInTaskDomain(
     val coPerformers: List<String>,
     val observers: List<String>,
 ) {
+
+    fun toTaskInput() = UsersInTask(
+        authorId = this.authorId,
+        performerId = this.performerId,
+        coPerformers = this.coPerformers,
+        observers = this.observers,
+    )
+
     companion object {
         fun fromInputTask(inTaskUsers: UsersInTask): UsersInTaskDomain = UsersInTaskDomain(
             authorId = inTaskUsers.authorId,
