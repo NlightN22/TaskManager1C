@@ -7,6 +7,12 @@
     android:layout_height="match_parent"
     tools:context=".presentation.screens.login.LoginFragment">
 
+    <ImageButton
+        android:id="@+id/options_menu"
+        style="@style/OptionsMenu"
+        tools:ignore="MissingConstraints" />
+
+
 
     <TextView
         android:id="@+id/title"
@@ -68,7 +74,6 @@
         app:menu="@menu/menu_login"
         style="@style/BottomMenu"
         tools:ignore="MissingConstraints" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

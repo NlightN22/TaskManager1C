@@ -1,0 +1,19 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+<!--        <group android:translateY="3" android:translateX="3">   -->
+
+            <!--        "@color/bottom_menu_icon_background"   -->
+
+<!--        </group>-->
+
+
+
+
+    </item>
+
+    <item>
+        <!--    "@color/bottom_menu_icon"  -->
+
+
+    </item>
+</layer-list>

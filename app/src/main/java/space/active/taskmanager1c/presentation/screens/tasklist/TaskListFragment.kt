@@ -1,60 +1,64 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.databinding.FragmentTaskListBinding
+import space.active.taskmanager1c.presentation.screens.BaseFragment
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [TaskListFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class TaskListFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    lateinit var binding: FragmentTaskListBinding
+    lateinit var viewModel: TaskListViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding = FragmentTaskListBinding.bind(view)
+        clearBottomMenuItemIconTintList(binding.bottomMenu)
+
+
+        //        incoming()
+        //        observers()
+        listeners()
+
+
+    }
+
+    private fun listeners() {
+
+        binding.optionsMenu.setOnClickListener {
+            val optionsMenu = showOptionsMenu(this.context, binding.optionsMenu)
+            optionsMenu?.let { optionsMenu ->
+                setOnOptionsMenuClickListener(optionsMenu) {
+                    when (it.itemId) {
+                        R.id.options_settings -> {
+                            launchSettings(R.id.action_taskListFragment_to_settingsFragment)
+                        }
+                        R.id.options_logout -> {}
+                    }
+                }
+            }
+        }
+
+        binding.bottomMenu.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.tasklist_filter -> {
+                    launchTaskDetailed("test")
+                }
+                R.id.tasklist_newTask -> {
+                    launchSetting()
+                }
+            }
+            return@setOnItemSelectedListener true
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_task_list, container, false)
+    private fun launchTaskDetailed(taskId: String) {
+        findNavController().navigate(R.id.action_taskListFragment_to_taskDetailedFragment)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment TaskListFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            TaskListFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun launchSetting() {
+        findNavController().navigate(R.id.action_taskListFragment_to_settingsFragment)
     }
 }

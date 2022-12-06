@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BackButton" parent="Widget.MaterialComponents.TimePicker.ImageButton">
+        <item name="android:layout_width">@dimen/back_button_width</item>
+        <item name="android:layout_height">@dimen/back_button_height</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="layout_constraintTop_toTopOf">parent</item>
+        <item name="layout_constraintStart_toStartOf">parent</item>
+        <item name="android:src">@drawable/ic_baseline_arrow_back_ios_new_24</item>
+        <item name="android:background">@null</item>
+    </style>
+    <dimen name="back_button_width">30dp</dimen>
+    <dimen name="back_button_height">35dp</dimen>
+</resources>

@@ -12,9 +12,8 @@
     <color name="edit_text_stroke">#AC2922</color>
     <color name="edit_text_background">#E1DCDC</color>
     <color name="edit_text_text">#1C0000</color>
-    <color name="text_item_not_editable">#E1DCDC</color>
     <color name="text_item_background_not_editable">#464242</color>
-    <color name="expandable_group_background">#1C0000</color>
+    <color name="expandable_group_background">#342B2B</color>
     <color name="title_not_editable">#FCC9C9</color>
     <color name="title_editable">#1C0000</color>
     <color name="button_not_pressed">#F25149</color>
@@ -25,7 +24,9 @@
     <color name="my_message_background">#FCDADA</color>
     <color name="bottom_menu_background">#342B2B</color>
     <color name="hint_text">#806161</color>
-
-
+    <color name="bottom_menu_icon">@color/button_not_pressed</color>
+    <color name="bottom_menu_icon_background">@color/app_background</color>
+    <color name="task_list_status_completed">#6AA673</color>
+    <color name="task_list_status_not_completed">#FCC9C9</color>
 
 </resources>

@@ -1,5 +1,39 @@
-<vector android:height="24dp" android:tint="#000000"
-    android:viewportHeight="24" android:viewportWidth="24"
-    android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="@android:color/white" android:pathData="M3,18h6v-2L3,16v2zM3,6v2h18L21,6L3,6zM3,13h12v-2L3,11v2z"/>
-</vector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <!--        <group android:translateY="3" android:translateX="3">   -->
+
+        <!--        "@color/bottom_menu_icon_background"   -->
+
+        <!--        </group>-->
+
+        <vector
+            android:width="38dp"
+            android:height="35dp"
+            android:viewportWidth="38"
+            android:viewportHeight="35">
+            <group android:translateY="3" android:translateX="3">
+                <path
+                    android:fillColor="@color/bottom_menu_icon_background"
+                    android:pathData="M28 27l-6-6h4.5V6H22l6-6 6 6h-4.5v15H34M4 24v-3h15v3M4 15v-3h10.5v3M4 6V3h6v3H4Z"/>
+            </group>
+        </vector>
+
+
+    </item>
+
+    <item>
+        <!--    "@color/bottom_menu_icon"  -->
+        <vector
+            android:width="38dp"
+            android:height="35dp"
+            android:viewportWidth="38"
+            android:viewportHeight="35">
+            <group>
+                <path
+                    android:fillColor="@color/bottom_menu_icon"
+                    android:pathData="M28 27l-6-6h4.5V6H22l6-6 6 6h-4.5v15H34M4 24v-3h15v3M4 15v-3h10.5v3M4 6V3h6v3H4Z"/>
+            </group>
+        </vector>
+
+    </item>
+</layer-list>

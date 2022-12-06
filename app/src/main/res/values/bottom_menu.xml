@@ -9,5 +9,6 @@
         <item name="layout_constraintBottom_toBottomOf">parent</item>
         <item name="layout_constraintLeft_toLeftOf">parent</item>
         <item name="layout_constraintRight_toRightOf">parent</item>
+        <item name="itemIconSize">35dp</item>
     </style>
 </resources>
