@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+    <vector
+        android:width="107dp"
+        android:height="26dp"
+        android:viewportWidth="107"
+        android:viewportHeight="26">
+        <path
+            android:fillColor="#FF464242"
+            android:pathData="M0 13c0-7.18 5.82-13 13-13h81c7.18 0 13 5.82 13 13v0c0 7.18-5.82 13-13 13h-81c-7.18 0-13-5.82-13-13z"/>
+    </vector>
+    </item>
+    <item android:state_enabled="true">
+    <vector
+        android:width="107dp"
+        android:height="26dp"
+        android:viewportWidth="107"
+        android:viewportHeight="26">
+        <path
+            android:fillColor="@color/edit_text_background"
+            android:strokeColor="@color/button_not_pressed"
+            android:strokeWidth="3"
+            android:pathData="M1.5 13c0-6.35 5.15-11.5 11.5-11.5h81c6.35 0 11.5 5.15 11.5 11.5v0c0 6.35-5.15 11.5-11.5 11.5h-81c-6.35 0-11.5-5.15-11.5-11.5z"/>
+    </vector>
+    </item>
+</selector>

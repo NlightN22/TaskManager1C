@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.TaskManager1C" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimary">@color/edit_text_stroke</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
@@ -14,10 +14,15 @@
         <!-- Customize your theme here. -->
         <item name="android:windowBackground">@color/app_background</item>
         <item name="bottomNavigationStyle">@style/BottomMenu</item>
+        <item name="buttonStyle">@style/Button</item>
         <item name="textInputStyle">@style/TextInputGlobal</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:textColor">@color/app_background</item>
+        <item name="cardCornerRadius">16dp</item>
     </style>
 
     <style name="TextInputGlobal" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_height">43dp</item>
         <item name="boxCornerRadiusBottomEnd">14dp</item>
         <item name="boxCornerRadiusTopEnd">14dp</item>
         <item name="boxCornerRadiusBottomStart">14dp</item>
@@ -48,5 +53,10 @@
         <item name="endIconMode">password_toggle</item>
         <item name="startIconDrawable">@drawable/ic_baseline_lock_24</item>
         <item name="android:hint">@string/password_login</item>
+    </style>
+
+    <style name="CardViewGlobal">
+        <item name="cardBackgroundColor">@color/text_item_background_not_editable</item>
+        <item name="cardCornerRadius">16dp</item>
     </style>
 </resources>
