@@ -12,5 +12,41 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@color/app_background</item>
+        <item name="bottomNavigationStyle">@style/BottomMenu</item>
+        <item name="textInputStyle">@style/TextInputGlobal</item>
+    </style>
+
+    <style name="TextInputGlobal" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxStrokeColor">@color/edit_text_stroke</item>
+        <item name="boxBackgroundColor">@color/edit_text_background</item>
+        <item name="hintTextColor">@color/hint_text</item>
+        <item name="hintAnimationEnabled">true</item>
+    </style>
+
+    <style name="TextInputLoginScreen" parent="TextInputGlobal">
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+    </style>
+
+    <style name="TextInputLogin" parent="TextInputLoginScreen">
+        <item name="boxStrokeWidth">2dp</item>
+        <item name="boxStrokeWidthFocused">3dp</item>
+        <item name="endIconMode">clear_text</item>
+        <item name="startIconDrawable">@drawable/ic_baseline_person_24</item>
+        <item name="android:hint">@string/username_login</item>
+    </style>
+
+    <style name="TextInputPassword" parent="TextInputLoginScreen">
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="boxStrokeWidth">2dp</item>
+        <item name="boxStrokeWidthFocused">3dp</item>
+        <item name="endIconMode">password_toggle</item>
+        <item name="startIconDrawable">@drawable/ic_baseline_lock_24</item>
+        <item name="android:hint">@string/password_login</item>
     </style>
 </resources>

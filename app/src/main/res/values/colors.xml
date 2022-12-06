@@ -7,4 +7,25 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Customize your theme here. -->
+    <color name="app_background">#1C0000</color>
+    <color name="edit_text_stroke">#AC2922</color>
+    <color name="edit_text_background">#E1DCDC</color>
+    <color name="edit_text_text">#1C0000</color>
+    <color name="text_item_not_editable">#E1DCDC</color>
+    <color name="text_item_background_not_editable">#464242</color>
+    <color name="expandable_group_background">#1C0000</color>
+    <color name="title_not_editable">#FCC9C9</color>
+    <color name="title_editable">#1C0000</color>
+    <color name="button_not_pressed">#F25149</color>
+    <color name="button_pressed">#682A27</color>
+    <color name="edit_text_top_hint">#FCC9C9</color>
+    <color name="task_finished">#6AA673</color>
+    <color name="task_not_finished">#FCC9C9</color>
+    <color name="my_message_background">#FCDADA</color>
+    <color name="bottom_menu_background">#342B2B</color>
+    <color name="hint_text">#806161</color>
+
+
+
 </resources>

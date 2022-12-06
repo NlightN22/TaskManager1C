@@ -7,12 +7,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
-import space.active.taskmanager1c.data.local.db.Converters
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
-import space.active.taskmanager1c.data.remote.dto.paramsToJsonStyle
 import space.active.taskmanager1c.data.repository.InputTaskRepository
 import space.active.taskmanager1c.data.repository.OutputTaskRepository
 import space.active.taskmanager1c.data.repository.TaskApi
@@ -29,7 +27,6 @@ class HandleJobForUpdateDb
     private val taskApi: TaskApi,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger,
-    private val converters: Converters
 ) {
     fun updateJob(updateDelay: Long = 1000L): Flow<Request<Any>> = flow {
         // Проверяем таблицу исходящих задач. С определенной переодичностью
@@ -76,11 +73,9 @@ class HandleJobForUpdateDb
                         val outDTOWithoutId = outToDTO.copy(id = "")
                         // get diff map key value
                         val inputDTO = TaskDto.fromInputTask(existingInputTask)
-                        val diffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
-                        // send in Json style
-                        // {name=New task name in Edit Task, number=New number}
-                        val final = diffs.paramsToJsonStyle(converters)
-                        logger.log(TAG, final.toString())
+                        val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
+                        // send in Map
+                        result = taskApi.sendEditedTaskMappedChanges(mappedDiffs)
                     }
                 } else {
                     // if task is not new
@@ -89,11 +84,12 @@ class HandleJobForUpdateDb
                     if (outputTask.newTask) {
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
-                        result = taskApi.sendTaskChanges(withoutId)
+                        result = taskApi.sendNewTask(withoutId)
                     }
                 }
                 when (result) {
                     is SuccessRequest -> {
+                        // TODO if task send with delete label
                         inputTaskRepository.insertTask(result.data.toTaskInput())
                         outputTaskRepository.deleteTasks(listOf(outputTask))
                         return SuccessRequest(Any())

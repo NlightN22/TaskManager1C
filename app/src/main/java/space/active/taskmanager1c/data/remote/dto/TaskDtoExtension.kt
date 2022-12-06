@@ -57,14 +57,3 @@ fun TaskDto.getParameters(): List<Any> {
 
     return properties
 }
-
-/**
- * convert difference parameters to Json
- */
-fun <T,R> Map<T,R>.paramsToJsonStyle(converters: Converters): String {
-    val startString = "\"task\":"
-
-    val final = converters.mapToJson(this)
-
-    return startString + final
-}

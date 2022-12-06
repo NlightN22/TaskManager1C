@@ -1,3 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" tools:ignore="Typos">TaskManager1C</string>
+    <string name="menu_ok">OK</string>
+    <string name="menu_cancel">Cancel</string>
+    <string name="menu_camera">Camera</string>
+    <string name="menu_filter">Filter</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="login_title">Login</string>
+    <string name="username_login">username</string>
+    <string name="password_login">password</string>
+
+    <string name="menu_order">Order</string>
+    <string name="menu_attach">Attach</string>
+    <string name="menu_new">New</string>
+    <string name="menu_save">Save</string>
 </resources>

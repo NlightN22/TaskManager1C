@@ -3,6 +3,7 @@ package space.active.taskmanager1c.data.local.db
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.google.gson.reflect.TypeToken
+import space.active.taskmanager1c.data.remote.dto.TaskListDto
 import space.active.taskmanager1c.data.utils.JsonParser
 
 @ProvidedTypeConverter
@@ -29,4 +30,11 @@ class Converters(
     fun <T,R>mapToJson(map: Map<T,R>): String {
         return jsonParser.toJsonSimple(map) ?: ""
     }
+
+    fun taskListDtoFromJson(json: String): TaskListDto? {
+         return jsonParser.fromJson<TaskListDto>(
+             json,
+            object : TypeToken<TaskListDto>(){}.type)
+    }
+
 }

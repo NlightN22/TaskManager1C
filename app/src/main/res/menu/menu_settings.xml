@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/cancel"
+        android:title="@string/menu_cancel"
+        android:tooltipText="@string/menu_cancel"
+        android:icon="@drawable/ic_baseline_not_interested_24"
+        />
+    <item
+        android:id="@+id/save"
+        android:title="@string/menu_save"
+        android:tooltipText="@string/menu_save"
+        android:icon="@drawable/ic_baseline_save_24"
+        />
+</menu>

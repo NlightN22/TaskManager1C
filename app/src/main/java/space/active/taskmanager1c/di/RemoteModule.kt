@@ -7,10 +7,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.data.local.db.Converters
 import space.active.taskmanager1c.data.remote.TaskApiImpl
-import space.active.taskmanager1c.data.remote.test.GetFromFile
+import space.active.taskmanager1c.data.remote.test.TaskApiMockk
 import space.active.taskmanager1c.data.repository.TaskApi
 import space.active.taskmanager1c.data.utils.GsonParserImpl
+import space.active.taskmanager1c.data.utils.JsonParser
 import javax.inject.Singleton
 
 
@@ -20,12 +22,16 @@ class RemoteModule {
 
     @Provides
     @Singleton
-    fun provideTaskApi(app: Application, logger: Logger): TaskApi {
+    fun provideTaskApi(app: Application, logger: Logger, converters: Converters): TaskApi {
         return TaskApiImpl(
-            jsonParser = GsonParserImpl(Gson()),
-            getFromFile = GetFromFile(app),
-            logger = logger
+            taskApiMockk = TaskApiMockk(app),
+            logger = logger,
+            converters = converters
         )
     }
+
+    @Provides
+    @Singleton
+    fun providesMock(app: Application) = TaskApiMockk(app)
 
 }

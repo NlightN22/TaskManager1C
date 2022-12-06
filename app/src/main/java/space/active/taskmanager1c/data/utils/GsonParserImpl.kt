@@ -19,4 +19,5 @@ class GsonParserImpl(
     override fun <T> toJsonSimple(obj: T): String? {
         return gson.toJson(obj)
     }
+
 }

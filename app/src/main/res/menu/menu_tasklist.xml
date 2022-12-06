@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/order"
+        android:title="@string/menu_order"
+        android:tooltipText="@string/menu_order"
+        android:icon="@drawable/ic_baseline_sort_24"
+        />
+
+    <item
+        android:id="@+id/newTask"
+        android:title="@string/menu_new"
+        android:tooltipText="@string/menu_new"
+        android:icon="@drawable/ic_baseline_add_24"
+        />
+
+    <item
+        android:id="@+id/filter"
+        android:title="@string/menu_filter"
+        android:tooltipText="@string/menu_filter"
+        android:icon="@drawable/ic_baseline_filter_alt_24"
+        />
+</menu>

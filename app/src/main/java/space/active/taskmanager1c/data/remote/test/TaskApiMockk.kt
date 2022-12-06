@@ -1,12 +1,12 @@
 package space.active.taskmanager1c.data.remote.test
 
 import android.content.Context
+import space.active.taskmanager1c.data.remote.dto.TaskDto
 
-class GetFromFile(
+class TaskApiMockk(
     private val context: Context
-)
-{
-    operator fun invoke(): String {
+) {
+    fun getTaskDtoFromFile(): String {
         val inputStream = context.assets.open("demo_json/md4_original_cut.json") // demo_json
         val size: Int = inputStream.available()
         val buffer = ByteArray(size)
@@ -14,5 +14,8 @@ class GetFromFile(
         inputStream.close()
         val json = String(buffer, Charsets.UTF_8)
         return json
+    }
+    fun getSavedChangesTask(): TaskDto {
+        TODO()
     }
 }

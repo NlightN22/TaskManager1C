@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/attach"
+        android:title="@string/menu_attach"
+        android:tooltipText="@string/menu_attach"
+        android:icon="@drawable/ic_baseline_attach_file_24"
+        />
+
+    <item
+        android:id="@+id/cancel"
+        android:title="@string/menu_cancel"
+        android:tooltipText="@string/menu_cancel"
+        android:icon="@drawable/ic_outline_close_24"
+        />
+    <item
+        android:id="@+id/ok"
+        android:title="@string/menu_ok"
+        android:tooltipText="@string/menu_ok"
+        android:icon="@drawable/ic_baseline_check_24"
+        />
+
+<!--    TODO add restore task item-->
+    
+</menu>

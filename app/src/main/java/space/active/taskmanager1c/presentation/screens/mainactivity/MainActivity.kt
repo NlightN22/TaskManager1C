@@ -33,26 +33,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observers() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.listTasks.collectLatest {
-                binding.jobContent.text = it
-            }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.testCaseText.collectLatest {
-                binding.testCaseText.text = it
-            }
-        }
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.listTasks.collectLatest {
+//                binding.jobContent.text = it
+//            }
+//        }
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.testCaseText.collectLatest {
+//                binding.testCaseText.text = it
+//            }
+//        }
     }
 
     private fun listeners() {
-        binding.loginButton.setOnClickListener { viewModel.updateJob() }
-        binding.logoutButton.setOnClickListener { viewModel.stopUpdateJob() }
-
-        // "3bb37cb5-a9a6-11e7-9d3f-00155d28010b"
-        val taskId = "3bb37cb5-a9a6-11e7-9d3f-00155d28010b"
-        binding.readTask.setOnClickListener { viewModel.readTask(taskId) }
-        binding.editButton.setOnClickListener { viewModel.editTask() }
-        binding.saveNewButton.setOnClickListener { viewModel.newTask() }
+//        binding.loginButton.setOnClickListener { viewModel.updateJob() }
+//        binding.logoutButton.setOnClickListener { viewModel.stopUpdateJob() }
+//
+//        // "3bb37cb5-a9a6-11e7-9d3f-00155d28010b"
+//        val taskId = "3bb37cb5-a9a6-11e7-9d3f-00155d28010b"
+//        binding.readTask.setOnClickListener { viewModel.readTask(taskId) }
+//        binding.editButton.setOnClickListener { viewModel.editTask() }
+//        binding.saveNewButton.setOnClickListener { viewModel.newTask() }
     }
 }
