@@ -27,11 +27,9 @@ class MainViewModel @Inject constructor(
     private val getTaskListFromDb: GetTaskListFromDb,
     private val getDetailedTask: GetDetailedTask,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
-    private val saveNewTaskToDb: SaveNewTaskToDb
+    private val saveNewTaskToDb: SaveNewTaskToDb,
+    private val logger: Logger
 ) : ViewModel() {
-
-    @Inject
-    lateinit var logger: Logger
 
     private val _testCaseText = MutableStateFlow("")
     val testCaseText = _testCaseText.asStateFlow()
@@ -47,41 +45,42 @@ class MainViewModel @Inject constructor(
     private lateinit var updateJob: CoroutineScope
 
     init {
-        viewModelScope.launch {
-            getTaskListFromDb().collect { listTasks ->
-                when (listTasks) {
-                    is SuccessRequest -> {
-                        _listTasks.value = listTasks.data
-                    }
-                    is ErrorRequest -> {
-                        _listTasks.value = listTasks.exception.message.toString()
-                    }
-                    is PendingRequest -> {
-                        _listTasks.value = "Loading..."
-                    }
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            // 3bb37cb5-a9a6-11e7-9d3f-00155d28010b
-            getDetailedTask("3bb37cb5-a9a6-11e7-9d3f-00155d28010b").collect { res ->
-                when (res) {
-                    is ErrorRequest -> {
-                        _testCaseText.value = res.exception.message.toString()
-                    }
-                    is PendingRequest -> {
-                        _testCaseText.value = "Loading..."
-                    }
-                    is SuccessRequest -> {
-                        val result = res.data.toString()
-                        logger.log(TAG, result)
-                        _testCaseText.value = result
-                    }
-                }
-            }
-
-        }
+        updateJob()
+//        viewModelScope.launch {
+//            getTaskListFromDb().collect { listTasks ->
+//                when (listTasks) {
+//                    is SuccessRequest -> {
+//                        _listTasks.value = listTasks.data
+//                    }
+//                    is ErrorRequest -> {
+//                        _listTasks.value = listTasks.exception.message.toString()
+//                    }
+//                    is PendingRequest -> {
+//                        _listTasks.value = "Loading..."
+//                    }
+//                }
+//            }
+//        }
+//
+//        viewModelScope.launch {
+//            // 3bb37cb5-a9a6-11e7-9d3f-00155d28010b
+//            getDetailedTask("3bb37cb5-a9a6-11e7-9d3f-00155d28010b").collect { res ->
+//                when (res) {
+//                    is ErrorRequest -> {
+//                        _testCaseText.value = res.exception.message.toString()
+//                    }
+//                    is PendingRequest -> {
+//                        _testCaseText.value = "Loading..."
+//                    }
+//                    is SuccessRequest -> {
+//                        val result = res.data.toString()
+//                        logger.log(TAG, result)
+//                        _testCaseText.value = result
+//                    }
+//                }
+//            }
+//
+//        }
     }
 
     fun readTask(taskId: String) {
