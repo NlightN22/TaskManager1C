@@ -15,4 +15,14 @@
     <string name="menu_new">New</string>
     <string name="menu_save">Save</string>
     <string name="hint_author">автор</string>
+    <string name="task_deadline_hint">срок выполнения</string>
+    <string name="task_days_end">осталось</string>
+    <string name="task_performer_hint">исполнитель</string>
+    <string name="task_coperformers_hint">соисполнители</string>
+    <string name="task_base_obj_hint">основание</string>
+    <string name="task_base_task">базовая задача</string>
+    <string name="task_inner_task">дочерние задачи</string>
+    <string name="task_description_hint">описание</string>
+    <string name="messages_hint">Сообщения:</string>
+    <string name="message_input_hint">введите сообщение...</string>
 </resources>

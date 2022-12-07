@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".presentation.screens.task_detailed.TaskDetailedFragment">
 
-
     <androidx.cardview.widget.CardView
         android:id="@+id/titleCardView"
         style="@style/TitleNotEditableCardView"
@@ -62,7 +61,7 @@
 
     </androidx.cardview.widget.CardView>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/mainDetailCard"
         style="@style/ExpandableCardView"
         android:layout_width="match_parent"
@@ -71,44 +70,49 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleCardView">
 
-        <com.google.android.material.button.MaterialButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="12.10.22"
-            android:backgroundTint="@color/text_item_background_not_editable"
-            app:strokeWidth="2dp"
-            app:strokeColor="@color/button_not_pressed"
-            app:cornerRadius="16dp"/>
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            android:paddingTop="16dp"
             >
 
+            <TextView
+                style="@style/OwnButtonDisabled"
+                android:id="@+id/taskDateDeadline"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="12.10.2022"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
+                />
+
+            <TextView
+                style="@style/OwnButtonHintDisabled"
+                android:text="@string/task_deadline_hint"
+                app:layout_constraintTop_toTopOf="@id/taskDateDeadline"
+                app:layout_constraintStart_toStartOf="@id/taskDateDeadline"
+                app:layout_constraintEnd_toEndOf="@id/taskDateDeadline"
+                tools:ignore="MissingConstraints" />
+
             <androidx.cardview.widget.CardView
+                style="@style/CardViewGlobal"
+                android:id="@+id/authorCardView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:cardCornerRadius="16dp"
                 >
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/NotEditableTextInput"
-                    android:layout_marginTop="-6dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:hint="@string/hint_author"
-                    app:boxCornerRadiusBottomEnd="16dp"
-                    app:boxCornerRadiusBottomStart="16dp"
-                    app:boxCornerRadiusTopEnd="16dp"
-                    app:boxCornerRadiusTopStart="16dp"
                     >
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/taskAuthor"
                         style="@style/EditTextNotEditable"
+                        android:id="@+id/taskAuthor"
                         android:layout_width="260dp"
                         android:inputType="textPersonName"
                         tools:text="Великий Платон Самуилович"
@@ -116,11 +120,334 @@
                 </com.google.android.material.textfield.TextInputLayout>
             </androidx.cardview.widget.CardView>
 
+            <TextView
+                style="@style/OwnButtonDisabled"
+                android:id="@+id/taskDaysEnd"
+                app:layout_constraintTop_toBottomOf="@+id/taskDateDeadline"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="15 дней"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
+                android:layout_marginTop="@dimen/margin_top_at_cards_elements"
+                />
+
+            <TextView
+                style="@style/OwnButtonHintDisabled"
+                android:text="@string/task_days_end"
+                app:layout_constraintTop_toTopOf="@id/taskDaysEnd"
+                app:layout_constraintStart_toStartOf="@id/taskDaysEnd"
+                app:layout_constraintEnd_toEndOf="@id/taskDaysEnd"
+                tools:ignore="MissingConstraints" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/taskPerformerCard"
+                style="@style/EditableCardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/authorCardView"
+                android:layout_marginTop="@dimen/margin_top_at_cards_elements"
+                >
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditableTextInput"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_performer_hint"
+
+                    >
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        style="@style/EditTextEditable"
+                        android:id="@+id/taskPerformer"
+                        android:layout_width="260dp"
+                        android:inputType="textPersonName"
+                        tools:text="Пупкин Владимир Гестапович "
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/taskCoPerformersCard"
+                style="@style/EditableCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/taskPerformerCard"
+                android:layout_marginTop="@dimen/margin_top_at_cards_elements"
+                android:visibility="gone"
+                >
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditableTextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_coperformers_hint"
+                    app:endIconMode="dropdown_menu"
+                    app:startIconDrawable="@drawable/ic_coperformers"
+
+                    >
+                    <MultiAutoCompleteTextView
+                        style="@style/EditTextEditable"
+                        android:id="@+id/taskCoPerformers"
+                        android:layout_width="match_parent"
+                        android:inputType="textPersonName"
+                        tools:text="Васильев П.В., Узкий А.Ц."
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/taskObserversCard"
+                style="@style/EditableCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/taskCoPerformersCard"
+                android:layout_marginTop="7dp"
+                android:visibility="gone"
+                >
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/EditableTextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_performer_hint"
+                    app:endIconMode="dropdown_menu"
+                    app:startIconDrawable="@drawable/ic_observer"
+
+                    >
+                    <MultiAutoCompleteTextView
+                        style="@style/EditTextEditable"
+                        android:id="@+id/taskObservers"
+                        android:layout_width="match_parent"
+                        android:inputType="textPersonName"
+                        tools:text="Главнова Е.И., Кадратьева А.П."
+
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/expandMainDetailCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_expandable_down_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_gravity="end|bottom"
+            android:layout_marginEnd="10dp"
+            />
+    </com.google.android.material.card.MaterialCardView>
 
-    </androidx.cardview.widget.CardView>
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/taskDescriptionCard"
+        style="@style/ExpandableCardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mainDetailCard">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:paddingTop="16dp"
+            >
+
+            <androidx.cardview.widget.CardView
+                style="@style/CardViewGlobal"
+                android:id="@+id/taskDescriptionCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                >
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/NotEditableTextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_description_hint"
+                    >
+                    <com.google.android.material.textfield.TextInputEditText
+                        style="@style/EditTextNotEditable"
+                        android:id="@+id/taskDescription"
+                        android:layout_width="match_parent"
+                        android:inputType="textMultiLine"
+                        android:gravity="top|center"
+                        android:maxLines="3"
+                        tools:text="Справедли́вость — понятие о должном, содержащее в себе требование cоответствия деяния и воздаяния: в частности, соответствия прав и обязанностей, труда и вознаграждения, заслуг и их ..."
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                style="@style/CardViewGlobal"
+                android:id="@+id/taskBaseObjectCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/taskDescriptionCardView"
+                android:layout_marginTop="@dimen/margin_top_at_cards_elements"
+                android:visibility="gone"
+                >
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/NotEditableTextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_base_obj_hint"
+                    >
+                    <com.google.android.material.textfield.TextInputEditText
+                        style="@style/EditTextNotEditable"
+                        android:id="@+id/taskBaseObject"
+                        android:layout_width="match_parent"
+                        android:inputType="textPersonName"
+                        tools:text="Великий Платон Самуилович"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                style="@style/CardViewGlobal"
+                android:id="@+id/taskBaseCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/taskBaseObjectCard"
+                android:layout_marginTop="@dimen/margin_top_at_cards_elements"
+                android:visibility="gone"
+                >
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/NotEditableTextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_base_task"
+                    >
+                    <com.google.android.material.textfield.TextInputEditText
+                        style="@style/EditTextNotEditable"
+                        android:id="@+id/taskBase"
+                        android:layout_width="match_parent"
+                        android:inputType="textMultiLine"
+                        android:gravity="top|center"
+                        android:maxLines="3"
+                        tools:text="Внимание! Резкое изменение цен в документе: Установка цен номенклатуры ЦБ000018751 от 16.09.2022 20:00:37"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                style="@style/CardViewGlobal"
+                android:id="@+id/taskInnerCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/taskBaseCardView"
+                android:layout_marginTop="@dimen/margin_top_at_cards_elements"
+                android:visibility="gone"
+                >
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/NotEditableTextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/task_inner_task"
+                    >
+                    <com.google.android.material.textfield.TextInputEditText
+                        style="@style/EditTextNotEditable"
+                        android:id="@+id/taskInner"
+                        android:layout_width="match_parent"
+                        android:inputType="textMultiLine"
+                        android:gravity="top|center"
+                        android:maxLines="2"
+                        tools:text="Согласование проведения / изменения документа № ЦБМА0001730"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+            </androidx.cardview.widget.CardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/expandTaskDescriptionCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_expandable_down_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_gravity="end|bottom"
+            android:layout_marginEnd="10dp"
+            />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/taskMessagesCard"
+        style="@style/ExpandableCardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/taskDescriptionCard">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            >
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/messagesHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/edit_text_top_hint"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="7dp"
+                android:text="@string/messages_hint"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/messagesHint"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_message"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/EditableCardView"
+        android:id="@+id/messageInputCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/bottomMenu"
+        android:layout_marginBottom="7dp"
+        >
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/EditableTextInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/message_input_hint"
+        app:endIconDrawable="@drawable/ic_send_message"
+        app:endIconMode="custom"
+        app:endIconTint="@color/button_not_pressed"
+        >
+        <com.google.android.material.textfield.TextInputEditText
+            style="@style/EditTextEditable"
+            android:id="@+id/messageInput"
+            android:layout_width="match_parent"
+            android:inputType="textMultiLine"
+            android:gravity="top|start"
+            tools:text=""
+            android:maxLines="10"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomMenu"

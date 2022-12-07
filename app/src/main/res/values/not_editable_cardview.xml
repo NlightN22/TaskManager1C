@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="NotEditableCardView" parent="CardViewGlobal">
-    </style>
     <style name="NotEditableTextInput">
+        <item name="android:enabled">false</item>
+        <item name="boxStrokeWidth">0dp</item>
         <item name="android:backgroundTint">@color/text_item_background_not_editable</item>
         <item name="android:textColorHint">@color/title_not_editable</item>
     </style>
@@ -10,7 +10,7 @@
         <item name="android:backgroundTint">@color/text_item_background_not_editable</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingTop">10dp</item>
-        <item name="android:layout_marginBottom">-11dp</item>
+        <item name="android:layout_marginBottom">-15dp</item>
         <item name="android:layout_marginTop">-17dp</item>
 <!--        <item name="android:enabled">false</item>-->
         <item name="android:textColor">@color/edit_text_background</item>

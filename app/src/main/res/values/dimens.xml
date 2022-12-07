@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="login_screen_text_size">18sp</dimen>
+    <dimen name="margin_top_at_cards_elements">16dp</dimen>
 </resources>
