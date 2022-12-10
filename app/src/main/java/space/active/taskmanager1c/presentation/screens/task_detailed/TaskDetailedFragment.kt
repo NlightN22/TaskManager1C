@@ -22,19 +22,27 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     lateinit var binding: FragmentTaskDetailedBinding
     private val viewModel by viewModels<TaskDetailedViewModel>()
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskDetailedBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
+        income()
         observers()
         listeners()
+    }
+
+    private fun income() {
+        val taskId = TaskDetailedFragmentArgs.fromBundle(requireArguments()).taskId
+        if (taskId != null) {
+            viewModel.getTaskFlow(taskId)
+        }
     }
 
     private fun observers() {
         lifecycleScope.launchWhenStarted {
             viewModel.taskState.collectLatest { taskState ->
+                binding.taskTitle.setText(taskState.title)
                 binding.taskNumberDetailed.text = taskState.number
                 binding.taskDateDetailed.text = taskState.startDate
                 binding.taskDeadline.setText(taskState.deadLine)

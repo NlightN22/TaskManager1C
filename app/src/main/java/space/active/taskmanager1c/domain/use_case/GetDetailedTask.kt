@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.domain.use_case
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -16,10 +17,9 @@ import javax.inject.Inject
 
 class GetDetailedTask @Inject constructor(
     private val repository: TasksRepository,
-    private val inputTaskRepository: InputTaskRepository,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-        operator fun invoke(taskId: String) = repository.getTask(taskId).flowOn(ioDispatcher)
+        operator fun invoke(taskId: String): Flow<Task?> = repository.getTask(taskId)
 //    operator fun invoke(taskId: String) = flow<Request<TaskInput>> {
 //        val res = inputTaskRepository.getTask(taskId)
 //        emit(SuccessRequest(res))

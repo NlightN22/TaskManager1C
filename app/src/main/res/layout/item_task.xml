@@ -7,12 +7,15 @@
     android:layout_marginTop="4dp"
     android:layout_marginStart="4dp"
     android:layout_marginEnd="4dp"
+    app:cardCornerRadius="14dp"
     android:background="@color/edit_text_background"
-    app:cardCornerRadius="14dp">
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="?android:selectableItemBackground"
+        >
 
         <ImageView
             android:layout_width="wrap_content"
@@ -32,7 +35,8 @@
             app:layout_constraintEnd_toStartOf="@+id/endPart"
             app:layout_constraintHorizontal_weight="8"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            >
 
             <TextView
                 android:id="@+id/taskTitle"

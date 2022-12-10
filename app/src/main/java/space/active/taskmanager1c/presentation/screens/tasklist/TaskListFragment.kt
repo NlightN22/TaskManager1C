@@ -2,14 +2,15 @@ package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
+import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 
 @AndroidEntryPoint
@@ -24,7 +25,26 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         binding = FragmentTaskListBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
-        recyclerTasks = TaskListAdapter()
+        recyclerTasks = TaskListAdapter(object : TaskActionListener {
+            override fun onTaskStatusClick(task: Task) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onTaskClick(task: Task) {
+                launchTaskDetailed(taskId = task.id)
+//                Toast.makeText(
+//                    this@TaskListFragment.requireContext(),
+//                    "Task : ${task.name}",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+            }
+
+            override fun onTaskLongClick(task: Task) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        )
         binding.listTasksRV.adapter = recyclerTasks
 
         //        incoming()
@@ -71,7 +91,12 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun launchTaskDetailed(taskId: String) {
-        findNavController().navigate(R.id.action_taskListFragment_to_taskDetailedFragment)
+        val direction =
+            TaskListFragmentDirections.actionTaskListFragmentToTaskDetailedFragment(taskId)
+        findNavController().navigate(
+            direction,
+            // TODO add animations
+        )
     }
 
     private fun launchSetting() {

@@ -85,27 +85,27 @@ class MainViewModel @Inject constructor(
 //        }
     }
 
-    fun readTask(taskId: String) {
-        viewModelScope.launch {
-            // 3bb37cb5-a9a6-11e7-9d3f-00155d28010b
-            getDetailedTask(taskId).collect { res ->
-                when (res) {
-                    is ErrorRequest -> {
-                        _testCaseText.value = res.exception.message.toString()
-                    }
-                    is PendingRequest -> {
-                        _testCaseText.value = "Loading..."
-                    }
-                    is SuccessRequest -> {
-                        val result = res.data.toString()
-                        logger.log(TAG, result)
-                        _testCaseText.value = result
-                    }
-                }
-            }
-
-        }
-    }
+//    fun readTask(taskId: String) {
+//        viewModelScope.launch {
+//            // 3bb37cb5-a9a6-11e7-9d3f-00155d28010b
+//            getDetailedTask(taskId).collect { res ->
+//                when (res) {
+//                    is ErrorRequest -> {
+//                        _testCaseText.value = res.exception.message.toString()
+//                    }
+//                    is PendingRequest -> {
+//                        _testCaseText.value = "Loading..."
+//                    }
+//                    is SuccessRequest -> {
+//                        val result = res.data.toString()
+//                        logger.log(TAG, result)
+//                        _testCaseText.value = result
+//                    }
+//                }
+//            }
+//
+//        }
+//    }
 
 //    fun newTask() {
 //        viewModelScope.launch {

@@ -27,5 +27,9 @@
         android:id="@+id/taskDetailedFragment"
         android:name="space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedFragment"
         android:label="fragment_task_detailed"
-        tools:layout="@layout/fragment_task_detailed" />
+        tools:layout="@layout/fragment_task_detailed" >
+        <argument
+            android:name="taskId"
+            app:argType="string" />
+    </fragment>
 </navigation>

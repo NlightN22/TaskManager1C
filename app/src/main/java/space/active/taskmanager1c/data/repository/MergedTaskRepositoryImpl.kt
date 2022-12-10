@@ -32,20 +32,12 @@ class MergedTaskRepositoryImpl(
             .flowOn(ioDispatcher)
 
 
-    override fun getTask(taskId: String): Flow<Request<Task>> =
+    override fun getTask(taskId: String): Flow<Task?> =
         combine(
             inputTaskRepository.getTaskFlow(taskId),
             outputTaskRepository.getTaskFlow(taskId),
         ) { inputTask, outputTask ->
-            val combineResult = taskCombine(inputTask, outputTask)
-            if (combineResult != null) {
-                SuccessRequest(combineResult)
-            } else {
-                /**
-                 * return if empty base
-                 */
-                ErrorRequest<Task>(EmptyObject)
-            }
+            taskCombine(inputTask, outputTask)
         }.flowOn(ioDispatcher)
 
 
@@ -79,7 +71,7 @@ class MergedTaskRepositoryImpl(
              */
             return inputTaskToTaskDomain(inputTask)
         } else {
-            null
+            return null
         }
     }
 

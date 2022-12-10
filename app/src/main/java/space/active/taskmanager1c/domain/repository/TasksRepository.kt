@@ -6,7 +6,7 @@ import space.active.taskmanager1c.domain.models.Task
 
 interface TasksRepository {
     val listTasksFlow: Flow<List<Task>>
-    fun getTask(taskId: String): Flow<Request<Task>>
+    fun getTask(taskId: String): Flow<Task?>
     fun editTask(task: Task): Flow<Request<Any>>
     fun createNewTask(task: Task): Flow<Request<Any>>
     fun attachFileToTask(file: ByteArray, taskId: String): Flow<Request<Any>>

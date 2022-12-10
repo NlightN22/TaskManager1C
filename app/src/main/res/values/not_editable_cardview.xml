@@ -17,4 +17,13 @@
         <item name="android:gravity">center_horizontal</item>
     </style>
 
+    <style name="TitleText" parent="EditTextNotEditable">
+        <item name="android:textColor">@color/edit_text_top_hint</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxEms">20</item> // TODO add from 1C max character
+        <item name="android:maxLines">3</item>
+    </style>
+
 </resources>
