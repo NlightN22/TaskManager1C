@@ -3,25 +3,25 @@ package space.active.taskmanager1c.domain.models
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.UsersInTask
 
 data class UsersInTaskDomain(
-    val authorId: String,
-    val performerId: String,
-    val coPerformers: List<String>,
-    val observers: List<String>,
+    val author: User,
+    val performer: User,
+    val coPerformers: List<User>,
+    val observers: List<User>,
 ) {
 
     fun toTaskInput() = UsersInTask(
-        authorId = this.authorId,
-        performerId = this.performerId,
-        coPerformers = this.coPerformers,
-        observers = this.observers,
+        authorId = this.author.id,
+        performerId = this.performer.id,
+        coPerformers = this.coPerformers.map { it.toString() },
+        observers = this.observers.map { it.toString() },
     )
 
     companion object {
-        fun fromInputTask(inTaskUsers: UsersInTask): UsersInTaskDomain = UsersInTaskDomain(
-            authorId = inTaskUsers.authorId,
-            performerId = inTaskUsers.performerId,
-            coPerformers = inTaskUsers.coPerformers,
-            observers = inTaskUsers.observers,
-        )
+//        fun fromInputTask(inputUsers: UserInput): UsersInTaskDomain = UsersInTaskDomain(
+//            author = inputUsers.toUserDomain(),
+//            performer = inTaskUsers.performerId,
+//            coPerformers = inTaskUsers.coPerformers,
+//            observers = inTaskUsers.observers,
+//        )
     }
 }

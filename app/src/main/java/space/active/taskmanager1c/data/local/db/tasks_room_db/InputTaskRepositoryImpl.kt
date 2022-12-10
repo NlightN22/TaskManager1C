@@ -7,6 +7,7 @@ import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskAndMessages
 import space.active.taskmanager1c.data.repository.InputTaskRepository
 
@@ -46,6 +47,23 @@ class InputTaskRepositoryImpl(
     override suspend fun insertTasks(taskInputList: List<TaskInput>) {
         taskInputList.forEach {
             insertTask(it)
+        }
+    }
+
+    override val listUsersFlow: Flow<List<UserInput>> = inputDao.getUsersFlow()
+
+    override suspend fun getUser(userId: String): UserInput? = inputDao.getUser(userId)
+
+    override suspend fun insertUser(userInput: UserInput) {
+        val currentVersionUser = getUser(userInput.id)
+        if (userInput != currentVersionUser) {
+            inputDao.insertUser(userInput)
+        }
+    }
+
+    override suspend fun insertUsers(userInputList: List<UserInput>) {
+        userInputList.forEach {
+            insertUser(it)
         }
     }
 }

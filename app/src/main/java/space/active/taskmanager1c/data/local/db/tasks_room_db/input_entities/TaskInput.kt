@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.UsersInTask
 
+
 @Entity
 data class TaskInput(
     val date: String,
@@ -21,6 +22,7 @@ data class TaskInput(
     val status: String,
     @Embedded val usersInTask: UsersInTask
 ) {
+
     companion object {
         /**
          * In params is list where we take items with unique ID and replace by them current list

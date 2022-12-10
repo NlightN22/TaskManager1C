@@ -16,6 +16,26 @@ import kotlin.reflect.jvm.javaGetter
 class ExampleUnitTest {
 
     @Test
+    fun abbreviationName() {
+        val name = "Михайлов Олег Федорович"
+        // split by " "
+        val lines: List<String> = name.split(" ")
+        val abbNameList: List<String> = lines.mapIndexed { index, s ->
+            if (index != 0) {
+                s.take(1) + "."
+            } else {
+                "$s "
+            }
+        }
+        val abbName = abbNameList.joinToString("")
+
+        // remove all exclude first
+        // contaminate
+        println(abbName)
+    }
+
+
+    @Test
     fun printValues() {
         data class A(val a: String ="A", val b:String = "B")
         val (valA, valB) = A()

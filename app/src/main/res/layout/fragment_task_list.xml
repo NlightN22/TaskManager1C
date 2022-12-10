@@ -20,27 +20,40 @@
         style="@style/BackButton"
         tools:ignore="MissingConstraints" />
 
-
-
-    <com.google.android.material.textfield.TextInputLayout
+    <com.google.android.material.card.MaterialCardView
+        style="@style/EditableCardView"
         android:id="@+id/searchInputLayout"
-        style="@style/TextInputGlobal"
         android:layout_width="0dp"
-        android:layout_marginTop="5dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         app:layout_constraintStart_toEndOf="@+id/back_button"
         app:layout_constraintEnd_toStartOf="@+id/options_menu"
         app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginBottom="7dp"
         >
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/searchEditText"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/EditableTextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textAutoComplete"
-            />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:hint="@string/tasklist_search_hint"
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/button_not_pressed"
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                style="@style/EditTextEditable"
+                android:id="@+id/searchEditText"
+                android:layout_width="match_parent"
+                android:inputType="textShortMessage"
+                android:gravity="top|start"
+                tools:text=""
+                android:maxLines="1"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.card.MaterialCardView>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fastFilterRV"

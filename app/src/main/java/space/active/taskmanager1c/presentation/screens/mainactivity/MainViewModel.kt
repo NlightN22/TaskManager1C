@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
@@ -15,7 +18,6 @@ import space.active.taskmanager1c.domain.use_case.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-import kotlin.random.Random
 
 private const val TAG = "MainViewModel"
 
@@ -105,88 +107,88 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun newTask() {
-        viewModelScope.launch {
-            saveNewTaskToDb(tesNewTask()).collect{ request ->
-                when (request) {
-                    is ErrorRequest -> {
-                        _listTasks.value = request.exception.message.toString()
-                    }
-                    is PendingRequest -> {
-                        _listTasks.value = "Loading..."
-                    }
-                    is SuccessRequest -> {
-                        val result = request.data.toString()
-                        logger.log(TAG, result)
-                        _listTasks.value = "Saved!"
-                    }
-                }
-            }
-        }
-    }
+//    fun newTask() {
+//        viewModelScope.launch {
+//            saveNewTaskToDb(tesNewTask()).collect { request ->
+//                when (request) {
+//                    is ErrorRequest -> {
+//                        _listTasks.value = request.exception.message.toString()
+//                    }
+//                    is PendingRequest -> {
+//                        _listTasks.value = "Loading..."
+//                    }
+//                    is SuccessRequest -> {
+//                        val result = request.data.toString()
+//                        logger.log(TAG, result)
+//                        _listTasks.value = "Saved!"
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-    fun editTask() {
-        viewModelScope.launch {
-            saveTaskChangesToDb(testEditTask()).collect{ request ->
-                when (request) {
-                    is ErrorRequest -> {
-                        _listTasks.value = request.exception.message.toString()
-                    }
-                    is PendingRequest -> {
-                        _listTasks.value = "Loading..."
-                    }
-                    is SuccessRequest -> {
-                        val result = request.data.toString()
-                        logger.log(TAG, result)
-                        _listTasks.value = "Saved!"
-                    }
-                }
-            }
-        }
-    }
+//    fun editTask() {
+//        viewModelScope.launch {
+//            saveTaskChangesToDb(testEditTask()).collect { request ->
+//                when (request) {
+//                    is ErrorRequest -> {
+//                        _listTasks.value = request.exception.message.toString()
+//                    }
+//                    is PendingRequest -> {
+//                        _listTasks.value = "Loading..."
+//                    }
+//                    is SuccessRequest -> {
+//                        val result = request.data.toString()
+//                        logger.log(TAG, result)
+//                        _listTasks.value = "Saved!"
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-    fun tesNewTask(): Task =
-        Task(
-            date="2022-11-11T11:11:11",
-            description = "",
-            endDate = "",
-            id = "",
-            mainTaskId = "",
-            name = "New task ",
-            number = "",
-            objName ="",
-            photos = emptyList(),
-            priority = "middle",
-            status = "new",
-            users = UsersInTaskDomain(
-                authorId="c49a0b62-c192-11e1-8a03-f46d0490adee",
-                performerId="c49a0b62-c192-11e1-8a03-f46d0490adee",
-                coPerformers = emptyList(),
-                observers = emptyList()
-            ),
-        )
+//    fun tesNewTask(): Task =
+//        Task(
+//            date = "2022-11-11T11:11:11",
+//            description = "",
+//            endDate = "",
+//            id = "",
+//            mainTaskId = "",
+//            name = "New task ",
+//            number = "",
+//            objName = "",
+//            photos = emptyList(),
+//            priority = "middle",
+//            status = Task.Status.New,
+//            users = UsersInTaskDomain(
+//                author = "c49a0b62-c192-11e1-8a03-f46d0490adee",
+//                performer = "c49a0b62-c192-11e1-8a03-f46d0490adee",
+//                coPerformers = emptyList(),
+//                observers = emptyList()
+//            ),
+//        )
 
-    fun testEditTask(): Task =
-        Task(
-            date="2017-10-05T15:21:34",
-            description = "",
-            endDate = "",
-            id = "3bb37cb5-a9a6-11e7-9d3f-00155d28010b",
-            mainTaskId = "",
-            name = "New task name in Edit Task",
-            number ="New number",
-            objName ="",
-            photos = emptyList(),
-            priority = "middle",
-            status = "new",
-            users = UsersInTaskDomain(
-                authorId="c49a0b62-c192-11e1-8a03-f46d0490adee",
-                performerId="c49a0b62-c192-11e1-8a03-f46d0490adee",
-                coPerformers = emptyList(),
-                observers = emptyList()
-            ),
-            outputId = 1
-        )
+//    fun testEditTask(): Task =
+//        Task(
+//            date = "2017-10-05T15:21:34",
+//            description = "",
+//            endDate = "",
+//            id = "3bb37cb5-a9a6-11e7-9d3f-00155d28010b",
+//            mainTaskId = "",
+//            name = "New task name in Edit Task",
+//            number = "New number",
+//            objName = "",
+//            photos = emptyList(),
+//            priority = "middle",
+//            status = Task.Status.New,
+//            users = UsersInTaskDomain(
+//                author = "c49a0b62-c192-11e1-8a03-f46d0490adee",
+//                performer = "c49a0b62-c192-11e1-8a03-f46d0490adee",
+//                coPerformers = emptyList(),
+//                observers = emptyList()
+//            ),
+//            outputId = 1
+//        )
 
     fun updateJob() {
         val coroutineContext: CoroutineContext =
@@ -204,22 +206,19 @@ class MainViewModel @Inject constructor(
                 return@launch
             }
             runningJob.compareAndSet(false, true)
-            while (true) {
-                try {
-                    logger.log(TAG, "updateJob launch")
+            try {
+                logger.log(TAG, "updateJob launch")
 
-                    /**
-                    set update work here
-                     */
-                    handleJobForUpdateDb.updateJob().collectLatest {
-                        logger.log(TAG, it.toString())
-                    }
-                } catch (e: CancellationException) {
-                    logger.log(TAG, "updateJob CancellationException ${e.message}")
-                } catch (e: Exception) {
-                    logger.log(TAG, "updateJob Exception ${e.message}")
+                /**
+                set update work here
+                 */
+                handleJobForUpdateDb.updateJob().collectLatest {
+                    logger.log(TAG, it.toString())
                 }
-                delay(1500) // TODO: delete
+            } catch (e: CancellationException) {
+                logger.log(TAG, "updateJob CancellationException ${e.message}")
+            } catch (e: Exception) {
+                logger.log(TAG, "updateJob Exception ${e.message}")
             }
         }
     }
@@ -234,9 +233,13 @@ class MainViewModel @Inject constructor(
      */
 
     fun stopUpdateJob() {
-        logger.log(TAG, "stopUpdateData")
         updateJob.cancel()
         runningJob.compareAndSet(true, false)
-        logger.log(TAG, "updateJob cancel")
+        logger.log(TAG, "updateJob cancelled")
+    }
+
+    override fun onCleared() {
+        stopUpdateJob()
+        super.onCleared()
     }
 }

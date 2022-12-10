@@ -36,13 +36,13 @@ class HandleJobForUpdateDb
         // При успешной отправке на сервер:
         //  в качестве подтверждения получаем входящую задачу с актуальными значениями
         //  записываем задачу во входящие задачи и удаляем из исходящих отправленную
-        // Далее запрашиваем с сервера входящие задачи. С определенной периодичностью.
+        // Далее запрашиваем с сервера входящие задачи.
         // Обновляем список входящих задач в таблице.
         // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
         while (true) {
             logger.log(TAG, "Job start")
-            emit(outputSendJob())
-            emit(inputFetchJob())
+            emit(outputSendJob()) // TODO replace to flow
+            emit(inputFetchJob()) // TODO replace to flow and add exception NoUserInDb
             delay(updateDelay)
             logger.log(TAG, "Job end")
         }
@@ -106,11 +106,14 @@ class HandleJobForUpdateDb
         return SuccessRequest(Any())
     }
 
-    suspend fun inputFetchJob(): Request<Any> {
+    private suspend fun inputFetchJob(): Request<Any> {
         val result = taskApi.getTaskList()
         when (result) {
             is SuccessRequest -> {
+                // add Task to DB
                 inputTaskRepository.insertTasks(result.data.toTaskInputList())
+                // add Users to DB
+                inputTaskRepository.insertUsers(result.data.toUserInputList())
                 return SuccessRequest(Any())
             }
             is ErrorRequest -> {
@@ -127,6 +130,7 @@ class HandleJobForUpdateDb
             when (request) {
                 is SuccessRequest -> {
                     inputTaskRepository.insertTasks(request.data.toTaskInputList())
+                    inputTaskRepository.insertUsers(request.data.toUserInputList())
                     emit(SuccessRequest(Any()))
                 }
                 is ErrorRequest -> {

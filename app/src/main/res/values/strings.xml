@@ -16,7 +16,7 @@
     <string name="menu_save">Save</string>
     <string name="hint_author">автор</string>
     <string name="task_deadline_hint">срок выполнения</string>
-    <string name="task_days_end">осталось</string>
+    <string name="task_days_end_hint">осталось</string>
     <string name="task_performer_hint">исполнитель</string>
     <string name="task_coperformers_hint">соисполнители</string>
     <string name="task_base_obj_hint">основание</string>
@@ -25,4 +25,5 @@
     <string name="task_description_hint">описание</string>
     <string name="messages_hint">Сообщения:</string>
     <string name="message_input_hint">введите сообщение...</string>
+    <string name="tasklist_search_hint">поиск...</string>
 </resources>

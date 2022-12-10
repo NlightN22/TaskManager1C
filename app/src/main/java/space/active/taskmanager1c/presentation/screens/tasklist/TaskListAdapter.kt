@@ -2,7 +2,6 @@ package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.active.taskmanager1c.databinding.ItemTaskBinding
@@ -34,15 +33,29 @@ class TaskListAdapter: RecyclerView.Adapter<TasksViewHolder> ()
             taskTitle.text = task.name
             taskDate.text = task.date
             taskNumber.text = task.number
-            taskAuthor.text = task.users.authorId // todo change domain model
+            taskAuthor.text = abbreviationName(task.users.author.name)
             isObserved.isVisible = task.users.observers.isNotEmpty()
             isCoPerformed.isVisible = task.users.coPerformers.isNotEmpty()
             isSending.isVisible = task.isSending
-            taskStatus.isSelected = task.status == "finished" // todo change domain model
+            taskStatus.isSelected = task.status == Task.Status.Finished // todo change domain model
         }
     }
 
     override fun getItemCount(): Int = tasks.size
+
+    private fun abbreviationName(name: String): String {
+        // split by " "
+        val lines: List<String> = name.split(" ")
+        val abbNameList: List<String> = lines.mapIndexed { index, s ->
+            if (index != 0) {
+                s.take(1) + "."
+            } else {
+                "$s "
+            }
+        }
+        val abbName = abbNameList.joinToString("")
+        return abbName
+    }
 
 }
 

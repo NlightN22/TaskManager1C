@@ -30,8 +30,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         //        incoming()
         observers()
         listeners()
-
-
     }
 
     private fun observers() {

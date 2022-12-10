@@ -5,9 +5,12 @@ import kotlinx.coroutines.flow.*
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.Task.Companion.mapAndReplaceById
+import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.UsersInTaskDomain
 import space.active.taskmanager1c.domain.repository.TasksRepository
 
 private const val TAG = "MergedTaskRepositoryImpl"
@@ -22,16 +25,17 @@ class MergedTaskRepositoryImpl(
     override val listTasksFlow: Flow<List<Task>> =
         combine(
             inputTaskRepository.listTaskFlow,
-            outputTaskRepository.outputTaskList
+            outputTaskRepository.outputTaskList,
         ) { inputList, outputList ->
             combineListTasks(inputList, outputList)
-        }.flowOn(ioDispatcher)
+        }
+            .flowOn(ioDispatcher)
 
 
     override fun getTask(taskId: String): Flow<Request<Task>> =
         combine(
-            inputTaskRepository.getTaskFlow(taskId), outputTaskRepository.getTaskFlow(taskId)
-
+            inputTaskRepository.getTaskFlow(taskId),
+            outputTaskRepository.getTaskFlow(taskId),
         ) { inputTask, outputTask ->
             val combineResult = taskCombine(inputTask, outputTask)
             if (combineResult != null) {
@@ -48,9 +52,9 @@ class MergedTaskRepositoryImpl(
     private suspend fun taskCombine(inputTask: TaskInput?, outputTask: OutputTask?): Task? {
 
         outputTask?.let { outputTask ->
-            val convertedOutput = Task.fromTaskOutput(outputTask)
+            val convertedOutput: Task = outputTaskToTaskDomain(outputTask)
             if (inputTask != null) {
-                val convertedInput = Task.fromTaskInput(inputTask)
+                val convertedInput: Task = inputTaskToTaskDomain(inputTask)
                 /**
                  * return if tasks are same. It's unbelievable, but still...
                  */
@@ -73,45 +77,11 @@ class MergedTaskRepositoryImpl(
             /**
              * return if output task is null
              */
-            Task.fromTaskInput(inputTask)
+            return inputTaskToTaskDomain(inputTask)
         } else {
             null
         }
     }
-
-    private fun getTaskCombineOld(taskId: String) = flow<Request<Task>> {
-        // TODO replace to flow combine
-        emit(PendingRequest())
-        /**
-         * If the task is new we can't edit it until it's submitted to server
-         */
-        if (taskId.isNotEmpty() or taskId.isNotBlank()) {
-
-            var resultOutputList = listOf<OutputTask>()
-            var resultInputList = listOf<TaskInput>()
-
-            // у новых исходящих задач, не будет id входящей
-            val resultOutput = outputTaskRepository.getTask(taskId)
-            if (resultOutput != null) {
-                resultOutputList = listOf<OutputTask>(resultOutput)
-            }
-            val resultInput = inputTaskRepository.getTask(taskId)
-            if (resultInput != null) {
-                resultInputList = listOf<TaskInput>(resultInput)
-            }
-
-            val finalTask = combineListTasks(resultInputList, resultOutputList).firstOrNull()
-            if (finalTask != null) {
-                emit(SuccessRequest(finalTask))
-            } else {
-                emit(ErrorRequest(EmptyObject))
-            }
-        } else {
-            emit(ErrorRequest(ThisTaskIsNotEdited))
-        }
-    }.catch { e ->
-        ErrorRequest<Task>(e)
-    }.flowOn(ioDispatcher)
 
     override fun editTask(task: Task) = flow<Request<Any>> {
         // TODO replace to flow combine
@@ -160,7 +130,8 @@ class MergedTaskRepositoryImpl(
         TODO("Not yet implemented")
     }.flowOn(ioDispatcher)
 
-    private fun combineListTasks(
+
+    private suspend fun combineListTasks(
         taskIn: List<TaskInput>,
         taskOut: List<OutputTask>
     ): List<Task> {
@@ -175,8 +146,8 @@ class MergedTaskRepositoryImpl(
                  * Data type casting to Task
                  */
 
-                val convertedTaskInput = Task.fromTaskInputList(taskIn)
-                val convertedTaskOutput = Task.fromTaskOutputList(taskOut)
+                val convertedTaskInput: List<Task> = taskIn.map { inputTaskToTaskDomain(it) }
+                val convertedTaskOutput: List<Task> = taskOut.map { outputTaskToTaskDomain(it) }
 
                 /**
                  *  Find in task input list the same tasks by id and replace them by output tasks
@@ -189,9 +160,56 @@ class MergedTaskRepositoryImpl(
                  */
                 return replacedTaskInputList.addNotContained(convertedTaskOutput)
             } else if (taskIn.isNotEmpty()) {
-                return Task.fromTaskInputList(taskIn)
+                return taskIn.map { inputTaskToTaskDomain(it) }
             }
         }
         return emptyList()
     }
+
+    private suspend fun inputTaskToTaskDomain(inputTask: TaskInput) = Task(
+        date = inputTask.date,
+        description = inputTask.description,
+        endDate = inputTask.endDate,
+        id = inputTask.id,
+        mainTaskId = inputTask.mainTaskId,
+        name = inputTask.name,
+        number = inputTask.number,
+        objName = inputTask.objName,
+        photos = inputTask.photos,
+        priority = inputTask.priority,
+        status = Task.toTaskStatus(inputTask.status),
+        users = UsersInTaskDomain
+            (
+            author = getUserForTaskInput(inputTask.usersInTask.authorId),
+            performer = getUserForTaskInput(inputTask.usersInTask.performerId),
+            coPerformers = inputTask.usersInTask.coPerformers.map { getUserForTaskInput(it) },
+            observers = inputTask.usersInTask.observers.map { getUserForTaskInput(it) },
+        )
+    )
+
+    private suspend fun outputTaskToTaskDomain(outputTask: OutputTask) = Task(
+        date = outputTask.taskInput.date,
+        description = outputTask.taskInput.description,
+        endDate = outputTask.taskInput.endDate,
+        id = outputTask.taskInput.id,
+        mainTaskId = outputTask.taskInput.mainTaskId,
+        name = outputTask.taskInput.name,
+        number = outputTask.taskInput.number,
+        objName = outputTask.taskInput.objName,
+        photos = outputTask.taskInput.photos,
+        priority = outputTask.taskInput.priority,
+        status = Task.toTaskStatus(outputTask.taskInput.status),
+        users = UsersInTaskDomain(
+            author = getUserForTaskInput(outputTask.taskInput.usersInTask.authorId),
+            performer = getUserForTaskInput(outputTask.taskInput.usersInTask.performerId),
+            coPerformers = outputTask.taskInput.usersInTask.coPerformers.map { getUserForTaskInput(it) },
+            observers = outputTask.taskInput.usersInTask.observers.map { getUserForTaskInput(it) },
+        ),
+        isSending = outputTask.newTask
+    )
+
+    private suspend fun getUserForTaskInput(userId: String): User =
+        inputTaskRepository.getUser(userId)?.toUserDomain()
+            ?: User(id = userId, name = userId)
+
 }

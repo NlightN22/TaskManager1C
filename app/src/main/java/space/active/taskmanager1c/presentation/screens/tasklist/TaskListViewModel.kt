@@ -31,11 +31,10 @@ class TaskListViewModel @Inject constructor(
             }
         }
     }
-
-    // get tasklist
+    // start update job if user isAuth
     // open taskedit
     // open newtask
-    // get ordered tasklit
+    // get ordered tasklist
     // get filtered tasklist
     // set task as completed
     // set task as not_completed
