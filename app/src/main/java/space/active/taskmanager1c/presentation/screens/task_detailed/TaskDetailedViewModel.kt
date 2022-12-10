@@ -33,12 +33,23 @@ class TaskDetailedViewModel @Inject constructor(
     fun expandCloseMainDetailed () {
         _expandState.value = _expandState.value.copy(main = !_expandState.value.main)
     }
+    fun expandMainDetailed () {
+        _expandState.value = _expandState.value.copy(main = true)
+    }
+    fun closeMainDetailed() {
+        _expandState.value = _expandState.value.copy(main = false)
+    }
     // Expand description
     fun expandCloseDescription() {
         _expandState.value = _expandState.value.copy(description = !_expandState.value.description)
     }
 
+    fun expandDescription () {
+        _expandState.value = _expandState.value.copy(description = true)
+    }
 
-
+    fun closeDescription () {
+        _expandState.value = _expandState.value.copy(description = false)
+    }
 
 }

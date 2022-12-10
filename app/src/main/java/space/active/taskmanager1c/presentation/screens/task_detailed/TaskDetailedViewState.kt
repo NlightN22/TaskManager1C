@@ -7,10 +7,12 @@ data class TaskDetailedTaskState(
     val number: String = "",
     val author: String = "",
     val deadLine: String = "",
+    val daysEnd: String = "",
     val performer: String = "",
     val coPerfomers: String = "",
     val observers: String = "",
     val description: String = "",
+    val taskObject: String = "",
     val mainTask: String = "",
     val innerTasks: String = "",
 )

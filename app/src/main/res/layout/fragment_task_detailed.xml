@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.screens.task_detailed.TaskDetailedFragment">
+    tools:context=".presentation.screens.task_detailed.TaskDetailedFragment"
+    >
 
 
     <androidx.cardview.widget.CardView
@@ -74,7 +75,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            >
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/mainDetailCard"
@@ -83,12 +85,15 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                >
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     style="@style/ExpandableConstraint"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    >
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/taskDeadlineCardView"
@@ -284,7 +289,9 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     style="@style/ExpandableConstraint"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    >
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/taskDescriptionCardView"
@@ -353,7 +360,7 @@
                             android:hint="@string/task_base_task">
 
                             <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/taskBase"
+                                android:id="@+id/taskMain"
                                 style="@style/EditTextNotEditable"
                                 android:layout_width="match_parent"
                                 android:gravity="top|center"
