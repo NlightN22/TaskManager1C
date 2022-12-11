@@ -3,10 +3,13 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.repository.TasksRepository
@@ -21,7 +24,8 @@ private const val TAG = "TaskDetailedViewModel"
 class TaskDetailedViewModel @Inject constructor(
     private val repository: TasksRepository,
     private val logger: Logger,
-    private val getDetailedTask: GetDetailedTask
+    private val getDetailedTask: GetDetailedTask,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _taskState = MutableStateFlow(TaskDetailedTaskState())
@@ -30,35 +34,69 @@ class TaskDetailedViewModel @Inject constructor(
     val expandState = _expandState.asStateFlow()
     private val _inputMessageState = MutableStateFlow(TaskDetailedInputMessage())
     val inputMessage = _inputMessageState.asStateFlow()
-    private val _saveState = MutableStateFlow(TaskDetailedSaveChangesState())
-    val saveState = _saveState.asStateFlow()
+    private val _changeState = MutableStateFlow(TaskIsChanged())
+    val changeState = _changeState.asStateFlow()
+    private val _enabledFields: MutableStateFlow<EditableFields> =
+        MutableStateFlow(EditableFields())
+    val enabledFields = _enabledFields.asStateFlow()
 
     // get task flow
     fun getTaskFlow(taskId: String) {
-        viewModelScope.launch {
-            getDetailedTask(taskId).collect { task ->
-                if (task != null) {
-                    _taskState.value = _taskState.value.copy(
-                        id = task.id,
-                        title = task.name,
-                        startDate = task.date,
-                        number = task.number,
-                        author = task.users.author.name,
-                        deadLine = task.endDate,
-                        daysEnd = task.getDeadline(),
-                        performer = task.users.performer.name,
-                        coPerfomers = task.users.coPerformers.toText(),
-                        observers = task.users.observers.toText(),
-                        description = task.description,
-                        taskObject = task.objName,
-                        mainTask = task.mainTaskId
-                    )
-                } else {
-                    _taskState.value = TaskDetailedTaskState()
+        /**
+         * If task is not new
+         */
+        if (taskId.isNotBlank()) {
+            viewModelScope.launch(ioDispatcher) {
+                getDetailedTask(taskId).collect { task ->
+                    if (task != null) {
+                        _taskState.value = _taskState.value.copy(
+                            id = task.id,
+                            title = task.name,
+                            startDate = task.date,
+                            number = task.number,
+                            author = task.users.author.name,
+                            deadLine = task.endDate,
+                            daysEnd = task.getDeadline(),
+                            performer = task.users.performer.name,
+                            coPerfomers = task.users.coPerformers.toText(),
+                            observers = task.users.observers.toText(),
+                            description = task.description,
+                            taskObject = task.objName,
+                            mainTask = task.mainTaskId
+                        )
+                        setFieldsState(task)
+                    }
+                    /**
+                     * If cant get task from DB
+                     */
+                    else {
+                        _taskState.value = TaskDetailedTaskState()
+                    }
                 }
             }
         }
+        /**
+         * If new task
+         */
+        else {
+            _taskState.value = TaskDetailedTaskState()
+        }
+    }
 
+
+    private suspend fun setFieldsState(task: Task) {
+        // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
+        val whoAmI: User = User(
+            id = "c49a0b62-c192-11e1-8a03-f46d0490adee",
+            name = "Михайлов Олег Федорович"
+        ) // TODO replace to shared preferences
+        if (task.users.author == whoAmI) {
+            _enabledFields.value = TaskUserIs.Author().fields
+        } else if (task.users.performer == whoAmI && task.users.author != whoAmI) {
+            _enabledFields.value = TaskUserIs.Performer().fields
+        } else {
+            _enabledFields.value = TaskUserIs.NotAuthorOrPerformer().fields
+        }
     }
 
     // get messages flow
@@ -100,7 +138,7 @@ class TaskDetailedViewModel @Inject constructor(
     }
 
     /**
-     * Return deadline in string
+     * Return days deadline in string
      */
     private fun Task.getDeadline(): String {
         val end = this.endDate

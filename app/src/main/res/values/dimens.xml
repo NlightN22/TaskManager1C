@@ -2,4 +2,6 @@
 <resources>
     <dimen name="login_screen_text_size">18sp</dimen>
     <dimen name="margin_top_at_cards_elements">16dp</dimen>
+    <dimen name="editable_card_stroke_width">2dp</dimen>
+    <integer name="description_collapsed_max_lines">3</integer>
 </resources>

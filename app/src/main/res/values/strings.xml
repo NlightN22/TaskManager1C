@@ -26,4 +26,7 @@
     <string name="messages_hint">Сообщения:</string>
     <string name="message_input_hint">введите сообщение...</string>
     <string name="tasklist_search_hint">поиск...</string>
+    <string name="toast_date_selected">Выбрана дата: %s</string>
+    <string name="toast_date_not_selected">Дата не выбрана</string>
+    <string name="date_picker_title">Выберите дату:</string>
 </resources>

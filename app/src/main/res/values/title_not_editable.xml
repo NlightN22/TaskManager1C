@@ -3,7 +3,7 @@
     <style name="TitleNotEditableCardView" parent="CardViewGlobal">
     </style>
     <style name="TitleTopperText">
-        <item name="backgroundTint">@color/text_item_background_not_editable</item>
+        <item name="backgroundTint">@color/not_editable_text_background</item>
         <item name="android:textColor">@color/edit_text_top_hint</item>
         <item name="android:textSize">12sp</item>
         <item name="android:textStyle">normal</item>

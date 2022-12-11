@@ -8,7 +8,7 @@
     android:layout_marginStart="4dp"
     android:layout_marginEnd="4dp"
     app:cardCornerRadius="14dp"
-    android:background="@color/edit_text_background"
+    android:background="@color/editable_text_background"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout

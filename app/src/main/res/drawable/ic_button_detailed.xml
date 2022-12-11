@@ -13,7 +13,7 @@
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <corners android:radius="16dp" />
-            <solid android:color="@color/text_item_background_not_editable" />
+            <solid android:color="@color/not_editable_text_background" />
             <padding android:bottom="5dp" android:left="5dp" android:right="5dp" android:top="5dp" />
         </shape>
     </item>

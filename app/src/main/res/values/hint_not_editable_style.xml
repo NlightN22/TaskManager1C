@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="HintNotEditable">
+        <item name="android:textColor">#54D66A</item>
+        <item name="android:textColorHint">#FCC9C9</item>
+    </style>
+</resources>

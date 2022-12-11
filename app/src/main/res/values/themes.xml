@@ -3,12 +3,12 @@
     <style name="Theme.TaskManager1C" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/edit_text_stroke</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimaryVariant">@color/hint_text</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSecondary">@color/title_not_editable</item>
+        <item name="colorSecondaryVariant">@color/hint_text</item>
+        <item name="colorOnSecondary">@color/app_background</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
@@ -27,7 +27,7 @@
         <item name="boxCornerRadiusBottomStart">14dp</item>
         <item name="boxCornerRadiusTopStart">14dp</item>
         <item name="boxStrokeColor">@color/edit_text_stroke</item>
-        <item name="boxBackgroundColor">@color/edit_text_background</item>
+        <item name="boxBackgroundColor">@color/editable_text_background</item>
         <item name="hintTextColor">@color/hint_text</item>
         <item name="hintAnimationEnabled">true</item>
     </style>
@@ -55,7 +55,7 @@
     </style>
 
     <style name="CardViewGlobal">
-        <item name="cardBackgroundColor">@color/text_item_background_not_editable</item>
+        <item name="cardBackgroundColor">@color/not_editable_text_background</item>
         <item name="cardCornerRadius">16dp</item>
     </style>
 </resources>

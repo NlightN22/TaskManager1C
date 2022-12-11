@@ -32,10 +32,10 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
             override fun onTaskClick(task: Task) {
                 launchTaskDetailed(taskId = task.id)
-//                Toast.makeText(
+//                Toasts.makeText(
 //                    this@TaskListFragment.requireContext(),
 //                    "Task : ${task.name}",
-//                    Toast.LENGTH_SHORT
+//                    Toasts.LENGTH_SHORT
 //                ).show()
             }
 

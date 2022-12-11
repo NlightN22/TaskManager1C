@@ -7,17 +7,29 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
+import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import space.active.taskmanager1c.presentation.utils.Toasts
+import space.active.taskmanager1c.presentation.utils.setColorState
+import space.active.taskmanager1c.presentation.utils.setState
+import java.text.SimpleDateFormat
+import java.util.*
+import javax.inject.Inject
+
 
 private const val TAG = "TaskDetailedFragment"
 
 @AndroidEntryPoint
 class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
+
+    @Inject lateinit var logger: Logger
+    @Inject lateinit var toasts: Toasts
 
     lateinit var binding: FragmentTaskDetailedBinding
     private val viewModel by viewModels<TaskDetailedViewModel>()
@@ -42,7 +54,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun observers() {
         lifecycleScope.launchWhenStarted {
             viewModel.taskState.collectLatest { taskState ->
-                binding.taskTitle.setText(taskState.title)
+                binding.taskTitleDetailed.setText(taskState.title)
                 binding.taskNumberDetailed.text = taskState.number
                 binding.taskDateDetailed.text = taskState.startDate
                 binding.taskDeadline.setText(taskState.deadLine)
@@ -58,6 +70,44 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             }
         }
         lifecycleScope.launchWhenStarted {
+            viewModel.enabledFields.collectLatest { fieldsState ->
+                // Title
+                binding.taskTitleCardView.setState(enabled = fieldsState.title)
+                binding.taskTitleTIL.setState(enabled = fieldsState.title, editable = fieldsState.title)
+                binding.taskDateDetailed.setColorState(fieldsState.title)
+                binding.taskNumberDetailed.setColorState(fieldsState.title)
+//                binding.taskTitleDetailed.enabled(fieldsState.title)
+                // End date
+                binding.taskDeadlineCardView.setState(enabled = fieldsState.deadLine)
+                binding.taskDeadlineTIL.setState(enabled = fieldsState.deadLine)
+                if (fieldsState.deadLine) {
+                    binding.taskDeadline.setOnClickListener {
+                        showDatePicker()
+                    }
+                }
+//                binding.taskDeadline.enabled(fieldsState.deadLine)
+                // Performer
+                binding.taskPerformerCard.setState(enabled = fieldsState.performer)
+                binding.taskPerformerTIL.setState(enabled = fieldsState.performer)
+//                binding.taskPerformer.enabled(fieldsState.performer)
+                // CoPerformers
+                binding.taskCoPerformersCard.setState(enabled = fieldsState.coPerfomers)
+                binding.taskCoPerformersTIL.setState(enabled = fieldsState.coPerfomers)
+//                binding.taskCoPerformers.enabled(fieldsState.coPerfomers)
+                // Observers
+                binding.taskObserversCard.setState(enabled = fieldsState.observers)
+                binding.taskObserversTIL.setState(enabled = fieldsState.observers)
+//                binding.taskObservers.enabled(fieldsState.observers)
+                // Descriptions
+                binding.taskDescriptionCardView.setState(enabled = fieldsState.description)
+                binding.taskDescriptionTIL.setState(enabled = fieldsState.description, editable = fieldsState.description)
+//                binding.taskDescription.enabled(fieldsState.description)
+
+
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
             viewModel.expandState.collectLatest { expandState ->
                 renderMainDetailed(expandState.main)
                 renderDescription(expandState.description)
@@ -69,7 +119,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.saveState.collectLatest {
+            viewModel.changeState.collectLatest {
 
             }
         }
@@ -103,7 +153,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             }
         }
         )
-
         binding.expandMainDetailCard.setOnClickListener {
             viewModel.expandCloseMainDetailed()
         }
@@ -112,6 +161,25 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         }
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
+        }
+    }
+
+    private fun showDatePicker() {
+        val datePicker = MaterialDatePicker.Builder
+            .datePicker()
+            .setTitleText(getString(R.string.date_picker_title))
+            .build()
+        datePicker.show(this.childFragmentManager, "DatePicker")
+        datePicker.addOnPositiveButtonClickListener {
+            val dateFormatter = SimpleDateFormat("dd-MM-yyyy")
+            val date = dateFormatter.format(Date(it))
+            toasts.toast(getString(R.string.toast_date_selected, date))
+        }
+        datePicker.addOnNegativeButtonClickListener {
+            toasts.toast(getString(R.string.toast_date_not_selected))
+        }
+        datePicker.addOnCancelListener {
+            toasts.toast(getString(R.string.toast_date_not_selected))
         }
     }
 
@@ -127,6 +195,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun renderDescription(state: Boolean) {
+        binding.taskDescription.maxLines = if (state) {100} else {3}
         binding.taskBaseObjectCard.isVisible = state
         binding.taskBaseCard.isVisible = state
         binding.taskInnerCardView.isVisible = state
@@ -136,5 +205,4 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             0F
         }
     }
-
 }

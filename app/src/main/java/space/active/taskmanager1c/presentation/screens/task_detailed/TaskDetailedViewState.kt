@@ -17,6 +17,35 @@ data class TaskDetailedTaskState(
     val innerTasks: String = "",
 )
 
+sealed class TaskUserIs {
+    data class Author(
+        val fields: EditableFields = EditableFields(
+            title = true,
+            deadLine = true,
+            performer = true,
+            coPerfomers = true,
+            observers = true,
+            description = true,
+            bottomPerformer = true
+        )
+    ) : TaskUserIs()
+
+    data class NotAuthorOrPerformer(
+        val fields: EditableFields = EditableFields()
+    ) : TaskUserIs()
+
+    class Performer(
+        val fields: EditableFields = EditableFields(
+            bottomPerformer = true
+        )
+    ) : TaskUserIs()
+
+}
+
+data class TaskIsChanged(
+    val bottomShowSave: Boolean = false,
+)
+
 data class TaskDetailedExpandState(
     val main: Boolean = false,
     val description: Boolean = false
@@ -24,8 +53,4 @@ data class TaskDetailedExpandState(
 
 data class TaskDetailedInputMessage(
     val input: String = ""
-)
-
-data class TaskDetailedSaveChangesState(
-    val show: Boolean = false
 )
