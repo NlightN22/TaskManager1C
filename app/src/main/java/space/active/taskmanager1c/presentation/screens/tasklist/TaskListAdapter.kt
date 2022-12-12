@@ -17,20 +17,20 @@ interface TaskActionListener {
 
 class TaskListAdapter(
     private val actionListener: TaskActionListener
-): RecyclerView.Adapter<TasksViewHolder> (), View.OnClickListener
-{
+) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener {
     var tasks: List<Task> = emptyList()
-    set(newValue) {
-        field = newValue
-        notifyDataSetChanged()
-    }
+        set(newValue) {
+            field = newValue
+            notifyDataSetChanged()
+        }
 
     override fun onClick(v: View) {
         val task = v.tag as Task
         when (v.id) {
             R.id.taskStatus -> {
                 // todo
-            } else -> {
+            }
+            else -> {
                 actionListener.onTaskClick(task)
             }
         }

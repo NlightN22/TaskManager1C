@@ -15,4 +15,9 @@ data class UserInput(
         id = this.id,
         name = this.name
             )
+    companion object {
+        fun List<UserInput>.toListUserDomain(): List<User> {
+            return this.map { it.toUserDomain() }
+        }
+    }
 }

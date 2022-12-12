@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
@@ -39,6 +37,9 @@ class TaskDetailedViewModel @Inject constructor(
     private val _enabledFields: MutableStateFlow<EditableFields> =
         MutableStateFlow(EditableFields())
     val enabledFields = _enabledFields.asStateFlow()
+
+    private val _showUsersToSelect = MutableSharedFlow<List<User>>()
+    val  showUsersToSelect = _showUsersToSelect.asSharedFlow()
 
     // get task flow
     fun getTaskFlow(taskId: String) {
@@ -100,7 +101,13 @@ class TaskDetailedViewModel @Inject constructor(
     }
 
     // get messages flow
-    // set view state:
+
+    fun showDialogSelectUsers() {
+        viewModelScope.launch(ioDispatcher) {
+            val listUsers = repository.listUsersFlow.first()
+            _showUsersToSelect.emit(listUsers)
+        }
+    }
     // NullTask, NewTask, Editable Task, InputValidationError, SaveCancelChanges
     // Expand main details
     fun expandCloseMainDetailed() {

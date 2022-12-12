@@ -38,7 +38,7 @@
                 tools:text="10.09.22" />
 
             <ImageButton
-                android:id="@+id/back_button"
+                android:id="@+id/back_button_task_detailed"
                 style="@style/BackButton"
                 android:layout_marginStart="-4dp"
                 app:layout_constraintBottom_toBottomOf="parent"

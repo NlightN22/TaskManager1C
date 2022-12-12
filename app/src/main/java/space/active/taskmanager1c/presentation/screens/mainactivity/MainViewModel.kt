@@ -213,7 +213,9 @@ class MainViewModel @Inject constructor(
                 set update work here
                  */
                 handleJobForUpdateDb.updateJob().collectLatest {
-                    logger.log(TAG, it.toString())
+                    if (it is ErrorRequest) {
+                        logger.log(TAG, it.toString())
+                    }
                 }
             } catch (e: CancellationException) {
                 logger.log(TAG, "updateJob CancellationException ${e.message}")

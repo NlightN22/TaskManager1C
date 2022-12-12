@@ -1,16 +1,24 @@
 package space.active.taskmanager1c.presentation.screens.login
 
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.FragmentLoginBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import javax.inject.Inject
 
-class LoginFragment: BaseFragment(R.layout.fragment_login) {
+private const val TAG = "LoginFragment"
+
+@AndroidEntryPoint
+class LoginFragment : BaseFragment(R.layout.fragment_login) {
 
     lateinit var binding: FragmentLoginBinding
+
+    @Inject
+    lateinit var logger: Logger
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -19,6 +27,10 @@ class LoginFragment: BaseFragment(R.layout.fragment_login) {
 
 //        incoming()
 //        observers()
+        logger.log(TAG, "${childFragmentManager.backStackEntryCount}")
+        logger.log(TAG, "${parentFragmentManager.backStackEntryCount}")
+        logger.log(TAG, "${findNavController().currentBackStackEntry?.destination}")
+
         listeners()
     }
 
@@ -44,14 +56,16 @@ class LoginFragment: BaseFragment(R.layout.fragment_login) {
         }
 
         binding.optionsMenu.setOnClickListener {
-            val optionsMenu = showOptionsMenu(this.context,binding.optionsMenu)
+            val optionsMenu = showOptionsMenu(this.context, binding.optionsMenu)
             optionsMenu?.let { optionsMenu ->
                 setOnOptionsMenuClickListener(optionsMenu) {
                     when (it.itemId) {
                         R.id.options_settings -> {
                             launchSettings(R.id.action_loginFragment2_to_settingsFragment2)
                         }
-                        R.id.options_logout -> {}
+                        R.id.options_logout -> {
+                            onBackClick()
+                        }
                     }
                 }
             }

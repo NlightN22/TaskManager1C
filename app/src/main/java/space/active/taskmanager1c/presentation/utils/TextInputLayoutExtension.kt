@@ -1,10 +1,12 @@
 package space.active.taskmanager1c.presentation.utils
 
 import android.content.res.ColorStateList
+import android.util.Log
 import android.widget.MultiAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import space.active.taskmanager1c.R
+
 
 fun TextInputLayout.setState(enabled: Boolean, editable: Boolean = false) {
     val hintColorDisabled: ColorStateList =
@@ -23,6 +25,7 @@ fun TextInputLayout.setState(enabled: Boolean, editable: Boolean = false) {
         } else if (it is MultiAutoCompleteTextView) {
             it.setState(enabled, editable = editable)
         }
+//        Log.d("TestViewState", "setState: $it \nEnabled: $enabled Editable: $editable")
     }
 }
 
@@ -37,6 +40,7 @@ private fun TextInputEditText.setState(enabled: Boolean, editable: Boolean = fal
     this.isEnabled = true
     this.isClickable = true
     this.isFocusable = editable
+    this.isFocusableInTouchMode = editable
     if (enabled) {
         this.backgroundTintList = enabledBackgroundColor
         this.setTextColor(editableTextColor)
@@ -56,13 +60,13 @@ private fun MultiAutoCompleteTextView.setState(enabled: Boolean, editable: Boole
         resources.getColor(R.color.not_editable_text, resources.newTheme())
     this.isEnabled = true
     this.isClickable = true
+    this.isFocusable = editable
+    this.isFocusableInTouchMode = editable
     if (enabled) {
         this.backgroundTintList = enabledBackgroundColor
         this.setTextColor(editableTextColor)
-        this.isFocusable = editable
     } else {
         this.backgroundTintList = disabledBackgroundColor
         this.setTextColor(notEditableTextColor)
-        this.isFocusable = false
     }
 }

@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.*
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput.Companion.toListUserDomain
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.Task.Companion.mapAndReplaceById
@@ -31,6 +31,8 @@ class MergedTaskRepositoryImpl(
         }
             .flowOn(ioDispatcher)
 
+    override val listUsersFlow: Flow<List<User>> =
+        inputTaskRepository.listUsersFlow.map { it.toListUserDomain() }
 
     override fun getTask(taskId: String): Flow<Task?> =
         combine(
@@ -194,7 +196,11 @@ class MergedTaskRepositoryImpl(
         users = UsersInTaskDomain(
             author = getUserForTaskInput(outputTask.taskInput.usersInTask.authorId),
             performer = getUserForTaskInput(outputTask.taskInput.usersInTask.performerId),
-            coPerformers = outputTask.taskInput.usersInTask.coPerformers.map { getUserForTaskInput(it) },
+            coPerformers = outputTask.taskInput.usersInTask.coPerformers.map {
+                getUserForTaskInput(
+                    it
+                )
+            },
             observers = outputTask.taskInput.usersInTask.observers.map { getUserForTaskInput(it) },
         ),
         isSending = outputTask.newTask

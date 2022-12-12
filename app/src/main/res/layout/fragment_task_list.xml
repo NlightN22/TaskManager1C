@@ -15,7 +15,7 @@
         tools:ignore="MissingConstraints" />
 
     <ImageButton
-        android:id="@+id/back_button"
+        android:id="@+id/back_button_task_list"
         android:layout_marginTop="14dp"
         style="@style/BackButton"
         tools:ignore="MissingConstraints" />
@@ -28,7 +28,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        app:layout_constraintStart_toEndOf="@+id/back_button"
+        app:layout_constraintStart_toEndOf="@+id/back_button_task_list"
         app:layout_constraintEnd_toStartOf="@+id/options_menu"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginBottom="7dp"

@@ -14,7 +14,9 @@ import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
+import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import space.active.taskmanager1c.presentation.utils.SingleChooseDialog
 import space.active.taskmanager1c.presentation.utils.Toasts
 import space.active.taskmanager1c.presentation.utils.setColorState
 import space.active.taskmanager1c.presentation.utils.setState
@@ -28,8 +30,11 @@ private const val TAG = "TaskDetailedFragment"
 @AndroidEntryPoint
 class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
-    @Inject lateinit var logger: Logger
-    @Inject lateinit var toasts: Toasts
+    @Inject
+    lateinit var logger: Logger
+
+    @Inject
+    lateinit var toasts: Toasts
 
     lateinit var binding: FragmentTaskDetailedBinding
     private val viewModel by viewModels<TaskDetailedViewModel>()
@@ -52,7 +57,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun observers() {
-        lifecycleScope.launchWhenStarted {
+        lifecycleScope.launchWhenCreated {
             viewModel.taskState.collectLatest { taskState ->
                 binding.taskTitleDetailed.setText(taskState.title)
                 binding.taskNumberDetailed.text = taskState.number
@@ -69,11 +74,15 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 binding.taskInner.setText(taskState.innerTasks)
             }
         }
-        lifecycleScope.launchWhenStarted {
+        lifecycleScope.launchWhenCreated {
             viewModel.enabledFields.collectLatest { fieldsState ->
+//                Log.d("TestViewState", "fieldsState $fieldsState")
                 // Title
                 binding.taskTitleCardView.setState(enabled = fieldsState.title)
-                binding.taskTitleTIL.setState(enabled = fieldsState.title, editable = fieldsState.title)
+                binding.taskTitleTIL.setState(
+                    enabled = fieldsState.title,
+                    editable = fieldsState.title
+                )
                 binding.taskDateDetailed.setColorState(fieldsState.title)
                 binding.taskNumberDetailed.setColorState(fieldsState.title)
 //                binding.taskTitleDetailed.enabled(fieldsState.title)
@@ -89,6 +98,11 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 // Performer
                 binding.taskPerformerCard.setState(enabled = fieldsState.performer)
                 binding.taskPerformerTIL.setState(enabled = fieldsState.performer)
+                if (fieldsState.performer) {
+                    binding.taskPerformer.setOnClickListener {
+                        viewModel.showDialogSelectUsers()
+                    }
+                }
 //                binding.taskPerformer.enabled(fieldsState.performer)
                 // CoPerformers
                 binding.taskCoPerformersCard.setState(enabled = fieldsState.coPerfomers)
@@ -100,13 +114,19 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 //                binding.taskObservers.enabled(fieldsState.observers)
                 // Descriptions
                 binding.taskDescriptionCardView.setState(enabled = fieldsState.description)
-                binding.taskDescriptionTIL.setState(enabled = fieldsState.description, editable = fieldsState.description)
+                binding.taskDescriptionTIL.setState(
+                    enabled = fieldsState.description,
+                    editable = fieldsState.description
+                )
 //                binding.taskDescription.enabled(fieldsState.description)
-
-
             }
         }
 
+        lifecycleScope.launchWhenStarted {
+            viewModel.showUsersToSelect.collectLatest {
+                showDialog(it)
+            }
+        }
         lifecycleScope.launchWhenStarted {
             viewModel.expandState.collectLatest { expandState ->
                 renderMainDetailed(expandState.main)
@@ -123,6 +143,8 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
             }
         }
+
+        setupMultipleChooseDialog()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -141,7 +163,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         })
 
         binding.taskDescriptionCard.setOnTouchListener(object :
-        OnSwipeTouchListener(binding.taskDescriptionCard.context) {
+            OnSwipeTouchListener(binding.taskDescriptionCard.context) {
             override fun onSwipeDown() {
                 super.onSwipeDown()
                 viewModel.expandDescription()
@@ -159,7 +181,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         binding.expandTaskDescriptionCard.setOnClickListener {
             viewModel.expandCloseDescription()
         }
-        binding.backButton.setOnClickListener {
+        binding.backButtonTaskDetailed.setOnClickListener {
             findNavController().popBackStack()
         }
     }
@@ -195,7 +217,11 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun renderDescription(state: Boolean) {
-        binding.taskDescription.maxLines = if (state) {100} else {3}
+        binding.taskDescription.maxLines = if (state) {
+            100
+        } else {
+            3
+        }
         binding.taskBaseObjectCard.isVisible = state
         binding.taskBaseCard.isVisible = state
         binding.taskInnerCardView.isVisible = state
@@ -203,6 +229,19 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             180F
         } else {
             0F
+        }
+    }
+
+    private fun showDialog(listUsers: List<User>) {
+        val tempList = listUsers.map { it.name }
+        SingleChooseDialog.show(parentFragmentManager, tempList, ok = false, cancel = true)
+    }
+
+    private fun setupMultipleChooseDialog() {
+        SingleChooseDialog.setupListener(parentFragmentManager, this) {
+            it?.let {
+                logger.log(TAG, "setupMultipleChooseDialog $it")
+            }
         }
     }
 }

@@ -33,9 +33,19 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         }
     }
 
-
     fun launchSettings(action: Int) {
         findNavController().navigate(action)
+    }
+
+    fun onBackClick() {
+        val destination = findNavController().currentBackStackEntry?.destination?.id
+        destination?.let {
+            if (it == findNavController().currentDestination?.id) {
+                requireActivity().onBackPressed()
+            } else {
+                findNavController().popBackStack()
+            }
+        }
     }
 
 }

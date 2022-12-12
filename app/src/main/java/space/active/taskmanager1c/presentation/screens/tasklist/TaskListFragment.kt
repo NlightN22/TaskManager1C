@@ -2,16 +2,19 @@ package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import javax.inject.Inject
+
+private const val TAG = "TaskListFragment"
 
 @AndroidEntryPoint
 class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
@@ -19,6 +22,8 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     lateinit var binding: FragmentTaskListBinding
     private val viewModel by viewModels<TaskListViewModel>()
     lateinit var recyclerTasks: TaskListAdapter
+    @Inject
+    lateinit var logger: Logger
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,11 +37,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
             override fun onTaskClick(task: Task) {
                 launchTaskDetailed(taskId = task.id)
-//                Toasts.makeText(
-//                    this@TaskListFragment.requireContext(),
-//                    "Task : ${task.name}",
-//                    Toasts.LENGTH_SHORT
-//                ).show()
             }
 
             override fun onTaskLongClick(task: Task) {
@@ -71,7 +71,9 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                         R.id.options_settings -> {
                             launchSettings(R.id.action_taskListFragment_to_settingsFragment)
                         }
-                        R.id.options_logout -> {}
+                        R.id.options_logout -> {
+                            onBackClick()
+                        }
                     }
                 }
             }
@@ -87,6 +89,9 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                 }
             }
             return@setOnItemSelectedListener true
+        }
+        binding.backButtonTaskList.setOnClickListener {
+            onBackClick()
         }
     }
 

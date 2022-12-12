@@ -40,11 +40,11 @@ class HandleJobForUpdateDb
         // Обновляем список входящих задач в таблице.
         // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
         while (true) {
-            logger.log(TAG, "Job start")
+//            logger.log(TAG, "Job start")
             emit(outputSendJob()) // TODO replace to flow
             emit(inputFetchJob()) // TODO replace to flow and add exception NoUserInDb
             delay(updateDelay)
-            logger.log(TAG, "Job end")
+//            logger.log(TAG, "Job end")
         }
     }.flowOn(ioDispatcher)
 
