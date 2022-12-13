@@ -237,11 +237,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/task_coperformers_hint"
-                            app:endIconMode="dropdown_menu"
                             app:startIconDrawable="@drawable/ic_coperformers"
                             >
 
-                            <MultiAutoCompleteTextView
+                            <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/taskCoPerformers"
                                 style="@style/EditTextEditable"
                                 android:layout_width="match_parent"
@@ -266,12 +265,11 @@
                             style="@style/EditableTextInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/task_performer_hint"
-                            app:endIconMode="dropdown_menu"
+                            android:hint="@string/task_observers_hint"
                             app:startIconDrawable="@drawable/ic_observer"
                             >
 
-                            <MultiAutoCompleteTextView
+                            <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/taskObservers"
                                 style="@style/EditTextEditable"
                                 android:layout_width="match_parent"

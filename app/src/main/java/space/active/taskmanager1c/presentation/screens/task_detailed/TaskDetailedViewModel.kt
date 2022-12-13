@@ -10,8 +10,10 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.User.Companion.toDialogItems
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.GetDetailedTask
+import space.active.taskmanager1c.presentation.utils.MultiChooseDialog
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -38,8 +40,11 @@ class TaskDetailedViewModel @Inject constructor(
         MutableStateFlow(EditableFields())
     val enabledFields = _enabledFields.asStateFlow()
 
-    private val _showUsersToSelect = MutableSharedFlow<List<User>>()
-    val  showUsersToSelect = _showUsersToSelect.asSharedFlow()
+    private val _showUsersToMultiSelect = MutableSharedFlow<List<MultiChooseDialog.DialogItem>>()
+    val showUsersToMultiSelect = _showUsersToMultiSelect.asSharedFlow()
+
+    private val _showUsersToSelectOne = MutableSharedFlow<List<MultiChooseDialog.DialogItem>>()
+    val  showUsersToSelectOne = _showUsersToSelectOne.asSharedFlow()
 
     // get task flow
     fun getTaskFlow(taskId: String) {
@@ -102,13 +107,27 @@ class TaskDetailedViewModel @Inject constructor(
 
     // get messages flow
 
-    fun showDialogSelectUsers() {
+//    fun showDialogSelectUsers() {
+//        viewModelScope.launch(ioDispatcher) {
+//            val listUsers = repository.listUsersFlow.first()
+//            _showUsersToSelect.emit(listUsers)
+//        }
+//    }
+
+    fun showDialogMultipleSelectUsers() {
         viewModelScope.launch(ioDispatcher) {
-            val listUsers = repository.listUsersFlow.first()
-            _showUsersToSelect.emit(listUsers)
+            val listUsers: List<User> = repository.listUsersFlow.first()
+            val currentTask = repository.getTask(_taskState.value.id).first()
+            // convert to dialog items
+            if (currentTask != null) {
+                val coPerformersIds = currentTask.users.coPerformers.map { it.id }
+                val dialogItems = listUsers.toDialogItems(coPerformersIds)
+                _showUsersToMultiSelect.emit(dialogItems)
+            }
         }
     }
-    // NullTask, NewTask, Editable Task, InputValidationError, SaveCancelChanges
+    // NullTask, NewTask, Editable Task, InputValidationError
+    // Save changes on flow with delay
     // Expand main details
     fun expandCloseMainDetailed() {
         _expandState.value = _expandState.value.copy(main = !_expandState.value.main)

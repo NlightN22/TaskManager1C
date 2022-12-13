@@ -14,12 +14,8 @@ import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
-import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.presentation.screens.BaseFragment
-import space.active.taskmanager1c.presentation.utils.SingleChooseDialog
-import space.active.taskmanager1c.presentation.utils.Toasts
-import space.active.taskmanager1c.presentation.utils.setColorState
-import space.active.taskmanager1c.presentation.utils.setState
+import space.active.taskmanager1c.presentation.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -100,7 +96,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 binding.taskPerformerTIL.setState(enabled = fieldsState.performer)
                 if (fieldsState.performer) {
                     binding.taskPerformer.setOnClickListener {
-                        viewModel.showDialogSelectUsers()
+                        viewModel.showDialogMultipleSelectUsers() //todo change to single
                     }
                 }
 //                binding.taskPerformer.enabled(fieldsState.performer)
@@ -123,8 +119,14 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         }
 
         lifecycleScope.launchWhenStarted {
-            viewModel.showUsersToSelect.collectLatest {
-                showDialog(it)
+            viewModel.showUsersToMultiSelect.collectLatest { dialogItems->
+                showMultiChooseDialog(dialogItems)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.showUsersToSelectOne.collectLatest { dialogItems ->
+                showSingleChooseDialog(dialogItems.map { it.text })
             }
         }
         lifecycleScope.launchWhenStarted {
@@ -143,8 +145,8 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
             }
         }
-
-        setupMultipleChooseDialog()
+        setupMultiChooseDialog()
+        setupSingleChooseDialog()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -205,7 +207,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         }
     }
 
-
     private fun renderMainDetailed(state: Boolean) {
         binding.taskCoPerformersCard.isVisible = state
         binding.taskObserversCard.isVisible = state
@@ -232,12 +233,23 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         }
     }
 
-    private fun showDialog(listUsers: List<User>) {
-        val tempList = listUsers.map { it.name }
-        SingleChooseDialog.show(parentFragmentManager, tempList, ok = false, cancel = true)
+    private fun showMultiChooseDialog(listItems: List<MultiChooseDialog.DialogItem>) {
+        MultiChooseDialog.show(parentFragmentManager, listItems, ok = true, cancel = true)
     }
 
-    private fun setupMultipleChooseDialog() {
+    private fun setupMultiChooseDialog() {
+        MultiChooseDialog.setupListener(parentFragmentManager, this) {
+            it?.let {
+                logger.log(TAG, "setupMultiChooseDialog $it")
+            }
+        }
+    }
+
+    private fun showSingleChooseDialog(listUsers: List<String>) {
+        SingleChooseDialog.show(parentFragmentManager, listUsers, ok = false, cancel = true)
+    }
+
+    private fun setupSingleChooseDialog() {
         SingleChooseDialog.setupListener(parentFragmentManager, this) {
             it?.let {
                 logger.log(TAG, "setupMultipleChooseDialog $it")

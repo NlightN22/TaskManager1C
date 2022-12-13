@@ -152,7 +152,7 @@ class MergedTaskRepositoryImpl(
                 /**
                  * Add new output tasks to final list
                  */
-                return replacedTaskInputList.addNotContained(convertedTaskOutput)
+                return replacedTaskInputList.addNotContainedFromList(convertedTaskOutput)
             } else if (taskIn.isNotEmpty()) {
                 return taskIn.map { inputTaskToTaskDomain(it) }
             }

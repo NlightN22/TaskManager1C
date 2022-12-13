@@ -32,4 +32,5 @@
     <string name="search_view_hint">Введите поисковый запрос</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
+    <string name="task_observers_hint">наблюдатели</string>
 </resources>

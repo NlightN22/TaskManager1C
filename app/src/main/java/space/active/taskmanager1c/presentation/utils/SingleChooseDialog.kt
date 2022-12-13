@@ -36,8 +36,7 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
         val itemsAdapter = DialogAdapter(object : DialogListener {
             override fun onClickItem(item: String) {
-                parentFragmentManager.setFragmentResult(REQUEST_KEY, bundleOf(RESPONSE_TAG to item))
-                close()
+                emitResult(item)
             }
         })
 
@@ -50,10 +49,16 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
         binding.searchDialog.addTextChangedListener { editable ->
             editable?.let { textChar ->
-                val filteredList = items.filter { it.contains(textChar) }
+                val filteredList = items.filter { it.contains(textChar,true) }
                 itemsAdapter.listItems = filteredList
             }
         }
+    }
+
+    private fun emitResult(item: String) {
+        parentFragmentManager.setFragmentResult(
+            REQUEST_KEY, bundleOf(
+                RESPONSE_TAG to item))
     }
 
     private fun close() {
@@ -86,6 +91,7 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
                 listTextView.text = item
                 listTextView.setOnClickListener {
                     listener.onClickItem(item)
+                    listCardView.isChecked = !listCardView.isChecked
                 }
             }
         }
