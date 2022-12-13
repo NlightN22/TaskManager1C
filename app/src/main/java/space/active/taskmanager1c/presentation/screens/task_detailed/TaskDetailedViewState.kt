@@ -1,5 +1,7 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
+import space.active.taskmanager1c.presentation.utils.DialogItem
+
 data class TaskDetailedTaskState(
     val id: String = "",
     val title: String = "",
@@ -41,6 +43,17 @@ sealed class TaskUserIs {
     ) : TaskUserIs()
 
 }
+
+sealed class TaskDetailedEventTypes
+data class CoPerformersDialog (
+    val listDialogItems: List<DialogItem>?
+        ) : TaskDetailedEventTypes()
+data class ObserversDialog (
+    val listDialogItems: List<DialogItem>?
+        ) : TaskDetailedEventTypes()
+data class PerformerDialog (
+    val listUsers: List<DialogItem>?
+        ) : TaskDetailedEventTypes()
 
 data class TaskIsChanged(
     val bottomShowSave: Boolean = false,

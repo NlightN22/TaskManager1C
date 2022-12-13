@@ -4,80 +4,76 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.screens.task_detailed.TaskDetailedFragment"
-    >
+    tools:context=".presentation.screens.task_detailed.TaskDetailedFragment">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/titleConstraint"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/titleConstraint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/taskNumberDetailed"
+            style="@style/TitleTopperText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:elevation="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="ЦБ000327375" />
+
+        <TextView
+            android:id="@+id/taskDateDetailed"
+            style="@style/TitleTopperText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:elevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="10.09.22" />
+
+        <ImageButton
+            android:id="@+id/back_button_task_detailed"
+            style="@style/BackButton"
+            android:layout_marginStart="-4dp"
+            android:elevation="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingConstraints" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/taskTitleCardView"
+            style="@style/EditableCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/editable_text_background"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/taskNumberDetailed"
-                style="@style/TitleTopperText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:elevation="4dp"
-                tools:text="ЦБ000327375" />
-
-            <TextView
-                android:id="@+id/taskDateDetailed"
-                style="@style/TitleTopperText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:elevation="4dp"
-                tools:text="10.09.22" />
-
-            <ImageButton
-                android:id="@+id/back_button_task_detailed"
-                style="@style/BackButton"
-                android:layout_marginStart="-4dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:elevation="4dp"
-                tools:ignore="MissingConstraints" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/taskTitleCardView"
-                style="@style/EditableCardView"
-                android:backgroundTint="@color/editable_text_background"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/taskTitleTIL"
+                style="@style/EditableTextInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                >
+                app:boxStrokeColor="@color/button_not_pressed">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/taskTitleTIL"
-                    style="@style/EditableTextInput"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/taskTitleDetailed"
+                    style="@style/TitleEditable"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:boxStrokeColor="@color/button_not_pressed"
-                    >
+                    android:ellipsize="end"
+                    android:gravity="top|center"
+                    android:inputType="textMultiLine"
+                    android:maxLines="3"
+                    tools:text="Социальная справедливость — один из распространённых общественных идеалов" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/taskTitleDetailed"
-                        style="@style/TitleEditable"
-                        android:layout_width="match_parent"
-                        android:gravity="top|center"
-                        android:inputType="textMultiLine"
-                        android:maxLines="3"
-                        android:ellipsize="end"
-                        tools:text="Социальная справедливость — один из распространённых общественных идеалов"
-                        />
-                </com.google.android.material.textfield.TextInputLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -131,8 +127,7 @@
                                 style="@style/EditTextEditable"
                                 android:layout_width="match_parent"
                                 android:inputType="date"
-                                tools:text="10.12.2022"
-                                />
+                                tools:text="10.12.2022" />
                         </com.google.android.material.textfield.TextInputLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -237,8 +232,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/task_coperformers_hint"
-                            app:startIconDrawable="@drawable/ic_coperformers"
-                            >
+                            app:startIconDrawable="@drawable/ic_coperformers">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/taskCoPerformers"
@@ -266,30 +260,37 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/task_observers_hint"
-                            app:startIconDrawable="@drawable/ic_observer"
-                            >
+                            app:startIconDrawable="@drawable/ic_observer">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/taskObservers"
                                 style="@style/EditTextEditable"
                                 android:layout_width="match_parent"
                                 android:inputType="textPersonName"
-                                tools:text="Главнова Е.И., Кадратьева А.П."
-                                />
+                                tools:text="Главнова Е.И., Кадратьева А.П." />
                         </com.google.android.material.textfield.TextInputLayout>
                     </com.google.android.material.card.MaterialCardView>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <ImageView
+                <FrameLayout
                     android:id="@+id/expandMainDetailCard"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end|bottom"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/ic_expandable_down_arrow"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    android:layout_gravity="bottom"
+                    android:paddingTop="6dp">
+
+                    <ImageView
+                        android:id="@+id/expandMainDetailCardImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="10dp"
+                        android:src="@drawable/ic_expandable_down_arrow"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+                </FrameLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
@@ -416,15 +417,23 @@
                     </com.google.android.material.card.MaterialCardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <ImageView
+                <FrameLayout
                     android:id="@+id/expandTaskDescriptionCard"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end|bottom"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/ic_expandable_down_arrow"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    android:layout_gravity="bottom"
+                    android:paddingTop="6dp">
+
+                    <ImageView
+                        android:id="@+id/expandTaskDescriptionCardImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="10dp"
+                        android:src="@drawable/ic_expandable_down_arrow"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+                </FrameLayout>
 
             </com.google.android.material.card.MaterialCardView>
 

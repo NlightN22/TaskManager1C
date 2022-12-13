@@ -25,7 +25,7 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
         super.onViewCreated(view, savedInstanceState)
         binding = DialogSingleMultiChooseBinding.bind(view)
 
-        val items: List<String> = arguments?.getStringArrayList(BUNDLE_TAG) ?: listOf<String>()
+        val items: List<DialogItem> = arguments?.getParcelableArrayList<DialogItem>(BUNDLE_TAG) ?: listOf<DialogItem>()
         val ok: Boolean = arguments?.getBoolean(OK_TAG) ?: true
         val cancel: Boolean = arguments?.getBoolean(CANCEL_TAG) ?: true
 
@@ -35,8 +35,9 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
         Log.d("SingleChooseDialog", "$items")
 
         val itemsAdapter = DialogAdapter(object : DialogListener {
-            override fun onClickItem(item: String) {
+            override fun onClickItem(item: DialogItem) {
                 emitResult(item)
+                close()
             }
         })
 
@@ -49,13 +50,13 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
         binding.searchDialog.addTextChangedListener { editable ->
             editable?.let { textChar ->
-                val filteredList = items.filter { it.contains(textChar,true) }
+                val filteredList = items.filter { it.text.contains(textChar,true) }
                 itemsAdapter.listItems = filteredList
             }
         }
     }
 
-    private fun emitResult(item: String) {
+    private fun emitResult(item: DialogItem) {
         parentFragmentManager.setFragmentResult(
             REQUEST_KEY, bundleOf(
                 RESPONSE_TAG to item))
@@ -66,14 +67,14 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
     }
 
     interface DialogListener {
-        fun onClickItem(item: String)
+        fun onClickItem(item: DialogItem) // todo replace to typealias
     }
 
     class DialogAdapter(val listener: DialogListener) :
         RecyclerView.Adapter<DialogAdapter.ItemViewHolder>() {
 
 
-        var listItems: List<String> = emptyList()
+        var listItems: List<DialogItem> = emptyList()
             set(newValue) {
                 field = newValue
                 notifyDataSetChanged()
@@ -88,10 +89,10 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
         override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
             val item = listItems[position]
             with(holder.itemBind) {
-                listTextView.text = item
+                listTextView.text = item.text
+                listCardView.isChecked = item.checked
                 listTextView.setOnClickListener {
                     listener.onClickItem(item)
-                    listCardView.isChecked = !listCardView.isChecked
                 }
             }
         }
@@ -123,7 +124,7 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
         fun show(
             manager: FragmentManager,
-            listItems: List<String>,
+            listItems: List<DialogItem>,
             ok: Boolean = true,
             cancel: Boolean = true
         ) {
@@ -136,13 +137,13 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
         fun setupListener(
             manager: FragmentManager,
             lifecycleOwner: LifecycleOwner,
-            listener: (String?) -> Unit
+            listener: (DialogItem?) -> Unit
         ) {
             manager.setFragmentResultListener(
                 REQUEST_KEY,
                 lifecycleOwner
             ) { _, result ->
-                listener.invoke(result.getString(RESPONSE_TAG))
+                listener.invoke(result.getParcelable(RESPONSE_TAG))
             }
         }
     }

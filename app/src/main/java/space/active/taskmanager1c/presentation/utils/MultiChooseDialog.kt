@@ -3,7 +3,6 @@ package space.active.taskmanager1c.presentation.utils
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,24 +13,28 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.parcelize.Parcelize
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.DialogSingleMultiChooseBinding
 import space.active.taskmanager1c.databinding.ListItemBinding
-import space.active.taskmanager1c.presentation.utils.MultiChooseDialog.DialogItem.Companion.toggleDialogItem
+import space.active.taskmanager1c.presentation.utils.DialogItem.Companion.toggleDialogItem
+
+typealias CustomInputDialogListener = (requestKey: String, listItems: java.util.ArrayList<DialogItem>?) -> Unit
 
 class MultiChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
     lateinit var binding: DialogSingleMultiChooseBinding
     lateinit var dialogItems: List<DialogItem>
+    lateinit var requestKey: String
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = DialogSingleMultiChooseBinding.bind(view)
 
+        requestKey = requireArguments().getString(ARG_REQUEST_KEY)!!
+
         dialogItems = if (savedInstanceState == null) {
             requireArguments().getParcelableArrayList<DialogItem>(PARCE_TAG)
-                ?: listOf<DialogItem>()
+                ?: listOf()
         } else {
             savedInstanceState.getParcelableArrayList<DialogItem>(
                 PARCE_TAG
@@ -44,11 +47,8 @@ class MultiChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
         binding.dialogOK.isVisible = ok
         binding.dialogCancel.isVisible = cancel
 
-        Log.d("MultiChooseDialog", "$dialogItems")
-
         val itemsAdapter = DialogAdapter(object : DialogListener {
             override fun onClickItem(filteredList: List<DialogItem>) {
-                Log.d("MultiChooseDialog", " filteredList $filteredList")
                 val filteredId = filteredList.map { it.id }
                 dialogItems = dialogItems.map { dialogitem ->
                     if (filteredId.contains(dialogitem.id)) {
@@ -57,7 +57,6 @@ class MultiChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
                         dialogitem.copy(checked = false)
                     }
                 }
-                Log.d("MultiChooseDialog", "dialogItems $dialogItems")
             }
         })
 
@@ -67,6 +66,7 @@ class MultiChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
         binding.dialogOK.setOnClickListener {
             emitResult(dialogItems)
+            close()
         }
 
         binding.listItemRV.adapter = itemsAdapter
@@ -90,7 +90,7 @@ class MultiChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
     private fun emitResult(selectedItems: List<DialogItem>) {
         parentFragmentManager.setFragmentResult(
-            REQUEST_KEY,
+            requestKey,
             bundleOf(RESPONSE_TAG to selectedItems)
         )
     }
@@ -145,62 +145,46 @@ class MultiChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
         }
 
     }
-
-    @Parcelize
-    data class DialogItem(
-        val id: String,
-        val text: String,
-        var checked: Boolean
-    ) : Parcelable {
-        companion object {
-            fun List<DialogItem>.toggleDialogItem(item: DialogItem): List<DialogItem> {
-                return this.map {
-                    if (it.id == item.id) {
-                        it.copy(checked = !item.checked)
-                    } else {
-                        it
-                    }
-                }
-            }
-        }
-    }
-
     companion object {
+        private val TAG = MultiChooseDialog::class.java.simpleName
         private const val OK_TAG = "OK"
         private const val CANCEL_TAG = "CANCEL"
         private const val PARCE_TAG = "DIALOG_ITEMS"
-
-        @JvmStatic
-        private val TAG = MultiChooseDialog::class.java.simpleName
+        private const val ARG_REQUEST_KEY = "ARG_REQUEST_KEY"
 
         @JvmStatic
         private val RESPONSE_TAG = "RESPONSE"
 
-        @JvmStatic
-        val REQUEST_KEY = "$TAG:defaultRequestKey"
 
         fun show(
             manager: FragmentManager,
             listItems: List<DialogItem>,
             ok: Boolean = true,
-            cancel: Boolean = true
+            cancel: Boolean = true,
+            requestKey: String
         ) {
             val dialogFragment = MultiChooseDialog()
             dialogFragment.arguments =
-                bundleOf(PARCE_TAG to listItems, OK_TAG to ok, CANCEL_TAG to cancel)
+                bundleOf(
+                    PARCE_TAG to listItems,
+                    OK_TAG to ok,
+                    CANCEL_TAG to cancel,
+                    ARG_REQUEST_KEY to requestKey
+                )
             dialogFragment.show(manager, TAG)
         }
 
         fun setupListener(
             manager: FragmentManager,
             lifecycleOwner: LifecycleOwner,
-            listener: (ArrayList<String>?) -> Unit
+            requestKey: String,
+            listener: CustomInputDialogListener
         ) {
             manager.setFragmentResultListener(
-                REQUEST_KEY,
+                requestKey,
                 lifecycleOwner
             ) { _, result ->
-                listener.invoke(result.getStringArrayList(RESPONSE_TAG))
+                listener.invoke(requestKey,result.getParcelableArrayList<DialogItem>(RESPONSE_TAG))
             }
         }
     }

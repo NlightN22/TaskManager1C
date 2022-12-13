@@ -72,7 +72,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         }
         lifecycleScope.launchWhenCreated {
             viewModel.enabledFields.collectLatest { fieldsState ->
-//                Log.d("TestViewState", "fieldsState $fieldsState")
                 // Title
                 binding.taskTitleCardView.setState(enabled = fieldsState.title)
                 binding.taskTitleTIL.setState(
@@ -81,7 +80,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 )
                 binding.taskDateDetailed.setColorState(fieldsState.title)
                 binding.taskNumberDetailed.setColorState(fieldsState.title)
-//                binding.taskTitleDetailed.enabled(fieldsState.title)
                 // End date
                 binding.taskDeadlineCardView.setState(enabled = fieldsState.deadLine)
                 binding.taskDeadlineTIL.setState(enabled = fieldsState.deadLine)
@@ -90,45 +88,78 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                         showDatePicker()
                     }
                 }
-//                binding.taskDeadline.enabled(fieldsState.deadLine)
                 // Performer
                 binding.taskPerformerCard.setState(enabled = fieldsState.performer)
                 binding.taskPerformerTIL.setState(enabled = fieldsState.performer)
                 if (fieldsState.performer) {
                     binding.taskPerformer.setOnClickListener {
-                        viewModel.showDialogMultipleSelectUsers() //todo change to single
+                        viewModel.showDialog(PerformerDialog(null))
                     }
                 }
-//                binding.taskPerformer.enabled(fieldsState.performer)
                 // CoPerformers
                 binding.taskCoPerformersCard.setState(enabled = fieldsState.coPerfomers)
                 binding.taskCoPerformersTIL.setState(enabled = fieldsState.coPerfomers)
-//                binding.taskCoPerformers.enabled(fieldsState.coPerfomers)
+                if (fieldsState.coPerfomers) {
+                    binding.taskCoPerformers.setOnClickListener {
+                        viewModel.showDialog(CoPerformersDialog(null))
+                    }
+                }
                 // Observers
                 binding.taskObserversCard.setState(enabled = fieldsState.observers)
                 binding.taskObserversTIL.setState(enabled = fieldsState.observers)
-//                binding.taskObservers.enabled(fieldsState.observers)
+                if (fieldsState.observers) {
+                    binding.taskObservers.setOnClickListener {
+                        viewModel.showDialog(ObserversDialog(null))
+                    }
+                }
                 // Descriptions
                 binding.taskDescriptionCardView.setState(enabled = fieldsState.description)
                 binding.taskDescriptionTIL.setState(
                     enabled = fieldsState.description,
                     editable = fieldsState.description
                 )
-//                binding.taskDescription.enabled(fieldsState.description)
             }
         }
 
         lifecycleScope.launchWhenStarted {
-            viewModel.showUsersToMultiSelect.collectLatest { dialogItems->
-                showMultiChooseDialog(dialogItems)
+            viewModel.showEvent.collectLatest { event ->
+                when (event) {
+                    is PerformerDialog -> {
+                        if (event.listUsers != null) {
+                            SingleChooseDialog.show(
+                                parentFragmentManager,
+                                event.listUsers, // todo replace to dialog item in class
+                                ok = false,
+                                cancel = true
+                            )
+                        }
+                    }
+                    is CoPerformersDialog -> {
+                        if (event.listDialogItems != null) {
+                            MultiChooseDialog.show(
+                                parentFragmentManager,
+                                event.listDialogItems,
+                                ok = true,
+                                cancel = true,
+                                REQUEST_COPERFOMREFRS
+                            )
+                        }
+                    }
+                    is ObserversDialog -> {
+                        if (event.listDialogItems != null) {
+                            MultiChooseDialog.show(
+                                parentFragmentManager,
+                                event.listDialogItems,
+                                ok = true,
+                                cancel = true,
+                                REQUEST_OBSERVERS
+                            )
+                        }
+                    }
+                }
             }
         }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.showUsersToSelectOne.collectLatest { dialogItems ->
-                showSingleChooseDialog(dialogItems.map { it.text })
-            }
-        }
         lifecycleScope.launchWhenStarted {
             viewModel.expandState.collectLatest { expandState ->
                 renderMainDetailed(expandState.main)
@@ -177,12 +208,50 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             }
         }
         )
-        binding.expandMainDetailCard.setOnClickListener {
-            viewModel.expandCloseMainDetailed()
+
+        binding.expandMainDetailCard.setOnTouchListener(object :
+            OnSwipeTouchListener(binding.expandMainDetailCard.context) {
+            override fun onSwipeDown() {
+                super.onSwipeDown()
+                logger.log(TAG, "onSwipeDown")
+                viewModel.expandMainDetailed()
+            }
+
+            override fun onSwipeUp() {
+                super.onSwipeUp()
+                logger.log(TAG, "onSwipeUp")
+
+                viewModel.closeMainDetailed()
+            }
+
+            override fun onClick() {
+                super.onClick()
+                logger.log(TAG, "onClick")
+
+                viewModel.expandCloseMainDetailed()
+            }
         }
-        binding.expandTaskDescriptionCard.setOnClickListener {
-            viewModel.expandCloseDescription()
+        )
+
+        binding.expandTaskDescriptionCard.setOnTouchListener(object :
+            OnSwipeTouchListener(binding.taskDescriptionCard.context) {
+            override fun onSwipeDown() {
+                super.onSwipeDown()
+                viewModel.expandDescription()
+            }
+
+            override fun onSwipeUp() {
+                super.onSwipeUp()
+                viewModel.closeDescription()
+            }
+
+            override fun onClick() {
+                super.onClick()
+                viewModel.expandCloseDescription()
+            }
         }
+        )
+
         binding.backButtonTaskDetailed.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -210,11 +279,13 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun renderMainDetailed(state: Boolean) {
         binding.taskCoPerformersCard.isVisible = state
         binding.taskObserversCard.isVisible = state
-        binding.expandMainDetailCard.rotation = if (state) {
-            180F
-        } else {
-            0F
-        }
+        binding.expandMainDetailCardImage.setImageResource(
+            if (state) {
+                R.drawable.ic_expandable_up_arrow
+            } else {
+                R.drawable.ic_expandable_down_arrow
+            }
+        )
     }
 
     private fun renderDescription(state: Boolean) {
@@ -226,34 +297,36 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         binding.taskBaseObjectCard.isVisible = state
         binding.taskBaseCard.isVisible = state
         binding.taskInnerCardView.isVisible = state
-        binding.expandTaskDescriptionCard.rotation = if (state) {
-            180F
-        } else {
-            0F
-        }
-    }
-
-    private fun showMultiChooseDialog(listItems: List<MultiChooseDialog.DialogItem>) {
-        MultiChooseDialog.show(parentFragmentManager, listItems, ok = true, cancel = true)
+        binding.expandTaskDescriptionCardImage.setImageResource(
+            if (state) {
+                R.drawable.ic_expandable_up_arrow
+            } else {
+                R.drawable.ic_expandable_down_arrow
+            }
+        )
     }
 
     private fun setupMultiChooseDialog() {
-        MultiChooseDialog.setupListener(parentFragmentManager, this) {
-            it?.let {
-                logger.log(TAG, "setupMultiChooseDialog $it")
+        val listener: CustomInputDialogListener = { requestKey, listItems ->
+            when (requestKey) {
+                REQUEST_COPERFOMREFRS -> logger.log(TAG, "REQUEST_COPERFOMREFRS $listItems")
+                REQUEST_OBSERVERS -> logger.log(TAG, "REQUEST_OBSERVERS $listItems")
             }
         }
-    }
-
-    private fun showSingleChooseDialog(listUsers: List<String>) {
-        SingleChooseDialog.show(parentFragmentManager, listUsers, ok = false, cancel = true)
+        MultiChooseDialog.setupListener(parentFragmentManager,this,REQUEST_COPERFOMREFRS,listener)
+        MultiChooseDialog.setupListener(parentFragmentManager, this, REQUEST_OBSERVERS, listener)
     }
 
     private fun setupSingleChooseDialog() {
         SingleChooseDialog.setupListener(parentFragmentManager, this) {
             it?.let {
-                logger.log(TAG, "setupMultipleChooseDialog $it")
+                logger.log(TAG, "setupSingleChooseDialog $it")
             }
         }
+    }
+
+    companion object {
+        private const val REQUEST_COPERFOMREFRS = "REQUEST_COPERFOMREFRS"
+        private const val REQUEST_OBSERVERS = "REQUEST_OBSERVERS"
     }
 }
