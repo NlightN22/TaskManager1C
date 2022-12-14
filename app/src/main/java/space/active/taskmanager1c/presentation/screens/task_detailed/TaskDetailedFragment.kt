@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -12,25 +13,19 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
-import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
+import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.utils.*
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
 
 
 private const val TAG = "TaskDetailedFragment"
 
 @AndroidEntryPoint
 class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
-
-    @Inject
-    lateinit var logger: Logger
-
-    @Inject
-    lateinit var toasts: Toasts
 
     lateinit var binding: FragmentTaskDetailedBinding
     private val viewModel by viewModels<TaskDetailedViewModel>()
@@ -70,6 +65,8 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 binding.taskInner.setText(taskState.innerTasks)
             }
         }
+
+        // Render enabled fields
         lifecycleScope.launchWhenCreated {
             viewModel.enabledFields.collectLatest { fieldsState ->
                 // Title
@@ -120,9 +117,19 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 )
             }
         }
-
+        // SnackBar observer
         lifecycleScope.launchWhenStarted {
-            viewModel.showEvent.collectLatest { event ->
+            viewModel.showSaveToast.collectLatest {
+                showSaveCancelSnackBar(it.text, binding.root, it.duration, lifecycleScope) {
+                    viewModel.cancelSave()
+                }
+            }
+        }
+
+
+        // Dialog observers
+        lifecycleScope.launchWhenStarted {
+            viewModel.showDialogEvent.collectLatest { event ->
                 when (event) {
                     is PerformerDialog -> {
                         if (event.listUsers != null) {
@@ -160,28 +167,42 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             }
         }
 
+
+        //Expand cards observers
         lifecycleScope.launchWhenStarted {
             viewModel.expandState.collectLatest { expandState ->
                 renderMainDetailed(expandState.main)
                 renderDescription(expandState.description)
             }
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.inputMessage.collectLatest {
 
-            }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.changeState.collectLatest {
-
-            }
-        }
         setupMultiChooseDialog()
         setupSingleChooseDialog()
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun listeners() {
+
+        binding.bottomMenu.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.detailed_cancel -> {
+
+                }
+                R.id.detailed_ok -> {
+                    // todo add ok fun
+                }
+            }
+            return@setOnItemSelectedListener true
+        }
+
+        binding.taskTitleDetailed.addTextChangedListener {
+            viewModel.saveChanges(ChangeTaskTitle(it.toString()))
+        }
+
+        binding.taskDescription.addTextChangedListener {
+            viewModel.saveChanges(ChangeTaskDescription(it.toString()))
+        }
+
         binding.mainDetailCard.setOnTouchListener(object :
             OnSwipeTouchListener(binding.mainDetailCard.context) {
             override fun onSwipeDown() {
@@ -213,21 +234,16 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             OnSwipeTouchListener(binding.expandMainDetailCard.context) {
             override fun onSwipeDown() {
                 super.onSwipeDown()
-                logger.log(TAG, "onSwipeDown")
                 viewModel.expandMainDetailed()
             }
 
             override fun onSwipeUp() {
                 super.onSwipeUp()
-                logger.log(TAG, "onSwipeUp")
-
                 viewModel.closeMainDetailed()
             }
 
             override fun onClick() {
                 super.onClick()
-                logger.log(TAG, "onClick")
-
                 viewModel.expandCloseMainDetailed()
             }
         }
@@ -264,15 +280,13 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             .build()
         datePicker.show(this.childFragmentManager, "DatePicker")
         datePicker.addOnPositiveButtonClickListener {
-            val dateFormatter = SimpleDateFormat("dd-MM-yyyy")
-            val date = dateFormatter.format(Date(it))
-            toasts.toast(getString(R.string.toast_date_selected, date))
+            viewModel.saveChanges(ChangeEndDate(Date(it)))
         }
         datePicker.addOnNegativeButtonClickListener {
-            toasts.toast(getString(R.string.toast_date_not_selected))
+            showSnackBar(getString(R.string.toast_date_not_selected), binding.root)
         }
         datePicker.addOnCancelListener {
-            toasts.toast(getString(R.string.toast_date_not_selected))
+            showSnackBar(getString(R.string.toast_date_not_selected), binding.root)
         }
     }
 
@@ -309,18 +323,23 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun setupMultiChooseDialog() {
         val listener: CustomInputDialogListener = { requestKey, listItems ->
             when (requestKey) {
-                REQUEST_COPERFOMREFRS -> logger.log(TAG, "REQUEST_COPERFOMREFRS $listItems")
-                REQUEST_OBSERVERS -> logger.log(TAG, "REQUEST_OBSERVERS $listItems")
+                REQUEST_COPERFOMREFRS -> viewModel.saveChanges(ChangeTaskCoPerformers(listItems.fromDialogItems()))
+                REQUEST_OBSERVERS -> viewModel.saveChanges(ChangeTaskObservers(listItems.fromDialogItems()))
             }
         }
-        MultiChooseDialog.setupListener(parentFragmentManager,this,REQUEST_COPERFOMREFRS,listener)
+        MultiChooseDialog.setupListener(
+            parentFragmentManager,
+            this,
+            REQUEST_COPERFOMREFRS,
+            listener
+        )
         MultiChooseDialog.setupListener(parentFragmentManager, this, REQUEST_OBSERVERS, listener)
     }
 
     private fun setupSingleChooseDialog() {
         SingleChooseDialog.setupListener(parentFragmentManager, this) {
             it?.let {
-                logger.log(TAG, "setupSingleChooseDialog $it")
+                viewModel.saveChanges(ChangeTaskPerformer(User.fromDialogItem(it)))
             }
         }
     }

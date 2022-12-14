@@ -33,4 +33,5 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="task_observers_hint">наблюдатели</string>
+    <string name="snackbar_cancel_button">Отмена %dс</string>
 </resources>

@@ -4,6 +4,10 @@ import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput.Companion.mapAndReplaceById
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
+import space.active.taskmanager1c.domain.models.User.Companion.toText
+import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedTaskState
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 data class Task(
     val date: String,
@@ -23,13 +27,13 @@ data class Task(
 ) {
 
     enum class Status {
-        New,
-        Accepted,
-        Performed,
-        Reviewed,
-        Finished,
-        Deferred,
-        Cancelled
+        New, // не используется
+        Accepted, // в работе - по умолчанию создаётся автором. может меняться исполнителем todo отображение snackbar с отменой
+        Performed, // на доработке - автор
+        Reviewed, // условно завершена - исполнитель todo отображение snackbar с отменой
+        Finished, // принята - автор
+        Deferred, // отложена используется редко - испольнитель todo иконка для испольнителя bottom menu
+        Cancelled // отклоненная - не используется
     }
 
     fun toTaskInput(new: Boolean = false) = TaskInput(
@@ -61,6 +65,22 @@ data class Task(
         }
     }
 
+    fun toTaskState() = TaskDetailedTaskState (
+        id = this.id,
+        title = this.name,
+        startDate = this.date,
+        number = this.number,
+        author = this.users.author.name,
+        deadLine = this.endDate,
+        daysEnd = this.getDeadline(),
+        performer = this.users.performer.name,
+        coPerfomers = this.users.coPerformers.toText(),
+        observers = this.users.observers.toText(),
+        description = this.description,
+        taskObject = this.objName,
+        mainTask = this.mainTaskId, // todo add inner task
+    )
+
     fun fromTaskStatus(status: Status): String {
         return when (status) {
             Status.New -> "new"
@@ -73,44 +93,28 @@ data class Task(
         }
     }
 
+    /**
+     * Return days deadline in string
+     */
+    fun getDeadline(): String {
+        val end = this.endDate
+        if (end.isNotBlank()) {
+            val today = LocalDate.now().toEpochDay()
+            try {
+                // 2022-04-07T00:52:37
+                val endDate = LocalDate.parse(end, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                val end = endDate.toEpochDay()
+                val difference: Long = end - today
+                return "${difference.toString()} дней"
+            } catch (e: Exception) {
+                return e.message.toString()
+            }
+        } else {
+            return ""
+        }
+    }
+
     companion object {
-//        fun fromTaskInput(taskInput: TaskInput): Task = Task(
-//            date = taskInput.date,
-//            description = taskInput.description,
-//            endDate = taskInput.endDate,
-//            id = taskInput.id,
-//            mainTaskId = taskInput.mainTaskId,
-//            name = taskInput.name,
-//            number = taskInput.number,
-//            objName = taskInput.objName,
-//            photos = taskInput.photos,
-//            priority = taskInput.priority,
-//            status = toTaskStatus(taskInput.status),
-//            users = UsersInTaskDomain.fromInputTask(taskInput.usersInTask),
-//        )
-
-//        fun fromTaskInputList(taskInputList: List<TaskInput>): List<Task> =
-//            taskInputList.map { fromTaskInput(it) }
-
-//        fun fromTaskOutput(taskOutput: OutputTask): Task = Task(
-//            date = taskOutput.taskInput.date,
-//            description = taskOutput.taskInput.description,
-//            endDate = taskOutput.taskInput.endDate,
-//            id = taskOutput.taskInput.id,
-//            mainTaskId = taskOutput.taskInput.mainTaskId,
-//            name = taskOutput.taskInput.name,
-//            number = taskOutput.taskInput.number,
-//            objName = taskOutput.taskInput.objName,
-//            photos = taskOutput.taskInput.photos,
-//            priority = taskOutput.taskInput.priority,
-//            status = toTaskStatus(taskOutput.taskInput.status),
-//            users = UsersInTaskDomain.fromInputTask(taskOutput.taskInput.usersInTask),
-//            isSending = taskOutput.newTask
-//        )
-
-//        fun fromTaskOutputList(taskOutputList: List<OutputTask>): List<Task> =
-//            taskOutputList.map { fromTaskOutput(it) }
-
         fun List<Task>.mapAndReplaceById(inputList: List<Task>): List<Task> {
             val replacedList = this.map { list1Item ->
                 inputList.find { list2Item -> (list1Item.id == list2Item.id) } ?: list1Item
@@ -130,7 +134,6 @@ data class Task(
                 else ->  throw TaskHasNotCorrectState
             }
         }
-
     }
 }
 

@@ -44,26 +44,26 @@ sealed class TaskUserIs {
 
 }
 
-sealed class TaskDetailedEventTypes
-data class CoPerformersDialog (
+sealed class TaskDetailedDialogs
+data class CoPerformersDialog(
     val listDialogItems: List<DialogItem>?
-        ) : TaskDetailedEventTypes()
-data class ObserversDialog (
-    val listDialogItems: List<DialogItem>?
-        ) : TaskDetailedEventTypes()
-data class PerformerDialog (
-    val listUsers: List<DialogItem>?
-        ) : TaskDetailedEventTypes()
+) : TaskDetailedDialogs()
 
-data class TaskIsChanged(
-    val bottomShowSave: Boolean = false,
-)
+data class ObserversDialog(
+    val listDialogItems: List<DialogItem>?
+) : TaskDetailedDialogs()
+
+data class PerformerDialog(
+    val listUsers: List<DialogItem>?
+) : TaskDetailedDialogs()
 
 data class TaskDetailedExpandState(
     val main: Boolean = false,
     val description: Boolean = false
 )
 
-data class TaskDetailedInputMessage(
-    val input: String = ""
+data class SnackBarState(
+    val text: String,
+    val duration: Int,
 )
+

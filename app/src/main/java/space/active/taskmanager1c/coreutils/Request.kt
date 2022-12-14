@@ -9,7 +9,11 @@ sealed class Request<T>
 /**
  * Operation is in progress
  */
-class PendingRequest<T> : Request<T>()
+open class PendingRequest<T> : Request<T>()
+
+class SaveRequest<T> (
+    val timer: Int
+        ): PendingRequest<T>()
 
 /**
  * Operation has finished successfully

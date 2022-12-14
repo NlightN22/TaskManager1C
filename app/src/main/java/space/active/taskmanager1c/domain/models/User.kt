@@ -20,5 +20,22 @@ data class User(
                 }
             }
         }
+
+        fun List<DialogItem>?.fromDialogItems(): List<User> {
+            return this?.filter { it.checked }?.map { fromDialogItem(it) } ?: emptyList<User>()
+        }
+
+        fun fromDialogItem(dialogItem: DialogItem) = User(
+            id = dialogItem.id,
+            name = dialogItem.text
+        )
+
+        fun List<User>.toText(): String {
+            if (this.isNotEmpty()) {
+                return this.map { it.name }.toString().dropLast(1).drop(1)
+            } else {
+                return ""
+            }
+        }
     }
 }

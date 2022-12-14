@@ -8,11 +8,9 @@ import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
-import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.presentation.screens.BaseFragment
-import javax.inject.Inject
 
 private const val TAG = "TaskListFragment"
 
@@ -22,8 +20,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     lateinit var binding: FragmentTaskListBinding
     private val viewModel by viewModels<TaskListViewModel>()
     lateinit var recyclerTasks: TaskListAdapter
-    @Inject
-    lateinit var logger: Logger
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -58,11 +54,9 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                 recyclerTasks.tasks = it
             }
         }
-
     }
 
     private fun listeners() {
-
         binding.optionsMenu.setOnClickListener {
             val optionsMenu = showOptionsMenu(this.context, binding.optionsMenu)
             optionsMenu?.let { optionsMenu ->
@@ -93,6 +87,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         binding.backButtonTaskList.setOnClickListener {
             onBackClick()
         }
+
     }
 
     private fun launchTaskDetailed(taskId: String) {

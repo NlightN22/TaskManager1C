@@ -5,10 +5,8 @@ import android.view.View
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
-import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.FragmentLoginBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
-import javax.inject.Inject
 
 private const val TAG = "LoginFragment"
 
@@ -16,9 +14,6 @@ private const val TAG = "LoginFragment"
 class LoginFragment : BaseFragment(R.layout.fragment_login) {
 
     lateinit var binding: FragmentLoginBinding
-
-    @Inject
-    lateinit var logger: Logger
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
