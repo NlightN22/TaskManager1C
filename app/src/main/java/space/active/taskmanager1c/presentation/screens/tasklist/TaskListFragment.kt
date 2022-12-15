@@ -2,6 +2,7 @@ package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -64,6 +65,12 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun listeners() {
+
+        binding.searchEditText.addTextChangedListener { editable ->
+                viewModel.find(editable)
+        }
+
+        // options menu
         binding.optionsMenu.setOnClickListener {
             val optionsMenu = showOptionsMenu(this.context, binding.optionsMenu)
             optionsMenu?.let { optionsMenu ->
