@@ -3,20 +3,18 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.EmptyObject
-import space.active.taskmanager1c.coreutils.SaveRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.User.Companion.toDialogItems
-import space.active.taskmanager1c.domain.models.User.Companion.toText
 import space.active.taskmanager1c.domain.repository.TasksRepository
-import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.domain.use_case.GetDetailedTask
-import space.active.taskmanager1c.domain.use_case.SaveTaskChangesToDb
+import space.active.taskmanager1c.domain.use_case.*
 import javax.inject.Inject
 
 private const val TAG = "TaskDetailedViewModel"
@@ -45,98 +43,102 @@ class TaskDetailedViewModel @Inject constructor(
     private val _showDialogEvent = MutableSharedFlow<TaskDetailedDialogs>()
     val showDialogEvent = _showDialogEvent.asSharedFlow()
 
-    private val _showSaveToast = MutableSharedFlow<SnackBarState>()
-    val showSaveToast = _showSaveToast.asSharedFlow()
+    private val _saveTaskEvent = MutableSharedFlow<SaveEvents>()
+    val saveTaskEvent = _saveTaskEvent.asSharedFlow()
+
+    private val _showSnackBar = MutableSharedFlow<String>()
+    val showSnackBar = _showSnackBar.asSharedFlow()
 
     private var saveJob: Job? = null
 
+    // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
+    val whoAmI: User = User(
+        id = "c49a0b62-c192-11e1-8a03-f46d0490adee",
+        name = "Михайлов Олег Федорович"
+    ) // TODO replace to shared preferences
 
-    fun saveChanges(event: TaskDetailedChangesEvents) {
+    fun saveChangesSmart(event: TaskChangesEvents) {
         viewModelScope.launch {
             var task = currentTask.first()
+            val textChangeDelay = 2
             if (task != null) {
-                val cancelDuration = 3
                 // validation
                 // save in cancellable job
                 // start job with duration
                 // show snackbar with duration
                 //
                 when (event) {
-                    is ChangeTaskTitle -> {
+                    is TaskChangesEvents.Title -> {
                         val changes = event.title
                         if (changes != _taskState.first().title) {
-                            saveJob?.cancel()
-                            saveJob = breakableSaveChanges(task, changes, cancelDuration)
+                            task = task.copy(name = changes)
+                            _saveTaskEvent.emit(
+                                SaveEvents.Delayed(
+                                    task,
+                                    event.javaClass.simpleName,
+                                    textChangeDelay
+                                )
+                            )
                         }
                     }
-                    is ChangeEndDate -> {
+                    is TaskChangesEvents.EndDate -> {
                         val changes = event.toTaskDate()
                         task = task.copy(endDate = changes)
-                        saveChanges(task, cancelDuration)
-                        _showSaveToast.emit(SnackBarState(changes, cancelDuration))
+                        _saveTaskEvent.emit(SaveEvents.Simple(task))
                     }
-                    is ChangeTaskPerformer -> {
+                    is TaskChangesEvents.Performer -> {
                         val changes = event.user
                         task = task.copy(users = task.users.copy(performer = changes))
-                        saveChanges(task, cancelDuration)
-                        _showSaveToast.emit(SnackBarState(changes.name, cancelDuration))
+                        _saveTaskEvent.emit(SaveEvents.Simple(task))
                     }
-                    is ChangeTaskCoPerformers -> {
+                    is TaskChangesEvents.CoPerformers -> {
                         val changes = event.users
                         task = task.copy(users = task.users.copy(coPerformers = changes))
-                        saveChanges(task, cancelDuration)
-                        _showSaveToast.emit(SnackBarState(changes.toText(), cancelDuration))
+                        _saveTaskEvent.emit(SaveEvents.Simple(task))
                     }
-                    is ChangeTaskObservers -> {
+                    is TaskChangesEvents.Observers -> {
                         val changes = event.users
                         task = task.copy(users = task.users.copy(observers = changes))
-                        saveChanges(task, cancelDuration)
-                        _showSaveToast.emit(SnackBarState(changes.toText(), cancelDuration))
+                        _saveTaskEvent.emit(SaveEvents.Simple(task))
                     }
-                    is ChangeTaskDescription -> {
+                    is TaskChangesEvents.Description -> {
                         val changes = event.text
                         if (changes != _taskState.first().description) {
                             task = task.copy(description = changes)
-                            saveChanges(task, cancelDuration)
-                            _showSaveToast.emit(SnackBarState(changes, cancelDuration))
+                            _saveTaskEvent.emit(
+                                SaveEvents.Delayed(
+                                    task,
+                                    event.javaClass.simpleName,
+                                    textChangeDelay
+                                )
+                            )
                         }
                     }
-                    is ChangeTaskStatus -> {
+                    is TaskChangesEvents.Status -> {
+                        val cancelDuration = 5
                         val changes = event.status
-                        task = task.copy(status = changes)
-                        saveChanges(task, cancelDuration)
-                        _showSaveToast.emit(SnackBarState(changes.toString(), cancelDuration))
+                        val userIs = TaskUserIs.userIs(task, whoAmI)
+
+                        // smart set status
+                        val getStatus = GetTaskStatus()(userIs, event.status )
+
+                        val validation = ValidationTaskChanges()(
+                            changeType = event,
+                            userIs = userIs,
+                            getStatus
+                        )
+                        if (validation is ValidationResult.Success) {
+                            task = task.copy(status = getStatus)
+                            _saveTaskEvent.emit(SaveEvents.Breakable(task, cancelDuration))
+                        } else if (validation is ValidationResult.Error) {
+                            _showSnackBar.emit(validation.message)
+                        }
                     }
                 }
             } else {
                 exceptionHandler(EmptyObject)
             }
         }
-    }
-
-    private fun breakableSaveChanges(task: Task, changes: String, cancelDuration: Int) =
-        viewModelScope.launch {
-            delay(1000)
-            val newTask = task.copy(name = changes)
-            saveChanges(newTask, cancelDuration)
-            _showSaveToast.emit(SnackBarState(changes, cancelDuration))
-        }
-
-    private fun saveChanges(task: Task, cancelDuration: Int) {
-        viewModelScope.launch {
-            saveTaskChangesToDb(cancelDuration, task).collectLatest {
-                if (it is SaveRequest) {
-                    logger.log(
-                        TAG,
-                        "Save timer: ${it.timer}"
-                    )
-                }
-            }
-        }.ensureActive()
-    }
-
-    fun cancelSave() {
-        saveTaskChangesToDb.cancelSave()
     }
 
     // get task flow
@@ -169,20 +171,8 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
-
     private suspend fun setFieldsState(task: Task) {
-        // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
-        val whoAmI: User = User(
-            id = "c49a0b62-c192-11e1-8a03-f46d0490adee",
-            name = "Михайлов Олег Федорович"
-        ) // TODO replace to shared preferences
-        if (task.users.author == whoAmI) {
-            _enabledFields.value = TaskUserIs.Author().fields
-        } else if (task.users.performer == whoAmI && task.users.author != whoAmI) {
-            _enabledFields.value = TaskUserIs.Performer().fields
-        } else {
-            _enabledFields.value = TaskUserIs.NotAuthorOrPerformer().fields
-        }
+        _enabledFields.value = TaskUserIs.userIs(task, whoAmI).fields
     }
 
     fun showDialog(eventType: TaskDetailedDialogs) {
@@ -208,7 +198,6 @@ class TaskDetailedViewModel @Inject constructor(
                         _showDialogEvent.emit(ObserversDialog(dialogItems))
                     }
                 }
-
             }
         }
     }

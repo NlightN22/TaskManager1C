@@ -11,6 +11,7 @@ import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 
 private const val TAG = "TaskListFragment"
 
@@ -18,13 +19,19 @@ private const val TAG = "TaskListFragment"
 class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
     lateinit var binding: FragmentTaskListBinding
+
     private val viewModel by viewModels<TaskListViewModel>()
+    private val mainVM by viewModels<MainViewModel>()
+
     lateinit var recyclerTasks: TaskListAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskListBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
+
+        // Start autoupdate job
+        mainVM.updateJob()
 
         recyclerTasks = TaskListAdapter(object : TaskActionListener {
             override fun onTaskStatusClick(task: Task) {

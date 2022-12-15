@@ -1,9 +1,18 @@
 package space.active.taskmanager1c.presentation.screens.mainactivity
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.ActivityMainBinding
 import javax.inject.Inject
@@ -31,6 +40,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observers() {
+
+
+
 //        lifecycleScope.launchWhenStarted {
 //            viewModel.listTasks.collectLatest {
 //                binding.jobContent.text = it
@@ -53,4 +65,6 @@ class MainActivity : AppCompatActivity() {
 //        binding.editButton.setOnClickListener { viewModel.editTask() }
 //        binding.saveNewButton.setOnClickListener { viewModel.newTask() }
     }
+
+
 }

@@ -26,33 +26,9 @@ class SaveTaskChangesToDb @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger
 ) {
-    var cancelListener: AtomicBoolean = AtomicBoolean(false)
-
-    operator fun invoke(cancelDuration: Int, task: Task): Flow<Request<Any>> = flow {
-        //set when new start
-        cancelListener.set(false)
-        // delay for user decision
-        var timer = cancelDuration
-        while (timer > 0 && !cancelListener.get()) {
-            emit(SaveRequest(timer))
-            delay(1000)
-            timer -= 1
-        }
-
-        // check only after timer user decision
-        if (cancelListener.get()) {
-            currentCoroutineContext().cancel(null)
-            cancelListener.compareAndSet(true, false)
-        }
-
-        emit(PendingRequest())
-//        repository.editTask(task)
-        delay(5000L) // todo delete
+    suspend operator fun invoke(task: Task) {
+//        logger.log(TAG, "Start save: $task")
+        delay(1000L) // todo delete
         logger.log(TAG, "Task saved: $task")
-        emit(SuccessRequest(Any()))
-    }.flowOn(ioDispatcher)
-
-    fun cancelSave() {
-        cancelListener.set(true)
     }
 }

@@ -14,11 +14,14 @@ import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
+import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
+import space.active.taskmanager1c.domain.use_case.SaveEvents
+import space.active.taskmanager1c.domain.use_case.TaskChangesEvents
 import space.active.taskmanager1c.presentation.utils.*
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -29,6 +32,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
     lateinit var binding: FragmentTaskDetailedBinding
     private val viewModel by viewModels<TaskDetailedViewModel>()
+    private val mainVM by viewModels<MainViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -115,17 +119,27 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                     enabled = fieldsState.description,
                     editable = fieldsState.description
                 )
-            }
-        }
-        // SnackBar observer
-        lifecycleScope.launchWhenStarted {
-            viewModel.showSaveToast.collectLatest {
-                showSaveCancelSnackBar(it.text, binding.root, it.duration, lifecycleScope) {
-                    viewModel.cancelSave()
-                }
+                // bottom menu state
+                binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible = fieldsState.bottomPerformer
             }
         }
 
+        // SnackBar observer
+        lifecycleScope.launchWhenStarted {
+            viewModel.showSnackBar.collectLatest {
+                showSnackBar(it, binding.root)
+            }
+        }
+
+        // Save observer
+        lifecycleScope.launchWhenStarted {
+            viewModel.saveTaskEvent.collectLatest {
+                mainVM.saveTask(it)
+                if (it is SaveEvents.Breakable) {
+                    onBackClick()
+                }
+            }
+        }
 
         // Dialog observers
         lifecycleScope.launchWhenStarted {
@@ -186,21 +200,21 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.detailed_cancel -> {
-
+                    viewModel.saveChangesSmart(TaskChangesEvents.Status(false))
                 }
                 R.id.detailed_ok -> {
-                    // todo add ok fun
+                    viewModel.saveChangesSmart(TaskChangesEvents.Status(true))
                 }
             }
             return@setOnItemSelectedListener true
         }
 
         binding.taskTitleDetailed.addTextChangedListener {
-            viewModel.saveChanges(ChangeTaskTitle(it.toString()))
+            viewModel.saveChangesSmart(TaskChangesEvents.Title(it.toString()))
         }
 
         binding.taskDescription.addTextChangedListener {
-            viewModel.saveChanges(ChangeTaskDescription(it.toString()))
+            viewModel.saveChangesSmart(TaskChangesEvents.Description(it.toString()))
         }
 
         binding.mainDetailCard.setOnTouchListener(object :
@@ -280,7 +294,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             .build()
         datePicker.show(this.childFragmentManager, "DatePicker")
         datePicker.addOnPositiveButtonClickListener {
-            viewModel.saveChanges(ChangeEndDate(Date(it)))
+            viewModel.saveChangesSmart(TaskChangesEvents.EndDate(Date(it)))
         }
         datePicker.addOnNegativeButtonClickListener {
             showSnackBar(getString(R.string.toast_date_not_selected), binding.root)
@@ -323,8 +337,16 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun setupMultiChooseDialog() {
         val listener: CustomInputDialogListener = { requestKey, listItems ->
             when (requestKey) {
-                REQUEST_COPERFOMREFRS -> viewModel.saveChanges(ChangeTaskCoPerformers(listItems.fromDialogItems()))
-                REQUEST_OBSERVERS -> viewModel.saveChanges(ChangeTaskObservers(listItems.fromDialogItems()))
+                REQUEST_COPERFOMREFRS -> viewModel.saveChangesSmart(
+                    TaskChangesEvents.CoPerformers(
+                        listItems.fromDialogItems()
+                    )
+                )
+                REQUEST_OBSERVERS -> viewModel.saveChangesSmart(
+                    TaskChangesEvents.Observers(
+                        listItems.fromDialogItems()
+                    )
+                )
             }
         }
         MultiChooseDialog.setupListener(
@@ -339,7 +361,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun setupSingleChooseDialog() {
         SingleChooseDialog.setupListener(parentFragmentManager, this) {
             it?.let {
-                viewModel.saveChanges(ChangeTaskPerformer(User.fromDialogItem(it)))
+                viewModel.saveChangesSmart(TaskChangesEvents.Performer(User.fromDialogItem(it)))
             }
         }
     }
