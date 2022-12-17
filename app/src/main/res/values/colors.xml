@@ -29,5 +29,6 @@
     <color name="bottom_menu_icon_background">@color/app_background</color>
     <color name="task_list_status_completed">#6AA673</color>
     <color name="task_list_status_not_completed">#FCC9C9</color>
+    <color name="shimmer_color">#FCC9C9</color>
 
 </resources>

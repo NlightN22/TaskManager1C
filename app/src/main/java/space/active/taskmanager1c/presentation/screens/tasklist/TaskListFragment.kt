@@ -17,6 +17,7 @@ import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
+import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 
@@ -65,13 +66,21 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     private fun observers() {
 
         lifecycleScope.launchWhenStarted {
+            viewModel.userList.collectLatest { users->
+                val arrayNames: Array<String> = users.map { it.name }.toTypedArray()
+                binding.searchEditText.setSimpleItems(arrayNames)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
             viewModel.listTask.collectLatest { request ->
                 when (request) {
                     is PendingRequest -> {
-                        recyclerTasks
+                        showShimmer()
                     }
                     is SuccessRequest -> {
                         recyclerTasks.tasks = request.data
+                        showRecyclerView()
                     }
                     is ErrorRequest -> {
                         showSnackBar(request.exception.message.toString(), binding.root)
@@ -80,19 +89,9 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             }
         }
 
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.filter {
-//                if (it.isNullOrBlank()) {
-//                    binding.taskListSearchTIL.isEndIconVisible = false
-//                } else {
-//                    binding.taskListSearchTIL.isEndIconVisible = true
-//                }
-//            }
-//        }
     }
 
     private fun listeners() {
-
         binding.searchEditText.addTextChangedListener { editable ->
             viewModel.find(editable)
         }
@@ -130,6 +129,22 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             onBackClick()
         }
 
+    }
+
+    private fun showShimmer() {
+        binding.listTasksRV.visibility = View.GONE
+        binding.shimmerTasksRV.apply {
+            visibility = View.VISIBLE
+            startShimmer()
+        }
+    }
+
+    private fun showRecyclerView() {
+        binding.shimmerTasksRV.apply {
+            stopShimmer()
+            visibility = View.GONE
+        }
+        binding.listTasksRV.visibility = View.VISIBLE
     }
 
     private fun showFilterMenu(view: View) {

@@ -6,9 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.Request
@@ -21,6 +19,7 @@ import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.fi
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDidNtCheck
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDo
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIObserve
+import space.active.taskmanager1c.domain.models.TaskListOrderTypes
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import javax.inject.Inject
@@ -39,6 +38,7 @@ class TaskListViewModel @Inject constructor(
 
     private val _searchFilter = MutableStateFlow<String>("")
     private val _bottomFilter = MutableStateFlow<TaskListFilterTypes>(TaskListFilterTypes.All)
+    private val _bottomOrder = MutableStateFlow<TaskListOrderTypes>(TaskListOrderTypes.StartDate())
 
     private var searchJob: Job? = null
 
@@ -48,15 +48,27 @@ class TaskListViewModel @Inject constructor(
         name = "Михайлов Олег Федорович"
     ) // TODO replace to shared preferences
 
-    private val inputListTask = combine(repository.listTasksFlow, _bottomFilter, _searchFilter) { input, bottomFilter, searchFilter ->
+    private val inputUserList = repository.listUsersFlow
+    val userList: StateFlow<List<User>> =
+        inputUserList.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+
+    private val inputListTask = combine(
+        repository.listTasksFlow,
+        _bottomFilter,
+        _searchFilter,
+        _bottomOrder
+    ) { input, bottomFilter, searchFilter, bottomOrder ->
+        _listTask.value = PendingRequest()
 //        logger.log(TAG, "_bottomFilter.combine $bottomFilter")
         val bottomList = filterByBottom(input, bottomFilter)
 //        logger.log(TAG, "_searchFilter.combine $searchFilter")
-        if (searchFilter.isNullOrBlank()) {
+        val searchList = if (searchFilter.isNullOrBlank()) {
             bottomList
         } else {
             filterBySearch(bottomList, searchFilter)
         }
+        // final result
+        orderByBottom(searchList, bottomOrder)
     }
 
     init {
@@ -69,18 +81,35 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-
-    private fun collectBottomList() {
+    fun orderByBottomMenu(orderTypes: TaskListOrderTypes) {
         viewModelScope.launch {
-
+            _bottomOrder.value = orderTypes
         }
-
     }
 
     fun filterByBottomMenu(filterType: TaskListFilterTypes) {
         viewModelScope.launch {
             _bottomFilter.value = filterType
         }
+    }
+
+    private fun orderByBottom(list: List<Task>, order: TaskListOrderTypes): List<Task> {
+        var result: List<Task> = emptyList()
+        when (order) {
+            is TaskListOrderTypes.StartDate -> {
+                result = list.sortedBy { it.date }
+            }
+            is TaskListOrderTypes.EndDate -> {
+                result = list.sortedBy { it.endDate }
+            }
+            is TaskListOrderTypes.Name -> {
+                result = list.sortedBy { it.name }
+            }
+            is TaskListOrderTypes.Performer -> {
+                result = list.sortedBy { it.users.performer.name }
+            }
+        }
+        return result
     }
 
 
@@ -132,20 +161,16 @@ class TaskListViewModel @Inject constructor(
         searchJob?.cancel()
 //        logger.log(TAG, "searchJob onStart ${searchJob?.isActive} expr: $expression")
         searchJob = viewModelScope.launch {
-            delay(500)
+            delay(700)
             _searchFilter.value = expression?.toString() ?: ""
-//            logger.log(TAG, "searchJob End ${searchJob?.isActive} ${_searchFilter.value}")
+            logger.log(TAG, "searchJob End ${searchJob?.isActive} ${_searchFilter.value}")
         }
     }
 
-    // start update job if user isAuth
     // open newtask
-    // get ordered tasklist
-    // get filtered tasklist
     // set task as completed
     // set task as not_completed
     // set task as unreadable
-    // goBack
 
 
 }

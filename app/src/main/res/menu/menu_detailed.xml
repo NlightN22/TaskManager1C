@@ -19,7 +19,4 @@
         android:tooltipText="@string/menu_ok"
         android:icon="@drawable/ic_baseline_check_24"
         />
-
-<!--    TODO add restore task item-->
-    
 </menu>

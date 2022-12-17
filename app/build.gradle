@@ -99,6 +99,8 @@ dependencies {
     // Kotlin Reflection
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
 
+    // Facebook shimmer
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
 }
 
 kapt {

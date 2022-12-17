@@ -1,14 +1,17 @@
 package space.active.taskmanager1c.domain.models
 
 sealed class TaskListOrderTypes {
-    object Name : TaskListOrderTypes()
-    object ReverseName: TaskListOrderTypes()
-    object Performer: TaskListOrderTypes()
-    // todo add reverse
-    object Author: TaskListOrderTypes()
-    // todo add reverse
-    object StartDate: TaskListOrderTypes()
-    // todo add reverse
-    object EndDate: TaskListOrderTypes()
-    // todo add reverse
+
+    data class Name(
+        val desc: Boolean = false
+    ) : TaskListOrderTypes()
+    data class Performer(
+        val desc: Boolean = false
+    ): TaskListOrderTypes()
+    data class StartDate(
+        val desc: Boolean = false
+    ): TaskListOrderTypes()
+    data class EndDate(
+        val desc: Boolean = false
+    ): TaskListOrderTypes()
 }

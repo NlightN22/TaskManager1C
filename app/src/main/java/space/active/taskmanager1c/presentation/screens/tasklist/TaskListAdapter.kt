@@ -58,7 +58,7 @@ class TaskListAdapter(
             isObserved.isVisible = task.users.observers.isNotEmpty()
             isCoPerformed.isVisible = task.users.coPerformers.isNotEmpty()
             isSending.isVisible = task.isSending
-            taskStatus.isSelected = task.status == Task.Status.Reviewed // todo change domain model
+            taskStatus.isSelected = task.status == Task.Status.Reviewed
         }
     }
 

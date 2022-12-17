@@ -24,7 +24,6 @@ class TaskDetailedViewModel @Inject constructor(
     private val logger: Logger,
     private val exceptionHandler: ExceptionHandler,
     private val getDetailedTask: GetDetailedTask,
-    private val saveTaskChangesToDb: SaveTaskChangesToDb,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -151,6 +150,8 @@ class TaskDetailedViewModel @Inject constructor(
                 currentTask.collect { task ->
                     if (task != null) {
                         _taskState.value = task.toTaskState()
+                        setDependentTasks(task)
+                        // get base and inner tasks from db
                         setFieldsState(task)
                     }
                     /**
@@ -168,6 +169,23 @@ class TaskDetailedViewModel @Inject constructor(
         else {
             _taskState.value = TaskDetailedTaskState()
         }
+    }
+
+    private fun setDependentTasks(task: Task) {
+        viewModelScope.launch {
+            val mainTaskId = task.mainTaskId
+            // todo val innerTasksId =
+            if (mainTaskId.isNotBlank()) {
+                val mainTask = repository.getTask(mainTaskId).first()
+                if (mainTask != null) {
+                    _taskState.value = _taskState.value.copy(mainTask = mainTask.name)
+                    logger.log(TAG, "setDependentTasks mainTask.name")
+                    // todo clickable for open
+                }
+            }
+            // todo add inner tasks
+        }
+
     }
 
     private suspend fun setFieldsState(task: Task) {
