@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.domain.use_case.HandleJobForUpdateDb
-import space.active.taskmanager1c.domain.use_case.SaveEvents
+import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.use_case.SaveNewTaskToDb
 import space.active.taskmanager1c.domain.use_case.SaveTaskChangesToDb
 import space.active.taskmanager1c.presentation.screens.task_detailed.SnackBarState

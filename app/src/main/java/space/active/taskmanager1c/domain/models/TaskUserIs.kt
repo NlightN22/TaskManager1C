@@ -1,11 +1,9 @@
-package space.active.taskmanager1c.domain.use_case
+package space.active.taskmanager1c.domain.models
 
-import space.active.taskmanager1c.domain.models.Task
-import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.presentation.screens.task_detailed.EditableFields
 
 sealed class TaskUserIs (
-    open val fields: EditableFields
+    open val fields: EditableFields = EditableFields()
         ) {
     data class Author(
         override val fields: EditableFields = EditableFields(
@@ -23,18 +21,22 @@ sealed class TaskUserIs (
         override val fields: EditableFields = EditableFields()
     ) : TaskUserIs(fields)
 
-    class Performer(
+    data class Performer(
         override val fields: EditableFields = EditableFields(
             bottomPerformer = false
         )
     ) : TaskUserIs(fields)
 
+    object Observer: TaskUserIs()
+
     companion object {
         fun userIs(task: Task, whoAmI: User): TaskUserIs {
             if (task.users.author == whoAmI) {
                 return Author()
-            } else if (task.users.performer == whoAmI && task.users.author != whoAmI) {
+            } else if (task.users.performer == whoAmI && task.users.coPerformers.contains(whoAmI) ) {
                 return Performer()
+            } else if (task.users.observers.contains(whoAmI)){
+                return Observer
             } else {
                 return NotAuthorOrPerformer()
             }

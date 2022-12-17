@@ -34,4 +34,10 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="task_observers_hint">наблюдатели</string>
     <string name="snackbar_cancel_button">Отмена %dс</string>
+    <string name="menu_i_do">Делаю</string>
+    <string name="menu_i_delegate">Поручил</string>
+    <string name="menu_i_didnt_check">Проверяю</string>
+    <string name="menu_i_observe">Наблюдаю</string>
+    <string name="menu_i_didnt_read">Непрочитано</string>
+    <string name="menu_all_tasks">Все</string>
 </resources>

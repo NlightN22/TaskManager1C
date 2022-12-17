@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
-import space.active.taskmanager1c.domain.use_case.SaveEvents
+import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.presentation.utils.Toasts
 import javax.inject.Inject
 
@@ -51,7 +51,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     fun showOptionsMenu(context: Context?, anchorView: View): PopupMenu? {
         context?.let { context ->
-            val optionsMenu = PopupMenu(context, anchorView)
+            val optionsMenu = PopupMenu(this.context, anchorView)
             optionsMenu.inflate(R.menu.options_menu)
             optionsMenu.show()
             return optionsMenu

@@ -1,7 +1,9 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -9,8 +11,12 @@ import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.ErrorRequest
+import space.active.taskmanager1c.coreutils.PendingRequest
+import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
 import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskListFilterTypes
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 
@@ -57,17 +63,38 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun observers() {
+
         lifecycleScope.launchWhenStarted {
-            viewModel.listTask.collectLatest {
-                recyclerTasks.tasks = it
+            viewModel.listTask.collectLatest { request ->
+                when (request) {
+                    is PendingRequest -> {
+                        recyclerTasks
+                    }
+                    is SuccessRequest -> {
+                        recyclerTasks.tasks = request.data
+                    }
+                    is ErrorRequest -> {
+                        showSnackBar(request.exception.message.toString(), binding.root)
+                    }
+                }
             }
         }
+
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.filter {
+//                if (it.isNullOrBlank()) {
+//                    binding.taskListSearchTIL.isEndIconVisible = false
+//                } else {
+//                    binding.taskListSearchTIL.isEndIconVisible = true
+//                }
+//            }
+//        }
     }
 
     private fun listeners() {
 
         binding.searchEditText.addTextChangedListener { editable ->
-                viewModel.find(editable)
+            viewModel.find(editable)
         }
 
         // options menu
@@ -90,10 +117,11 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.tasklist_filter -> {
-                    launchTaskDetailed("test")
+                    val viewMenu = binding.bottomMenu
+                    logger.log(TAG, "viewMenu $viewMenu")
+                    showFilterMenu(viewMenu)
                 }
                 R.id.tasklist_newTask -> {
-                    launchSetting()
                 }
             }
             return@setOnItemSelectedListener true
@@ -102,6 +130,39 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             onBackClick()
         }
 
+    }
+
+    private fun showFilterMenu(view: View) {
+        val popupMenu = PopupMenu(requireContext(), view)
+        popupMenu.inflate(R.menu.menu_tasklist_filter)
+        popupMenu.setForceShowIcon(true)
+        popupMenu.gravity = Gravity.END
+        popupMenu.show()
+        popupMenu.setOnMenuItemClickListener {
+            with(viewModel) {
+                when (it.itemId) {
+                    R.id.iDo -> {
+                        filterByBottomMenu(TaskListFilterTypes.IDo)
+                    }
+                    R.id.iDelegate -> {
+                        filterByBottomMenu(TaskListFilterTypes.IDelegate)
+                    }
+                    R.id.iDidNtCheck -> {
+                        filterByBottomMenu(TaskListFilterTypes.IDidNtCheck)
+                    }
+                    R.id.iObserve -> {
+                        filterByBottomMenu(TaskListFilterTypes.IObserve)
+                    }
+                    R.id.iDidNtRead -> {
+                        filterByBottomMenu(TaskListFilterTypes.IDidNtRead)
+                    }
+                    R.id.allTasks -> {
+                        filterByBottomMenu(TaskListFilterTypes.All)
+                    }
+                }
+            }
+            return@setOnMenuItemClickListener false
+        }
     }
 
     private fun launchTaskDetailed(taskId: String) {

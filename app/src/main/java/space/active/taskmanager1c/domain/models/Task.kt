@@ -2,7 +2,6 @@ package space.active.taskmanager1c.domain.models
 
 import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput.Companion.mapAndReplaceById
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.domain.models.User.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedTaskState
@@ -29,9 +28,9 @@ data class Task(
     enum class Status {
         New, // не используется Можно использовать при отправке на сервер
         Accepted, // в работе - по умолчанию создаётся автором. может меняться исполнителем todo отображение snackbar с отменой
-        Performed, // на доработке - автор
-        Reviewed, // условно завершена - исполнитель todo отображение snackbar с отменой
-        Finished, // принята - автор
+        Performed, // на доработке - ставит автор
+        Reviewed, // условно завершена - ставит исполнитель todo отображение snackbar с отменой
+        Finished, // принята - ставит автор
         Deferred, // отложена используется редко - испольнитель todo иконка для испольнителя bottom menu
         Cancelled // отклоненная - не используется
     }
@@ -59,13 +58,14 @@ data class Task(
         return if (new) {
             OutputTask(newTask = new, taskInput = this.toTaskInput(new))
         } else {
-            OutputTask(taskInput = this.toTaskInput(),
-            outputId = this.outputId
-                )
+            OutputTask(
+                taskInput = this.toTaskInput(),
+                outputId = this.outputId
+            )
         }
     }
 
-    fun toTaskState() = TaskDetailedTaskState (
+    fun toTaskState() = TaskDetailedTaskState(
         id = this.id,
         title = this.name,
         startDate = this.date,
@@ -79,6 +79,7 @@ data class Task(
         description = this.description,
         taskObject = this.objName,
         mainTask = this.mainTaskId, // todo add inner task
+        status = this.status
     )
 
     fun fromTaskStatus(status: Status): String {
@@ -86,7 +87,7 @@ data class Task(
             Status.New -> "new"
             Status.Accepted -> "accepted"
             Status.Performed -> "performed"
-            Status.Reviewed  -> "reviewed"
+            Status.Reviewed -> "reviewed"
             Status.Finished -> "finished"
             Status.Deferred -> "deferred"
             Status.Cancelled -> "cancelled"
@@ -115,6 +116,7 @@ data class Task(
     }
 
     companion object {
+
         fun List<Task>.mapAndReplaceById(inputList: List<Task>): List<Task> {
             val replacedList = this.map { list1Item ->
                 inputList.find { list2Item -> (list1Item.id == list2Item.id) } ?: list1Item
@@ -124,14 +126,16 @@ data class Task(
 
         fun toTaskStatus(status: String): Status {
             return when (status) {
-                "new" -> {Status.New}
+                "new" -> {
+                    Status.New
+                }
                 "accepted" -> Status.Accepted
                 "performed" -> Status.Performed
                 "reviewed" -> Status.Reviewed
                 "finished" -> Status.Finished
                 "deferred" -> Status.Deferred
                 "cancelled" -> Status.Cancelled
-                else ->  throw TaskHasNotCorrectState
+                else -> throw TaskHasNotCorrectState
             }
         }
     }

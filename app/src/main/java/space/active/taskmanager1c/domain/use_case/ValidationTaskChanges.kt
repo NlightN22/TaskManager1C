@@ -1,6 +1,9 @@
 package space.active.taskmanager1c.domain.use_case
 
 import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskChangesEvents
+import space.active.taskmanager1c.domain.models.TaskUserIs
+import space.active.taskmanager1c.domain.models.ValidationResult
 
 class ValidationTaskChanges(
 
@@ -33,7 +36,7 @@ class ValidationTaskChanges(
                         }
                         return ValidationResult.Error("performer can set only Reviewed")
                     }
-                    is TaskUserIs.NotAuthorOrPerformer -> {
+                    else -> {
                         // nothing to change
                         return ValidationResult.Error("Not author or performer")
                     }

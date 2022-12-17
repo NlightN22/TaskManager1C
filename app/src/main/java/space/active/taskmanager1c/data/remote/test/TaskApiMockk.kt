@@ -7,7 +7,7 @@ class TaskApiMockk(
     private val context: Context
 ) {
     fun getTaskDtoFromFile(): String {
-        val inputStream = context.assets.open("demo_json/md4_original_cut.json") // demo_json
+        val inputStream = context.assets.open("demo_json/md4_original.json") // demo_json
         val size: Int = inputStream.available()
         val buffer = ByteArray(size)
         inputStream.read(buffer)

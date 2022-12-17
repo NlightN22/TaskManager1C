@@ -1,7 +1,5 @@
-package space.active.taskmanager1c.domain.use_case
+package space.active.taskmanager1c.domain.models
 
-import space.active.taskmanager1c.domain.models.Task
-import space.active.taskmanager1c.domain.models.User
 import java.text.SimpleDateFormat
 import java.util.*
 

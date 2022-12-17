@@ -26,6 +26,18 @@
             tools:text="ЦБ000327375" />
 
         <TextView
+            android:id="@+id/taskStatus"
+            style="@style/TitleTopperText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:elevation="4dp"
+            app:layout_constraintStart_toEndOf="@+id/taskNumberDetailed"
+            app:layout_constraintEnd_toStartOf="@+id/taskDateDetailed"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Accepted" />
+
+        <TextView
             android:id="@+id/taskDateDetailed"
             style="@style/TitleTopperText"
             android:layout_width="wrap_content"

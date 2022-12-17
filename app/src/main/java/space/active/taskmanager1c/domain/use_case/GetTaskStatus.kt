@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.domain.use_case
 
 import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskUserIs
 
 class GetTaskStatus {
     operator fun invoke(userIs: TaskUserIs, status: Boolean): Task.Status {

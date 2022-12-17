@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
+import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.presentation.utils.DialogItem
 
 data class TaskDetailedTaskState(
@@ -17,6 +18,7 @@ data class TaskDetailedTaskState(
     val taskObject: String = "",
     val mainTask: String = "",
     val innerTasks: String = "",
+    val status: Task.Status = Task.Status.New,
 )
 
 

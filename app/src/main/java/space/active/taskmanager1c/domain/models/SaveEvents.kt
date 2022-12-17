@@ -1,6 +1,4 @@
-package space.active.taskmanager1c.domain.use_case
-
-import space.active.taskmanager1c.domain.models.Task
+package space.active.taskmanager1c.domain.models
 
 sealed class SaveEvents {
     data class Simple(

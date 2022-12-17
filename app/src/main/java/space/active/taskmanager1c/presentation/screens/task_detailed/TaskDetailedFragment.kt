@@ -14,13 +14,12 @@ import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
-import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
-import space.active.taskmanager1c.domain.use_case.SaveEvents
-import space.active.taskmanager1c.domain.use_case.TaskChangesEvents
+import space.active.taskmanager1c.domain.models.SaveEvents
+import space.active.taskmanager1c.domain.models.TaskChangesEvents
 import space.active.taskmanager1c.presentation.utils.*
 import java.util.*
 
@@ -56,6 +55,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             viewModel.taskState.collectLatest { taskState ->
                 binding.taskTitleDetailed.setText(taskState.title)
                 binding.taskNumberDetailed.text = taskState.number
+                binding.taskStatus.text = taskState.status.name
                 binding.taskDateDetailed.text = taskState.startDate
                 binding.taskDeadline.setText(taskState.deadLine)
                 binding.taskAuthor.setText(taskState.author)
@@ -80,6 +80,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                     editable = fieldsState.title
                 )
                 binding.taskDateDetailed.setColorState(fieldsState.title)
+                binding.taskStatus.setColorState(fieldsState.title)
                 binding.taskNumberDetailed.setColorState(fieldsState.title)
                 // End date
                 binding.taskDeadlineCardView.setState(enabled = fieldsState.deadLine)
