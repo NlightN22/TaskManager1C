@@ -1,7 +1,6 @@
 package space.active.taskmanager1c.domain.models
 
 sealed class TaskListOrderTypes {
-
     data class Name(
         val desc: Boolean = false
     ) : TaskListOrderTypes()

@@ -39,6 +39,7 @@ class TaskListViewModel @Inject constructor(
     private val _searchFilter = MutableStateFlow<String>("")
     private val _bottomFilter = MutableStateFlow<TaskListFilterTypes>(TaskListFilterTypes.All)
     private val _bottomOrder = MutableStateFlow<TaskListOrderTypes>(TaskListOrderTypes.StartDate())
+    val bottomOrder = _bottomOrder.asStateFlow()
 
     private var searchJob: Job? = null
 
@@ -83,9 +84,27 @@ class TaskListViewModel @Inject constructor(
 
     fun orderByBottomMenu(orderTypes: TaskListOrderTypes) {
         viewModelScope.launch {
-            _bottomOrder.value = orderTypes
+            if (orderTypes == _bottomOrder.value) {
+                _bottomOrder.value = when (orderTypes) {
+                    is TaskListOrderTypes.Name -> {
+                        orderTypes.copy(desc = !orderTypes.desc)
+                    }
+                    is TaskListOrderTypes.Performer -> {
+                        orderTypes.copy(desc = !orderTypes.desc)
+                    }
+                    is TaskListOrderTypes.StartDate -> {
+                        orderTypes.copy(desc = !orderTypes.desc)
+                    }
+                    is TaskListOrderTypes.EndDate -> {
+                        orderTypes.copy(desc = !orderTypes.desc)
+                    }
+                }
+            } else {
+                _bottomOrder.value = orderTypes
+            }
         }
     }
+
 
     fun filterByBottomMenu(filterType: TaskListFilterTypes) {
         viewModelScope.launch {
@@ -97,16 +116,32 @@ class TaskListViewModel @Inject constructor(
         var result: List<Task> = emptyList()
         when (order) {
             is TaskListOrderTypes.StartDate -> {
-                result = list.sortedBy { it.date }
+                result = if (order.desc) {
+                    list.sortedByDescending { it.date }
+                } else {
+                    list.sortedBy { it.date }
+                }
             }
             is TaskListOrderTypes.EndDate -> {
-                result = list.sortedBy { it.endDate }
+                result = if (order.desc) {
+                    list.sortedByDescending { it.endDate }
+                } else {
+                    list.sortedBy { it.endDate }
+                }
             }
             is TaskListOrderTypes.Name -> {
-                result = list.sortedBy { it.name }
+                result = if (order.desc) {
+                    list.sortedByDescending { it.name }
+                } else {
+                    list.sortedBy { it.name }
+                }
             }
             is TaskListOrderTypes.Performer -> {
-                result = list.sortedBy { it.users.performer.name }
+                result = if (order.desc) {
+                    list.sortedByDescending { it.users.performer.name }
+                } else {
+                    list.sortedBy { it.users.performer.name }
+                }
             }
         }
         return result

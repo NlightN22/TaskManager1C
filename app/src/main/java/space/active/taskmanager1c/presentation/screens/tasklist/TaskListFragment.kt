@@ -17,21 +17,24 @@ import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
-import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.TaskListOrderTypes
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
+import space.active.taskmanager1c.presentation.utils.setIcon09State
+import space.active.taskmanager1c.presentation.utils.setIconAZState
 
 private const val TAG = "TaskListFragment"
 
 @AndroidEntryPoint
 class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
-    lateinit var binding: FragmentTaskListBinding
+    private lateinit var binding: FragmentTaskListBinding
 
     private val viewModel by viewModels<TaskListViewModel>()
     private val mainVM by viewModels<MainViewModel>()
 
-    lateinit var recyclerTasks: TaskListAdapter
+    private lateinit var recyclerTasks: TaskListAdapter
+    private lateinit var orderMenu: PopupMenu
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -58,13 +61,37 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         )
         binding.listTasksRV.adapter = recyclerTasks
 
+
+        initOrderMenu()
         //        incoming()
         observers()
         listeners()
     }
 
     private fun observers() {
+        // order sate for order menu
+        lifecycleScope.launchWhenStarted {
+            viewModel.bottomOrder.collectLatest { type->
+                with(orderMenu.menu) {
+                    when (type) {
+                        is TaskListOrderTypes.Name -> {
+                            findItem(R.id.orderName).setIconAZState(type.desc, requireContext())
+                        }
+                        is TaskListOrderTypes.EndDate -> {
+                            findItem(R.id.orderEndDate).setIcon09State(type.desc,requireContext())
+                        }
+                        is TaskListOrderTypes.StartDate -> {
+                            findItem(R.id.orderStartDate).setIcon09State(type.desc,requireContext())
+                        }
+                        is TaskListOrderTypes.Performer -> {
+                            findItem(R.id.orderPerformer).setIconAZState(type.desc,requireContext())
+                        }
+                    }
+                }
+            }
+        }
 
+        // for autocomplete search
         lifecycleScope.launchWhenStarted {
             viewModel.userList.collectLatest { users->
                 val arrayNames: Array<String> = users.map { it.name }.toTypedArray()
@@ -72,6 +99,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             }
         }
 
+        // task list for recycler view
         lifecycleScope.launchWhenStarted {
             viewModel.listTask.collectLatest { request ->
                 when (request) {
@@ -89,6 +117,13 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             }
         }
 
+    }
+
+    private fun initOrderMenu(){
+        orderMenu = PopupMenu(requireContext(), binding.bottomMenu)
+        orderMenu.inflate(R.menu.menu_tasklist_order)
+        orderMenu.setForceShowIcon(true)
+        orderMenu.gravity = Gravity.START
     }
 
     private fun listeners() {
@@ -116,11 +151,13 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.tasklist_filter -> {
-                    val viewMenu = binding.bottomMenu
-                    logger.log(TAG, "viewMenu $viewMenu")
-                    showFilterMenu(viewMenu)
+                    showFilterMenu(binding.bottomMenu)
                 }
                 R.id.tasklist_newTask -> {
+                    // todo add new task
+                }
+                R.id.tasklist_order -> {
+                    showOrderMenu()
                 }
             }
             return@setOnItemSelectedListener true
@@ -145,6 +182,29 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             visibility = View.GONE
         }
         binding.listTasksRV.visibility = View.VISIBLE
+    }
+
+    private fun showOrderMenu() {
+        orderMenu.show()
+        orderMenu.setOnMenuItemClickListener {
+            with(viewModel) {
+                when (it.itemId) {
+                    R.id.orderName -> {
+                        orderByBottomMenu(TaskListOrderTypes.Name())
+                    }
+                    R.id.orderPerformer -> {
+                        orderByBottomMenu(TaskListOrderTypes.Performer())
+                    }
+                    R.id.orderStartDate -> {
+                        orderByBottomMenu(TaskListOrderTypes.StartDate())
+                    }
+                    R.id.orderEndDate -> {
+                        orderByBottomMenu(TaskListOrderTypes.EndDate())
+                    }
+                }
+            }
+            return@setOnMenuItemClickListener false
+        }
     }
 
     private fun showFilterMenu(view: View) {

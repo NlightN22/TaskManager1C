@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:title="@string/menu_order_name"
+        android:id="@+id/orderName"
+        android:icon="@drawable/ic_menu_order_az"
+        />
+    <item android:title="@string/menu_order_performer"
+        android:id="@+id/orderPerformer"
+        android:icon="@drawable/ic_menu_order_az"
+        />
+    <item android:title="@string/menu_order_start_date"
+        android:id="@+id/orderStartDate"
+        android:icon="@drawable/ic_menu_order_09"
+        />
+    <item android:title="@string/menu_order_end_date"
+        android:id="@+id/orderEndDate"
+        android:icon="@drawable/ic_menu_order_09"
+        />
+</menu>
