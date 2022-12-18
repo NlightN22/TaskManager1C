@@ -117,6 +117,25 @@ data class Task(
 
     companion object {
 
+        fun newTask(author: User) = Task(
+            date = LocalDate.now().toString(),
+            endDate = LocalDate.now().toString(),
+            users = UsersInTaskDomain(
+                author = author,
+                performer = User.blankUser(),
+                coPerformers = emptyList(),
+                observers = emptyList()
+            ),
+            description = "",
+            id = "",
+            mainTaskId = "",
+            name = "",
+            number = "",
+            objName = "",
+            priority = "",
+            status = Task.Status.New,
+        )
+
         fun List<Task>.mapAndReplaceById(inputList: List<Task>): List<Task> {
             val replacedList = this.map { list1Item ->
                 inputList.find { list2Item -> (list1Item.id == list2Item.id) } ?: list1Item

@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
+import space.active.taskmanager1c.domain.models.SaveEvents
+import space.active.taskmanager1c.domain.models.TaskChangesEvents
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
-import space.active.taskmanager1c.domain.models.SaveEvents
-import space.active.taskmanager1c.domain.models.TaskChangesEvents
 import space.active.taskmanager1c.presentation.utils.*
 import java.util.*
 
@@ -51,144 +51,69 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun observers() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.taskState.collectLatest { taskState ->
-                binding.taskTitleDetailed.setText(taskState.title)
-                binding.taskNumberDetailed.text = taskState.number
-                binding.taskStatus.text = taskState.status.name
-                binding.taskDateDetailed.text = taskState.startDate
-                binding.taskDeadline.setText(taskState.deadLine)
-                binding.taskAuthor.setText(taskState.author)
-                binding.taskDaysEnd.setText(taskState.daysEnd)
-                binding.taskPerformer.setText(taskState.performer)
-                binding.taskCoPerformers.setText(taskState.coPerfomers)
-                binding.taskObservers.setText(taskState.observers)
-                binding.taskDescription.setText(taskState.description)
-                binding.taskBaseObject.setText(taskState.taskObject)
-                binding.taskMain.setText(taskState.mainTask)
-                binding.taskInner.setText(taskState.innerTasks)
-            }
-        }
+
+        renderState(viewModel)
 
         // Render enabled fields
-        lifecycleScope.launchWhenCreated {
-            viewModel.enabledFields.collectLatest { fieldsState ->
-                // Title
-                binding.taskTitleCardView.setState(enabled = fieldsState.title)
-                binding.taskTitleTIL.setState(
-                    enabled = fieldsState.title,
-                    editable = fieldsState.title
-                )
-                binding.taskDateDetailed.setColorState(fieldsState.title)
-                binding.taskStatus.setColorState(fieldsState.title)
-                binding.taskNumberDetailed.setColorState(fieldsState.title)
-                // End date
-                binding.taskDeadlineCardView.setState(enabled = fieldsState.deadLine)
-                binding.taskDeadlineTIL.setState(enabled = fieldsState.deadLine)
-                if (fieldsState.deadLine) {
-                    binding.taskDeadline.setOnClickListener {
-                        showDatePicker()
-                    }
-                }
-                // Performer
-                binding.taskPerformerCard.setState(enabled = fieldsState.performer)
-                binding.taskPerformerTIL.setState(enabled = fieldsState.performer)
-                if (fieldsState.performer) {
-                    binding.taskPerformer.setOnClickListener {
-                        viewModel.showDialog(PerformerDialog(null))
-                    }
-                }
-                // CoPerformers
-                binding.taskCoPerformersCard.setState(enabled = fieldsState.coPerfomers)
-                binding.taskCoPerformersTIL.setState(enabled = fieldsState.coPerfomers)
-                if (fieldsState.coPerfomers) {
-                    binding.taskCoPerformers.setOnClickListener {
-                        viewModel.showDialog(CoPerformersDialog(null))
-                    }
-                }
-                // Observers
-                binding.taskObserversCard.setState(enabled = fieldsState.observers)
-                binding.taskObserversTIL.setState(enabled = fieldsState.observers)
-                if (fieldsState.observers) {
-                    binding.taskObservers.setOnClickListener {
-                        viewModel.showDialog(ObserversDialog(null))
-                    }
-                }
-                // Descriptions
-                binding.taskDescriptionCardView.setState(enabled = fieldsState.description)
-                binding.taskDescriptionTIL.setState(
-                    enabled = fieldsState.description,
-                    editable = fieldsState.description
-                )
-                // bottom menu state
-                binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible = fieldsState.bottomPerformer
-            }
-        }
+        renderFields(viewModel)
 
         // SnackBar observer
-        lifecycleScope.launchWhenStarted {
-            viewModel.showSnackBar.collectLatest {
-                showSnackBar(it, binding.root)
-            }
-        }
+        showSnackBar(viewModel.showSnackBar, binding.root)
 
         // Save observer
-        lifecycleScope.launchWhenStarted {
-            viewModel.saveTaskEvent.collectLatest {
-                mainVM.saveTask(it)
-                if (it is SaveEvents.Breakable) {
-                    onBackClick()
-                }
+        viewModel.saveTaskEvent.collectOnStart {
+            mainVM.saveTask(it)
+            if (it is SaveEvents.Breakable) {
+                onBackClick()
             }
         }
 
         // Dialog observers
-        lifecycleScope.launchWhenStarted {
-            viewModel.showDialogEvent.collectLatest { event ->
-                when (event) {
-                    is PerformerDialog -> {
-                        if (event.listUsers != null) {
-                            SingleChooseDialog.show(
-                                parentFragmentManager,
-                                event.listUsers, // todo replace to dialog item in class
-                                ok = false,
-                                cancel = true
-                            )
-                        }
+        viewModel.showDialogEvent.collectOnStart { event ->
+            when (event) {
+                is PerformerDialog -> {
+                    if (event.listUsers != null) {
+                        SingleChooseDialog.show(
+                            parentFragmentManager,
+                            event.listUsers, // todo replace to dialog item in class
+                            ok = false,
+                            cancel = true
+                        )
                     }
-                    is CoPerformersDialog -> {
-                        if (event.listDialogItems != null) {
-                            MultiChooseDialog.show(
-                                parentFragmentManager,
-                                event.listDialogItems,
-                                ok = true,
-                                cancel = true,
-                                REQUEST_COPERFOMREFRS
-                            )
-                        }
+                }
+                is CoPerformersDialog -> {
+                    if (event.listDialogItems != null) {
+                        MultiChooseDialog.show(
+                            parentFragmentManager,
+                            event.listDialogItems,
+                            ok = true,
+                            cancel = true,
+                            REQUEST_COPERFOMREFRS
+                        )
                     }
-                    is ObserversDialog -> {
-                        if (event.listDialogItems != null) {
-                            MultiChooseDialog.show(
-                                parentFragmentManager,
-                                event.listDialogItems,
-                                ok = true,
-                                cancel = true,
-                                REQUEST_OBSERVERS
-                            )
-                        }
+                }
+                is ObserversDialog -> {
+                    if (event.listDialogItems != null) {
+                        MultiChooseDialog.show(
+                            parentFragmentManager,
+                            event.listDialogItems,
+                            ok = true,
+                            cancel = true,
+                            REQUEST_OBSERVERS
+                        )
                     }
+                }
+                is DatePicker -> {
+                    showDatePicker()
                 }
             }
         }
 
 
         //Expand cards observers
-        lifecycleScope.launchWhenStarted {
-            viewModel.expandState.collectLatest { expandState ->
-                renderMainDetailed(expandState.main)
-                renderDescription(expandState.description)
-            }
+        viewModel.expandState.collectOnStart { expandState ->
+            renderMainDetailed(expandState.main)
+            renderDescription(expandState.description)
         }
 
         setupMultiChooseDialog()

@@ -11,6 +11,9 @@ data class User(
     }
 
     companion object {
+
+        fun blankUser() = User (id = "", name = "")
+
         fun List<User>.toDialogItems(currentSelectedUsersId: List<String>): List<DialogItem> {
             return this.map {
                 if (currentSelectedUsersId.contains(it.id)) {

@@ -28,7 +28,7 @@ class TaskListAdapter(
         val task = v.tag as Task
         when (v.id) {
             R.id.taskStatus -> {
-                // todo
+                actionListener.onTaskStatusClick(task)
             }
             else -> {
                 actionListener.onTaskClick(task)

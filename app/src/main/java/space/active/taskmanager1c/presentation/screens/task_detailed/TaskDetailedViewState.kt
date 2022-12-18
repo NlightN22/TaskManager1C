@@ -2,6 +2,30 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.presentation.utils.DialogItem
+import java.time.LocalDate
+
+sealed class TaskDetailedViewState(
+    open val state: TaskDetailedTaskState
+) {
+    data class New(
+        override val state: TaskDetailedTaskState = TaskDetailedTaskState()
+    ) : TaskDetailedViewState(state) {
+        fun setNew(author: String): TaskDetailedViewState.New {
+            return this.copy(
+                state = state.copy(
+                    author = author,
+                    startDate = LocalDate.now().toString(),
+                    deadLine = LocalDate.now().toString(),
+                    status = Task.Status.New
+                )
+            )
+        }
+    }
+
+    data class Edit(
+        override val state: TaskDetailedTaskState
+    ) : TaskDetailedViewState(state)
+}
 
 data class TaskDetailedTaskState(
     val id: String = "",
@@ -40,8 +64,4 @@ data class TaskDetailedExpandState(
     val description: Boolean = false
 )
 
-data class SnackBarState(
-    val text: String,
-    val duration: Int,
-)
-
+object DatePicker : TaskDetailedDialogs()

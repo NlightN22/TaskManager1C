@@ -87,6 +87,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+<!--    TODO add extreme positions to get swipe element-->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -250,7 +251,7 @@
                                 android:id="@+id/taskCoPerformers"
                                 style="@style/EditTextEditable"
                                 android:layout_width="match_parent"
-                                android:inputType="textPersonName"
+                                android:inputType="textMultiLine"
                                 tools:text="Васильев П.В., Узкий А.Ц." />
 
                         </com.google.android.material.textfield.TextInputLayout>
@@ -278,7 +279,7 @@
                                 android:id="@+id/taskObservers"
                                 style="@style/EditTextEditable"
                                 android:layout_width="match_parent"
-                                android:inputType="textPersonName"
+                                android:inputType="textMultiLine"
                                 tools:text="Главнова Е.И., Кадратьева А.П." />
                         </com.google.android.material.textfield.TextInputLayout>
                     </com.google.android.material.card.MaterialCardView>

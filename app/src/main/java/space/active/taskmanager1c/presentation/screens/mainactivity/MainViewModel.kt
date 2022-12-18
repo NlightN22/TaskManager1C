@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.use_case.HandleJobForUpdateDb
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.use_case.SaveNewTaskToDb
 import space.active.taskmanager1c.domain.use_case.SaveTaskChangesToDb
-import space.active.taskmanager1c.presentation.screens.task_detailed.SnackBarState
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -27,18 +27,22 @@ class MainViewModel @Inject constructor(
     private val handleJobForUpdateDb: HandleJobForUpdateDb,
     private val saveNewTaskToDb: SaveNewTaskToDb,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger
 ) : ViewModel() {
 
     private val _showSaveSnack = MutableSharedFlow<SnackBarState>()
     val showSaveSnack = _showSaveSnack.asSharedFlow()
 
+    private val _savedTaskIdEvent = MutableSharedFlow<String>()
+    val savedIdEvent = _savedTaskIdEvent.asSharedFlow()
+
     private var cancelListener: AtomicBoolean = AtomicBoolean(false)
     private val delayedJobsList: ArrayList<SaveJob> = arrayListOf()
 
 
     val coroutineContext: CoroutineContext =
-        SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { context, exception ->
+        SupervisorJob() + ioDispatcher + CoroutineExceptionHandler { context, exception ->
             logger.log(
                 TAG,
                 "updateJob CoroutineExceptionHandler ${exception.message}"
@@ -63,10 +67,11 @@ class MainViewModel @Inject constructor(
             is SaveEvents.Breakable -> {
                 val cancelDuration = saveEvents.cancelDuration
                 viewModelScope.launch(SupervisorJob()) {
+                    _savedTaskIdEvent.emit(saveEvents.task.id)
                     _showSaveSnack.emit(
                         SnackBarState(
                             saveEvents.task.name,
-                            saveEvents.cancelDuration
+                            cancelDuration
                         )
                     )
                     //set when new start

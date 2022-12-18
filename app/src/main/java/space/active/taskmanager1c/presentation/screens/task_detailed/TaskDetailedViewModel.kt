@@ -13,7 +13,10 @@ import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.*
 import space.active.taskmanager1c.domain.models.User.Companion.toDialogItems
 import space.active.taskmanager1c.domain.repository.TasksRepository
-import space.active.taskmanager1c.domain.use_case.*
+import space.active.taskmanager1c.domain.use_case.ExceptionHandler
+import space.active.taskmanager1c.domain.use_case.GetDetailedTask
+import space.active.taskmanager1c.domain.use_case.GetTaskStatus
+import space.active.taskmanager1c.domain.use_case.ValidationTaskChanges
 import javax.inject.Inject
 
 private const val TAG = "TaskDetailedViewModel"
@@ -27,10 +30,12 @@ class TaskDetailedViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private var currentTask: Flow<Task?> = flow { emit(null) }
 
-    private val _taskState = MutableStateFlow(TaskDetailedTaskState())
+
+
+    private val _taskState = MutableStateFlow<TaskDetailedViewState>(TaskDetailedViewState.New())
     val taskState = _taskState.asStateFlow()
+
     private val _expandState = MutableStateFlow(TaskDetailedExpandState())
     val expandState = _expandState.asStateFlow()
 
@@ -47,13 +52,69 @@ class TaskDetailedViewModel @Inject constructor(
     private val _showSnackBar = MutableSharedFlow<String>()
     val showSnackBar = _showSnackBar.asSharedFlow()
 
-    private var saveJob: Job? = null
 
     // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
     val whoAmI: User = User(
         id = "c49a0b62-c192-11e1-8a03-f46d0490adee",
         name = "Михайлов Олег Федорович"
     ) // TODO replace to shared preferences
+
+    private var currentTask: Flow<Task?> = flow { emit(null) }
+
+
+    init {
+        viewModelScope.launch {
+            currentTask.collect { task ->
+                if (task != null) {
+                    /**
+                     * If task is not new
+                     */
+                    if (task.id.isNotBlank()) {
+                        _taskState.value = TaskDetailedViewState.Edit(task.toTaskState())
+                        setDependentTasks(task)
+                        // get base and inner tasks from db
+                        _enabledFields.value = TaskUserIs.userIs(task, whoAmI).fields
+
+                    } else
+                    /**
+                     * If new task
+                     */
+                    {
+                        _taskState.value = TaskDetailedViewState.New(task.toTaskState())
+                        _enabledFields.value = TaskUserIs.Author().fields
+                    }
+                }
+                /**
+                 * If cant get task from DB
+                 */
+                else {
+                    exceptionHandler(EmptyObject)
+                }
+            }
+        }
+    }
+
+    // get task flow
+
+    // todo change to transformation
+    fun getTaskFlow(taskId: String) {
+        /**
+         * If task is not new
+         */
+        if (taskId.isNotBlank()) {
+            viewModelScope.launch(ioDispatcher) {
+                currentTask = getDetailedTask(taskId)
+            }
+        }
+        /**
+         * If new task
+         */
+        else {
+            viewModelScope.launch {
+                currentTask = flow { emit(Task.newTask(whoAmI)) }
+            }
+        }
+    }
 
     fun saveChangesSmart(event: TaskChangesEvents) {
         viewModelScope.launch {
@@ -68,7 +129,7 @@ class TaskDetailedViewModel @Inject constructor(
                 when (event) {
                     is TaskChangesEvents.Title -> {
                         val changes = event.title
-                        if (changes != _taskState.first().title) {
+                        if (changes != _taskState.first().state.title) {
                             task = task.copy(name = changes)
                             _saveTaskEvent.emit(
                                 SaveEvents.Delayed(
@@ -101,7 +162,7 @@ class TaskDetailedViewModel @Inject constructor(
                     }
                     is TaskChangesEvents.Description -> {
                         val changes = event.text
-                        if (changes != _taskState.first().description) {
+                        if (changes != _taskState.first().state.description) {
                             task = task.copy(description = changes)
                             _saveTaskEvent.emit(
                                 SaveEvents.Delayed(
@@ -118,7 +179,7 @@ class TaskDetailedViewModel @Inject constructor(
                         val userIs = TaskUserIs.userIs(task, whoAmI)
 
                         // smart set status
-                        val getStatus = GetTaskStatus()(userIs, event.status )
+                        val getStatus = GetTaskStatus()(userIs, event.status)
 
                         val validation = ValidationTaskChanges()(
                             changeType = event,
@@ -139,38 +200,6 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
-    // get task flow
-    fun getTaskFlow(taskId: String) {
-        /**
-         * If task is not new
-         */
-        if (taskId.isNotBlank()) {
-            viewModelScope.launch(ioDispatcher) {
-                currentTask = getDetailedTask(taskId)
-                currentTask.collect { task ->
-                    if (task != null) {
-                        _taskState.value = task.toTaskState()
-                        setDependentTasks(task)
-                        // get base and inner tasks from db
-                        setFieldsState(task)
-                    }
-                    /**
-                     * If cant get task from DB
-                     */
-                    else {
-                        _taskState.value = TaskDetailedTaskState()
-                    }
-                }
-            }
-        }
-        /**
-         * If new task
-         */
-        else {
-            _taskState.value = TaskDetailedTaskState()
-        }
-    }
-
     private fun setDependentTasks(task: Task) {
         viewModelScope.launch {
             val mainTaskId = task.mainTaskId
@@ -178,24 +207,32 @@ class TaskDetailedViewModel @Inject constructor(
             if (mainTaskId.isNotBlank()) {
                 val mainTask = repository.getTask(mainTaskId).first()
                 if (mainTask != null) {
-                    _taskState.value = _taskState.value.copy(mainTask = mainTask.name)
-                    logger.log(TAG, "setDependentTasks mainTask.name")
+                    val currentstate = _taskState.value
+                    when (currentstate) {
+                        is TaskDetailedViewState.New -> {}
+                        is TaskDetailedViewState.Edit -> {
+                            _taskState.value =
+                                currentstate.copy(currentstate.state.copy(mainTask = mainTask.name))
+                        }
+                    }
+                    logger.log(TAG, "setDependentTasks ${mainTask.name}")
                     // todo clickable for open
                 }
             }
             // todo add inner tasks
         }
-
     }
 
-    private suspend fun setFieldsState(task: Task) {
-        _enabledFields.value = TaskUserIs.userIs(task, whoAmI).fields
+    fun showDatePicker() {
+        viewModelScope.launch {
+            _showDialogEvent.emit(DatePicker)
+        }
     }
 
     fun showDialog(eventType: TaskDetailedDialogs) {
         viewModelScope.launch(ioDispatcher) {
             val listUsers: List<User> = repository.listUsersFlow.first()
-            val currentTask = repository.getTask(_taskState.value.id).first()
+            val currentTask = repository.getTask(_taskState.value.state.id).first()
             if (currentTask != null) {
                 val usersIds: List<String>
                 when (eventType) {
@@ -214,6 +251,7 @@ class TaskDetailedViewModel @Inject constructor(
                         val dialogItems = listUsers.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(ObserversDialog(dialogItems))
                     }
+                    is DatePicker -> {}
                 }
             }
         }
