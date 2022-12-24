@@ -1,22 +1,19 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import space.active.taskmanager1c.coreutils.EmptyObject
+import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.*
+import space.active.taskmanager1c.domain.models.Messages.Companion.toMessages
 import space.active.taskmanager1c.domain.models.User.Companion.toDialogItems
 import space.active.taskmanager1c.domain.repository.TasksRepository
-import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.domain.use_case.GetDetailedTask
-import space.active.taskmanager1c.domain.use_case.GetTaskStatus
-import space.active.taskmanager1c.domain.use_case.ValidationTaskChanges
+import space.active.taskmanager1c.domain.use_case.*
 import javax.inject.Inject
 
 private const val TAG = "TaskDetailedViewModel"
@@ -27,6 +24,7 @@ class TaskDetailedViewModel @Inject constructor(
     private val logger: Logger,
     private val exceptionHandler: ExceptionHandler,
     private val getDetailedTask: GetDetailedTask,
+    private val getTaskMessages: GetTaskMessages,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -48,6 +46,9 @@ class TaskDetailedViewModel @Inject constructor(
 
     private val _showSnackBar = MutableSharedFlow<String>()
     val showSnackBar = _showSnackBar.asSharedFlow()
+
+    private val _messagesList = MutableStateFlow<Request<List<Messages>>>(PendingRequest())
+    val messageList = _messagesList.asStateFlow()
 
 
     // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
@@ -77,7 +78,7 @@ class TaskDetailedViewModel @Inject constructor(
                         setDependentTasks(task)
                         // get base and inner tasks from db
                         _enabledFields.value = TaskUserIs.userIs(task, whoAmI).fields
-
+                        showMessages(task.id)
                     } else
                     // If new task
                     {
@@ -93,9 +94,38 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
+    private fun showMessages(taskId: String) {
+        viewModelScope.launch {
+            getTaskMessages(taskId).collect { request ->
+                when (request) {
+                    is PendingRequest -> {
+                        _messagesList.value = PendingRequest()
+                    }
+                    is ErrorRequest -> {
+                        exceptionHandler(request.exception)
+                    }
+                    is SuccessRequest -> {
+                        val messagesList = request.data.messages
+                        val convertedMessages = messagesList
+                            .toMessages(request.data.users)
+                            .sortedByDescending { it.dateTime }
+                        val setMyList = convertedMessages.map {
+                            if (it.authorId == whoAmI.id) {
+                                it.copy(my = true)
+                            } else {
+                                it.copy(my = false)
+                            }
+                        }
+                        _messagesList.value = SuccessRequest(setMyList)
+                    }
+                }
+            }
+        }
+    }
+
     fun setTaskFlow(taskId: String) {
 //            logger.log(TAG, "setTaskFlow $taskId")
-            _inputTaskId.value = taskId
+        _inputTaskId.value = taskId
     }
 
     fun saveChangesSmart(event: TaskChangesEvents) {

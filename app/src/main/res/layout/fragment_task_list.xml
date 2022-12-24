@@ -76,7 +76,6 @@
             style="@style/BottomMenu"
             tools:ignore="MissingConstraints" />
 
-
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmerTasksRV"
         android:layout_width="match_parent"

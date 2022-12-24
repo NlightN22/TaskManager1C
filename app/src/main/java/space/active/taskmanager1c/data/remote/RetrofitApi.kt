@@ -8,6 +8,7 @@ import retrofit2.http.Query
 import space.active.taskmanager1c.data.remote.dto.MessageDto
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.TaskListDto
+import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
 
 interface RetrofitApi {
     /**
@@ -23,7 +24,7 @@ interface RetrofitApi {
      * http://172.16.17.242/torg_develop/hs/taskmgr/messages?id=4ce6cb44-a3c4-11ea-8d5a-00155d28010b
      */
     @GET("messages")
-    suspend fun getMessages(@Query("id") taskId: String): List<MessageDto>
+    suspend fun getMessages(@Query("id") taskId: String): TaskMessagesDTO
 
 
     /**
@@ -43,6 +44,6 @@ interface RetrofitApi {
      * http://172.16.17.242/torg_develop/hs/taskmgr/tasks/list
      */
     @POST("tasks/list")
-    suspend fun getMessagesTimes(@Body taskListIds: List<String>): List<MessageDto>
+    suspend fun getMessagesTimes(@Body taskListIds: List<String>): List<TaskMessagesDTO>
 
 }

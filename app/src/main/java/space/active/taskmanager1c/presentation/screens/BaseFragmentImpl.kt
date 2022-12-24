@@ -4,11 +4,14 @@ import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
+import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
@@ -136,6 +139,18 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     fun showSnackBar(text: String, view: View) {
         Snackbar.make(view, text, Snackbar.LENGTH_SHORT).show()
+    }
+
+    fun shimmerShow(shimmerView: ShimmerFrameLayout, recyclerView: RecyclerView, visibility: Boolean) {
+        if (visibility) {
+            shimmerView.visibility = View.VISIBLE
+            shimmerView.startShimmer()
+            recyclerView.visibility = View.GONE
+        } else {
+            shimmerView.visibility = View.GONE
+            shimmerView.stopShimmer()
+            recyclerView.visibility = View.VISIBLE
+        }
     }
 
     fun showSaveCancelSnackBar(

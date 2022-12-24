@@ -7,6 +7,7 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput.Companion.toListUserDomain
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
+import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.Task.Companion.mapAndReplaceById
 import space.active.taskmanager1c.domain.models.User
@@ -123,7 +124,6 @@ class MergedTaskRepositoryImpl(
     override fun attachFileToTask(file: ByteArray, taskId: String) = flow<Request<Any>> {
         TODO("Not yet implemented")
     }.flowOn(ioDispatcher)
-
 
     private suspend fun combineListTasks(
         taskIn: List<TaskInput>,

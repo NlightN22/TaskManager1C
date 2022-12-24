@@ -10,9 +10,8 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.InputTaskRepositor
 import space.active.taskmanager1c.data.local.db.tasks_room_db.OutputTaskRepositoryImpl
 import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskInputDao
 import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskOutputDao
-import space.active.taskmanager1c.data.repository.InputTaskRepository
-import space.active.taskmanager1c.data.repository.MergedTaskRepositoryImpl
-import space.active.taskmanager1c.data.repository.OutputTaskRepository
+import space.active.taskmanager1c.data.repository.*
+import space.active.taskmanager1c.domain.repository.MessagesRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import javax.inject.Singleton
 
@@ -28,7 +27,10 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun providesOutputTaskRepository(outputDao: TaskOutputDao, logger: Logger): OutputTaskRepository {
+    fun providesOutputTaskRepository(
+        outputDao: TaskOutputDao,
+        logger: Logger
+    ): OutputTaskRepository {
         return OutputTaskRepositoryImpl(outputDao, logger)
     }
 
@@ -42,4 +44,10 @@ class RepositoryModule {
     ): TasksRepository {
         return MergedTaskRepositoryImpl(inputRepo, outputRepo, ioDispatcher, logger)
     }
+
+    @Provides
+    @Singleton
+    fun providesMessagesRepository(
+        taskApi: TaskApi
+    ): MessagesRepository = MessagesRepositoryImpl(taskApi)
 }

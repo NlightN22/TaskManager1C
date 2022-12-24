@@ -11,6 +11,8 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
+import space.active.taskmanager1c.coreutils.PendingRequest
+import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.models.TaskChangesEvents
@@ -18,6 +20,7 @@ import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
+import space.active.taskmanager1c.presentation.screens.tasklist.TaskListAdapter
 import space.active.taskmanager1c.presentation.utils.*
 import java.util.*
 
@@ -28,13 +31,18 @@ private const val TAG = "TaskDetailedFragment"
 class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
     lateinit var binding: FragmentTaskDetailedBinding
+    lateinit var messagesAdapter: MessagesAdapter
     private val viewModel by viewModels<TaskDetailedViewModel>()
     private val mainVM by viewModels<MainViewModel>()
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskDetailedBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
+
+        messagesAdapter = MessagesAdapter()
+        binding.messagesRV.adapter = messagesAdapter
 
         income()
         observers()
@@ -54,6 +62,20 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
         // Render enabled fields
         renderFields(viewModel)
+
+        // messages observer
+        viewModel.messageList.collectOnStart { request ->
+        when (request) {
+            is SuccessRequest -> {
+                messagesAdapter.messages = request.data
+                shimmerShow(binding.shimmerMessagesRV, binding.messagesRV,false)
+            }
+            is PendingRequest -> {
+                shimmerShow(binding.shimmerMessagesRV, binding.messagesRV,true)
+            }
+            else -> {}
+        }
+        }
 
         // SnackBar observer
         showSnackBar(viewModel.showSnackBar, binding.root)

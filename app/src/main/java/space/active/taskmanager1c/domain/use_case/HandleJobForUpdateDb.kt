@@ -75,8 +75,10 @@ class HandleJobForUpdateDb
                         val inputDTO = TaskDto.fromInputTask(existingInputTask)
                         val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
                         // send in Map
-                        val res = taskApi.sendEditedTaskMappedChanges(inputDTO.id, mappedDiffs)
-                        result = SuccessRequest(res)  // todo change to real answer
+//                        val res = taskApi.sendEditedTaskMappedChanges(inputDTO.id, mappedDiffs)
+//                        result = SuccessRequest(res)
+                        //mock
+                        result = SuccessRequest(inputDTO)
                     }
                 } else {
                     // if task is not new

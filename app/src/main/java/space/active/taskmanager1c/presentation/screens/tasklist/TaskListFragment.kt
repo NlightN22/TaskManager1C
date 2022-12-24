@@ -117,11 +117,11 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         viewModel.listTask.collectOnStart { request ->
             when (request) {
                 is PendingRequest -> {
-                    showShimmer()
+                    shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, true)
                 }
                 is SuccessRequest -> {
                     recyclerTasks.tasks = request.data
-                    showRecyclerView()
+                    shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
                 }
                 is ErrorRequest -> {
                     showSnackBar(request.exception.message.toString(), binding.root)
@@ -180,21 +180,22 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
     }
 
-    private fun showShimmer() {
-        binding.listTasksRV.visibility = View.GONE
-        binding.shimmerTasksRV.apply {
-            visibility = View.VISIBLE
-            startShimmer()
-        }
-    }
-
-    private fun showRecyclerView() {
-        binding.shimmerTasksRV.apply {
-            stopShimmer()
-            visibility = View.GONE
-        }
-        binding.listTasksRV.visibility = View.VISIBLE
-    }
+// todo delete
+//    private fun showShimmer() {
+//        binding.listTasksRV.visibility = View.GONE
+//        binding.shimmerTasksRV.apply {
+//            visibility = View.VISIBLE
+//            startShimmer()
+//        }
+//    }
+// todo delete
+//    private fun showRecyclerView() {
+//        binding.shimmerTasksRV.apply {
+//            stopShimmer()
+//            visibility = View.GONE
+//        }
+//        binding.listTasksRV.visibility = View.VISIBLE
+//    }
 
     private fun showOrderMenu() {
         orderMenu.show()

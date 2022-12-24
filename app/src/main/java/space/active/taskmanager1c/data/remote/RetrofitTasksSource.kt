@@ -8,6 +8,7 @@ import space.active.taskmanager1c.data.local.db.Converters
 import space.active.taskmanager1c.data.remote.dto.AuthDto
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.TaskListDto
+import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.repository.TaskApi
 import javax.inject.Inject
 
@@ -51,7 +52,15 @@ class RetrofitTasksSource @Inject constructor
         retrofitApi.saveChanges(changes)
     }
 
-    override suspend fun authUser(username: String, password: String): Request<AuthDto> {
+    override suspend fun getMessages(taskId: String): TaskMessagesDTO = wrapRetrofitExceptions {
+        retrofitApi.getMessages(taskId)
+    }
+
+    override suspend fun getMessagesTimes(taskIds: List<String>): List<TaskMessagesDTO> = wrapRetrofitExceptions{
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun authUser(username: String, password: String): Request<AuthDto> = wrapRetrofitExceptions {
         TODO("Not yet implemented")
     }
 }
