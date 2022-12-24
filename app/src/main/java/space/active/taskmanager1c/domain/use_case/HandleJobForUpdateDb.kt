@@ -2,9 +2,7 @@ package space.active.taskmanager1c.domain.use_case
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
@@ -28,7 +26,7 @@ class HandleJobForUpdateDb
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger,
 ) {
-    fun updateJob(updateDelay: Long = 1000L): Flow<Request<Any>> = flow {
+    fun updateJob(updateDelay: Long = 1000L): Flow<Request<Any>> = channelFlow<Request<Any>> {
         // Проверяем таблицу исходящих задач. С определенной переодичностью
         // Если в таблице исходящих есть задачи, то сравниваем их с таблицей входящих задач.
         // При совпадении исходящих и входящих задач удаляем совпадающие из таблицы исходящих.
@@ -39,16 +37,18 @@ class HandleJobForUpdateDb
         // Далее запрашиваем с сервера входящие задачи.
         // Обновляем список входящих задач в таблице.
         // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
-        while (true) {
 //            logger.log(TAG, "Job start")
-            emit(outputSendJob()) // TODO replace to flow
-            emit(inputFetchJob()) // TODO replace to flow and add exception NoUserInDb
+        outputSendJob().collect {
+            send(it)
+        }
+//        inputFetchJobFlow().collect {
+//            send(it)
+//        }
             delay(updateDelay)
 //            logger.log(TAG, "Job end")
-        }
     }.flowOn(ioDispatcher)
 
-    private suspend fun outputSendJob(): Request<Any> {
+    private fun outputSendJob() = flow<Request<Any>> {
         val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
         val inputTasks: List<TaskInput> = inputTaskRepository.getTasks()
         if (outputTasks.isNotEmpty()) {
@@ -66,7 +66,7 @@ class HandleJobForUpdateDb
                 val outToDTO = TaskDto.fromOutputTask(outputTask)
                 // find diffs with TaskInput if id in input table or send as is
                 if (existingInputTask != null) {
-                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited)
+                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(existingInputTask.name))
                     // if task is not edited and existing in input table
                     if (!outputTask.newTask) {
                         // get taskDTO with id and only diffs params
@@ -75,7 +75,8 @@ class HandleJobForUpdateDb
                         val inputDTO = TaskDto.fromInputTask(existingInputTask)
                         val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
                         // send in Map
-                        result = taskApi.sendEditedTaskMappedChanges(mappedDiffs)
+                        val res = taskApi.sendEditedTaskMappedChanges(inputDTO.id, mappedDiffs)
+                        result = SuccessRequest(res)  // todo change to real answer
                     }
                 } else {
                     // if task is not new
@@ -92,18 +93,18 @@ class HandleJobForUpdateDb
                         // TODO if task send with delete label
                         inputTaskRepository.insertTask(result.data.toTaskInput())
                         outputTaskRepository.deleteTasks(listOf(outputTask))
-                        return SuccessRequest(Any())
+                        emit(SuccessRequest(Any()))
                     }
                     is ErrorRequest -> {
-                        return ErrorRequest(result.exception)
+                        emit(ErrorRequest(result.exception))
                     }
                     is PendingRequest -> {
-                        return PendingRequest()
+                        emit(PendingRequest())
                     }
                 }
             }
         }
-        return SuccessRequest(Any())
+        emit(SuccessRequest(Any()))
     }
 
     private suspend fun inputFetchJob(): Request<Any> {

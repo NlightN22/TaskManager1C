@@ -33,7 +33,7 @@ class HandleEmptyTaskList @Inject constructor(
                         is SuccessRequest -> {
                             listTasks = repository.listTasksFlow.first()
                             if (listTasks.isEmpty()) {
-                                emit(ErrorRequest(EmptyObject))
+                                emit(ErrorRequest(EmptyObject("listTasks")))
                                 iterator = TRIES_TO_FETCH
                             } else if (listTasks.isNotEmpty()) {
                                 iterator = TRIES_TO_FETCH

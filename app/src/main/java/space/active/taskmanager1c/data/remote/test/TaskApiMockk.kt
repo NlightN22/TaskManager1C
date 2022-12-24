@@ -15,7 +15,4 @@ class TaskApiMockk(
         val json = String(buffer, Charsets.UTF_8)
         return json
     }
-    fun getSavedChangesTask(): TaskDto {
-        TODO()
-    }
 }

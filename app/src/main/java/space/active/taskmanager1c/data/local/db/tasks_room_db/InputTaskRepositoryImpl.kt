@@ -24,7 +24,7 @@ class InputTaskRepositoryImpl(
             if (listTask.isNotEmpty()) {
                 SuccessRequest(listTask)
             } else {
-                ErrorRequest(EmptyObject)
+                ErrorRequest(EmptyObject("List<TaskInput>"))
             }
         }
 

@@ -11,14 +11,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.CantShowSnackBar
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.domain.models.SaveEvents
+import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.Toasts
 import javax.inject.Inject
@@ -33,6 +38,9 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     @Inject
     lateinit var toasts: Toasts
 
+    @Inject
+    lateinit var exceptionHandler: ExceptionHandler
+
     private val baseMainVM by viewModels<MainViewModel>()
 
 
@@ -41,7 +49,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         // SnackBar observer
         lifecycleScope.launchWhenStarted {
             baseMainVM.showSaveSnack.collectLatest {
-                showSaveCancelSnackBar(it.text, view, it.duration, lifecycleScope) {
+                showSaveCancelSnackBar(it.text, requireView(), it.duration, lifecycleScope) {
                     baseMainVM.saveTask(SaveEvents.BreakSave)
                 }
             }
@@ -138,22 +146,22 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         listener: View.OnClickListener,
     ) {
         var duration = timer
-        val snack = Snackbar.make(view, text, Snackbar.LENGTH_INDEFINITE)
-        coroutineScope.launch(SupervisorJob()) {
-//            try {
-            snack.setActionTextColor(resources.getColor(R.color.button_not_pressed))
-            snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
-            snack.show()
-            while (duration > 0) {
+        try {
+            val snack = Snackbar.make(view, text, Snackbar.LENGTH_INDEFINITE)
+            coroutineScope.launch(SupervisorJob()) {
+                snack.setActionTextColor(resources.getColor(R.color.button_not_pressed))
                 snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
-                delay(1000)
-                duration -= 1
+                snack.show()
+                while (duration > 0) {
+                    snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
+                    delay(1000)
+                    duration -= 1
+                }
+                snack.dismiss()
+
             }
-            snack.dismiss()
-//            } catch (e: CancellationException) {
-//                snack.dismiss()
-//            }
+        } catch (e: IllegalArgumentException) {
+            exceptionHandler(CantShowSnackBar(e.message ?: ""))
         }
     }
-
 }

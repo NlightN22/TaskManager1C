@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="space.active.taskmanager1c">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
+<!--    android:usesCleartextTraffic="true" TODO DELETE and use https-->
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -13,6 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TaskManager1C"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
             android:name=".presentation.screens.mainactivity.MainActivity"

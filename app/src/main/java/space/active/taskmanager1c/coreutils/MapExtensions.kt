@@ -1,5 +1,7 @@
 package space.active.taskmanager1c.coreutils
 
+import android.util.Log
+
 /**
  * Compare two maps current "this" and coming
  * The current map will be the base one,
@@ -27,9 +29,12 @@ fun <T,R> Map<T,R>.diff(incomingMapToCompare: Map<T,R>): Map<T,R> {
     // compare values in all keys and return different
     this.forEach { (key, value) ->
         if (incomingMapToCompare[key] != value) {
+            // todo delete debug
+            if (key == "observers") { Log.d("Map.diff", "observers: $value -- ${incomingMapToCompare[key]}" )}
             diff += Pair(key,value)
         }
     }
-
+    // todo delete debug
+    Log.d("Map.diff", diff.toString())
     return diff
 }

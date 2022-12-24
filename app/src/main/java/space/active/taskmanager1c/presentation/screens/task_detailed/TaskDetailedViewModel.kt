@@ -1,10 +1,10 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.EmptyObject
@@ -29,9 +29,6 @@ class TaskDetailedViewModel @Inject constructor(
     private val getDetailedTask: GetDetailedTask,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
-
-
-
 
     private val _taskState = MutableStateFlow<TaskDetailedViewState>(TaskDetailedViewState.New())
     val taskState = _taskState.asStateFlow()
@@ -59,16 +56,22 @@ class TaskDetailedViewModel @Inject constructor(
         name = "Михайлов Олег Федорович"
     ) // TODO replace to shared preferences
 
-    private var currentTask: Flow<Task?> = flow { emit(null) }
+    private val _inputTaskId = MutableStateFlow<String?>(null)
 
+    private val currentTask: Flow<Task?> = _inputTaskId.transformLatest { inputId ->
+//        logger.log(TAG, "currentTask transform $inputId")
+        if (inputId.isNullOrEmpty()) {
+            emit(Task.newTask(whoAmI))
+        } else {
+            emit(getDetailedTask(inputId).first())
+        }
+    }.flowOn(ioDispatcher)
 
     init {
         viewModelScope.launch {
             currentTask.collect { task ->
                 if (task != null) {
-                    /**
-                     * If task is not new
-                     */
+                    //If task is not new
                     if (task.id.isNotBlank()) {
                         _taskState.value = TaskDetailedViewState.Edit(task.toTaskState())
                         setDependentTasks(task)
@@ -76,44 +79,23 @@ class TaskDetailedViewModel @Inject constructor(
                         _enabledFields.value = TaskUserIs.userIs(task, whoAmI).fields
 
                     } else
-                    /**
-                     * If new task
-                     */
+                    // If new task
                     {
                         _taskState.value = TaskDetailedViewState.New(task.toTaskState())
                         _enabledFields.value = TaskUserIs.Author().fields
                     }
                 }
-                /**
-                 * If cant get task from DB
-                 */
+                // If cant get task from DB
                 else {
-                    exceptionHandler(EmptyObject)
+                    exceptionHandler(EmptyObject("currentTask"))
                 }
             }
         }
     }
 
-    // get task flow
-
-    // todo change to transformation
-    fun getTaskFlow(taskId: String) {
-        /**
-         * If task is not new
-         */
-        if (taskId.isNotBlank()) {
-            viewModelScope.launch(ioDispatcher) {
-                currentTask = getDetailedTask(taskId)
-            }
-        }
-        /**
-         * If new task
-         */
-        else {
-            viewModelScope.launch {
-                currentTask = flow { emit(Task.newTask(whoAmI)) }
-            }
-        }
+    fun setTaskFlow(taskId: String) {
+//            logger.log(TAG, "setTaskFlow $taskId")
+            _inputTaskId.value = taskId
     }
 
     fun saveChangesSmart(event: TaskChangesEvents) {
@@ -195,7 +177,7 @@ class TaskDetailedViewModel @Inject constructor(
                     }
                 }
             } else {
-                exceptionHandler(EmptyObject)
+                exceptionHandler(EmptyObject("currentTask"))
             }
         }
     }

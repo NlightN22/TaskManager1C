@@ -7,12 +7,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
-import space.active.taskmanager1c.domain.use_case.HandleJobForUpdateDb
 import space.active.taskmanager1c.domain.models.SaveEvents
+import space.active.taskmanager1c.domain.use_case.ExceptionHandler
+import space.active.taskmanager1c.domain.use_case.HandleJobForUpdateDb
 import space.active.taskmanager1c.domain.use_case.SaveNewTaskToDb
 import space.active.taskmanager1c.domain.use_case.SaveTaskChangesToDb
 import java.util.concurrent.atomic.AtomicBoolean
@@ -23,39 +25,34 @@ private const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-//    private val tmpApi: TaskApi
     private val handleJobForUpdateDb: HandleJobForUpdateDb,
     private val saveNewTaskToDb: SaveNewTaskToDb,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
+    private val exceptionHandler: ExceptionHandler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger
 ) : ViewModel() {
-
+//
     private val _showSaveSnack = MutableSharedFlow<SnackBarState>()
     val showSaveSnack = _showSaveSnack.asSharedFlow()
 
     private val _savedTaskIdEvent = MutableSharedFlow<String>()
     val savedIdEvent = _savedTaskIdEvent.asSharedFlow()
-
+//
     private var cancelListener: AtomicBoolean = AtomicBoolean(false)
     private val delayedJobsList: ArrayList<SaveJob> = arrayListOf()
 
 
-    val coroutineContext: CoroutineContext =
-        SupervisorJob() + ioDispatcher + CoroutineExceptionHandler { context, exception ->
-            logger.log(
-                TAG,
-                "updateJob CoroutineExceptionHandler ${exception.message}"
-            ) // TODO Handle exception
-        }
+    val coroutineContext: CoroutineContext = SupervisorJob() + ioDispatcher
 
     /**
      *
      * Variable for stoppable job witch regular update data after user login
      */
     private var updateJob: Job? = null
-
-
+    private val runningJob: AtomicBoolean = AtomicBoolean(false)
+//
+//
     fun saveTask(saveEvents: SaveEvents) {
         // new or edit
         when (saveEvents) {
@@ -138,56 +135,65 @@ class MainViewModel @Inject constructor(
             }
         }
     }
-
+//
     data class SaveJob(
         var job: Job? = null,
         val context: CoroutineContext
     )
-
+//
     fun updateJob() {
         logger.log(TAG, "updateJob.isActive ${updateJob?.isActive}")
-        if (updateJob == null) {
+        if (updateJob == null && !runningJob.get()) {
             updateJob = viewModelScope.launch(coroutineContext) {
-                try {
-                    logger.log(TAG, "updateJob launch")
-
-                    /**
-                    set update work here
-                     */
-                    handleJobForUpdateDb.updateJob().collectLatest {
-                        if (it is ErrorRequest) {
-                            logger.log(TAG, it.toString())
+                runningJob.compareAndSet(false, true)
+                while (true) {
+                    try {
+//                        logger.log(TAG, "updateJob launch")
+                        /**
+                        set update work here
+                         */
+                        handleJobForUpdateDb.updateJob()
+                            .catch { e->
+                                exceptionHandler(e)
+                                delay(2000)
+                            }
+                            .collectLatest {
+                            if (it is ErrorRequest) {
+                                logger.log(TAG, it.exception.message.toString())
+                            }
                         }
+                    } catch (e: CancellationException) {
+                        logger.log(TAG, "updateJob CancellationException ${e.message}")
+                        exceptionHandler(e)
+                    } catch (e: Throwable) {
+                        logger.log(TAG, "updateJob Exception ${e.message}")
+                        exceptionHandler(e)
                     }
-                } catch (e: CancellationException) {
-                    logger.log(TAG, "updateJob CancellationException ${e.message}")
-                } catch (e: Exception) {
-                    logger.log(TAG, "updateJob Exception ${e.message}")
                 }
             }
         }
     }
-
-    /** TODO update job
-     * - update only for authenticated user
-     * - take data only from DB
-     * - write to DB from api
-     * - update must be only in data layer with threshold handler
-     * - get and collect update result to threshold handler
-     * - catch update timeouts and tries and when the threshold is exceeded show information to user
-     */
-
+//
+//    /** TODO update job
+//     * - update only for authenticated user
+//     * - take data only from DB
+//     * - write to DB from api
+//     * - update must be only in data layer with threshold handler
+//     * - get and collect update result to threshold handler
+//     * - catch update timeouts and tries and when the threshold is exceeded show information to user
+//     */
+//
     fun stopUpdateJob() {
         try {
             updateJob?.cancel()
-//            runningJob.compareAndSet(true, false)
-            logger.log(TAG, "updateJob cancelled")
+            runningJob.compareAndSet(true, false)
+            logger.log(TAG, "updateJob cancelled ${updateJob?.isActive}")
             updateJob = null
         } catch (e: UninitializedPropertyAccessException) {
             Log.w(TAG, "Warning updateJob already cancelled")
         }
     }
-
+//
     override fun onCleared() {
         stopUpdateJob()
         super.onCleared()

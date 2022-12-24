@@ -90,7 +90,7 @@ class MergedTaskRepositoryImpl(
                 outputTaskRepository.insertTask(task.toOutputTask())
                 emit(SuccessRequest(Any()))
             } else {
-                emit(ErrorRequest(ThisTaskIsNotEdited))
+                emit(ErrorRequest(ThisTaskIsNotEdited(task.name)))
             }
         }
     }.catch { e ->

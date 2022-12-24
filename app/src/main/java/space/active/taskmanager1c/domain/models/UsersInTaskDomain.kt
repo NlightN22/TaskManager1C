@@ -12,8 +12,8 @@ data class UsersInTaskDomain(
     fun toTaskInput() = UsersInTask(
         authorId = this.author.id,
         performerId = this.performer.id,
-        coPerformers = this.coPerformers.map { it.toString() },
-        observers = this.observers.map { it.toString() },
+        coPerformers = this.coPerformers.map { it.id },
+        observers = this.observers.map { it.id },
     )
 
     companion object {

@@ -81,6 +81,10 @@ class TaskListViewModel @Inject constructor(
     }
 
     init {
+        collectListTasks()
+    }
+
+    private fun collectListTasks() {
         viewModelScope.launch {
             inputListTask.collect { inputList ->
 //                logger.log(TAG, "inputListTask.collect")
@@ -129,7 +133,7 @@ class TaskListViewModel @Inject constructor(
                     _showSnackBar.emit(validation.message)
                 }
             } else {
-                exceptionHandler(EmptyObject)
+                exceptionHandler(EmptyObject("task"))
             }
         }
     }
@@ -268,6 +272,4 @@ class TaskListViewModel @Inject constructor(
     // set task as completed
     // set task as not_completed
     // set task as unreadable
-
-
 }
