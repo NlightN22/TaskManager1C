@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.domain.models
 
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.util.*
 
 sealed class TaskChangesEvents {
@@ -10,8 +11,9 @@ sealed class TaskChangesEvents {
     ) : TaskChangesEvents()
 
     data class EndDate(
-        val date: Date
+        val date: LocalDateTime
     ) : TaskChangesEvents() {
+        // todo delete
         fun toTaskDate(): String {
             val formatter = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",

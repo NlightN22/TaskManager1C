@@ -1,17 +1,20 @@
 package space.active.taskmanager1c.domain.models
 
 import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
+import space.active.taskmanager1c.coreutils.toShortDate
+import space.active.taskmanager1c.coreutils.toShortDateTime
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.domain.models.User.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedTaskState
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 data class Task(
-    val date: String,
+    val date: LocalDateTime,
     val description: String,
-    val endDate: String,
+    val endDate: LocalDateTime?,
     val id: String,
     val mainTaskId: String,
     val name: String,
@@ -36,9 +39,9 @@ data class Task(
     }
 
     fun toTaskInput(new: Boolean = false) = TaskInput(
-        date = this.date,
+        date = this.date.toString(),
         description = this.description,
-        endDate = this.endDate,
+        endDate = this.endDate?.toString() ?: "",
         id = if (new) {
             this.hashCode().toString()
         } else {
@@ -68,10 +71,10 @@ data class Task(
     fun toTaskState() = TaskDetailedTaskState(
         id = this.id,
         title = this.name,
-        startDate = this.date,
+        startDate = this.date.toShortDateTime(),
         number = this.number,
         author = this.users.author.name,
-        deadLine = this.endDate,
+        deadLine = this.endDate?.toShortDate() ?: "",
         daysEnd = this.getDeadline(),
         performer = this.users.performer.name,
         coPerfomers = this.users.coPerformers.toText(),
@@ -94,32 +97,50 @@ data class Task(
         }
     }
 
-    /**
-     * Return days deadline in string
-     */
+    //    /**
+//     * Return days deadline in string
+//     */
+
     fun getDeadline(): String {
-        val end = this.endDate
-        if (end.isNotBlank()) {
-            val today = LocalDate.now().toEpochDay()
-            try {
-                // 2022-04-07T00:52:37
-                val endDate = LocalDate.parse(end, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                val end = endDate.toEpochDay()
-                val difference: Long = end - today
-                return "${difference.toString()} дней"
-            } catch (e: Exception) {
-                return e.message.toString()
-            }
+        if (this.endDate != null) {
+            val today: Long = LocalDate.now().toEpochDay()
+            val end: Long = this.endDate.toEpochSecond(ZoneOffset.UTC) / 60 / 60 / 24
+            val difference: Int = (end - today).toInt()
+            return "$difference дней"
         } else {
             return ""
         }
+
     }
+
+
+    // todo delete
+//    /**
+//     * Return days deadline in string
+//     */
+//    fun getDeadline(): String {
+//        val end = this.endDate
+//        if (end.isNotBlank()) {
+//            val today = LocalDate.now().toEpochDay()
+//            try {
+//                // 2022-04-07T00:52:37
+//                val endDate = LocalDate.parse(end, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+//                val end = endDate.toEpochDay()
+//                val difference: Long = end - today
+//                return "${difference.toString()} дней"
+//            } catch (e: Exception) {
+//                return e.message.toString()
+//            }
+//        } else {
+//            return ""
+//        }
+//    }
 
     companion object {
 
         fun newTask(author: User) = Task(
-            date = LocalDate.now().toString(),
-            endDate = LocalDate.now().toString(),
+            date = LocalDateTime.now(),
+            endDate = LocalDateTime.now(),
             users = UsersInTaskDomain(
                 author = author,
                 performer = User.blankUser(),

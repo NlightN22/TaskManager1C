@@ -13,6 +13,7 @@ import space.active.taskmanager1c.domain.models.Task.Companion.mapAndReplaceById
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.UsersInTaskDomain
 import space.active.taskmanager1c.domain.repository.TasksRepository
+import java.time.format.DateTimeFormatter
 
 private const val TAG = "MergedTaskRepositoryImpl"
 
@@ -161,9 +162,9 @@ class MergedTaskRepositoryImpl(
     }
 
     private suspend fun inputTaskToTaskDomain(inputTask: TaskInput) = Task(
-        date = inputTask.date,
+        date = inputTask.date.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         description = inputTask.description,
-        endDate = inputTask.endDate,
+        endDate = inputTask.endDate.toDateTimeOrNull(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         id = inputTask.id,
         mainTaskId = inputTask.mainTaskId,
         name = inputTask.name,
@@ -182,9 +183,9 @@ class MergedTaskRepositoryImpl(
     )
 
     private suspend fun outputTaskToTaskDomain(outputTask: OutputTask) = Task(
-        date = outputTask.taskInput.date,
+        date = outputTask.taskInput.date.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         description = outputTask.taskInput.description,
-        endDate = outputTask.taskInput.endDate,
+        endDate = outputTask.taskInput.endDate.toDateTimeOrNull(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         id = outputTask.taskInput.id,
         mainTaskId = outputTask.taskInput.mainTaskId,
         name = outputTask.taskInput.name,

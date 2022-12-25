@@ -84,6 +84,7 @@ class TaskDetailedViewModel @Inject constructor(
                     {
                         _taskState.value = TaskDetailedViewState.New(task.toTaskState())
                         _enabledFields.value = TaskUserIs.Author().fields
+                        _messagesList.value = SuccessRequest(emptyList<Messages>())
                     }
                 }
                 // If cant get task from DB
@@ -153,7 +154,7 @@ class TaskDetailedViewModel @Inject constructor(
                         }
                     }
                     is TaskChangesEvents.EndDate -> {
-                        val changes = event.toTaskDate()
+                        val changes = event.date
                         task = task.copy(endDate = changes)
                         _saveTaskEvent.emit(SaveEvents.Simple(task))
                     }
@@ -235,12 +236,6 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
-    fun showDatePicker() {
-        viewModelScope.launch {
-            _showDialogEvent.emit(DatePicker)
-        }
-    }
-
     fun showDialog(eventType: TaskDetailedDialogs) {
         viewModelScope.launch(ioDispatcher) {
             val listUsers: List<User> = repository.listUsersFlow.first()
@@ -263,7 +258,9 @@ class TaskDetailedViewModel @Inject constructor(
                         val dialogItems = listUsers.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(ObserversDialog(dialogItems))
                     }
-                    is DatePicker -> {}
+                    is DatePicker -> {
+                        _showDialogEvent.emit(DatePicker)
+                    }
                 }
             }
         }

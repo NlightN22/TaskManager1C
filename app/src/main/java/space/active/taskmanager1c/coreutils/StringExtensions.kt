@@ -15,6 +15,16 @@ fun String.toDateTime(formatter: DateTimeFormatter): LocalDateTime {
     }
 }
 
+fun String.toDateTimeOrNull(formatter: DateTimeFormatter): LocalDateTime? {
+    // 2022-04-07T00:52:37
+    return try {
+        LocalDateTime.parse(this, formatter)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+
 fun String.toDate(formatter: DateTimeFormatter): LocalDate {
     // 2022-04-07T00:52:37
     return try {

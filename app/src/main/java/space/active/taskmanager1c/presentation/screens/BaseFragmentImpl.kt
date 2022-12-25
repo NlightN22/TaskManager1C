@@ -2,10 +2,12 @@ package space.active.taskmanager1c.presentation.screens
 
 import android.content.Context
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.MenuItem
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -29,6 +31,7 @@ import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.Toasts
+import java.util.Date
 import javax.inject.Inject
 
 private const val TAG = "BaseFragment"
@@ -52,7 +55,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         // SnackBar observer
         lifecycleScope.launchWhenStarted {
             baseMainVM.showSaveSnack.collectLatest {
-                showSaveCancelSnackBar(it.text, requireView(), it.duration, lifecycleScope) {
+                showSaveCancelSnackBar(it.text, it.duration, lifecycleScope) {
                     baseMainVM.saveTask(SaveEvents.BreakSave)
                 }
             }
@@ -106,7 +109,6 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         }
     }
 
-
     fun <T> Flow<T>.collectOnStart(listener: (T) -> Unit) {
         lifecycleScope.launchWhenStarted {
             this@collectOnStart.collectLatest {
@@ -131,14 +133,14 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         }
     }
 
-    fun showSnackBar(collectableShared: SharedFlow<String>, view: View) {
+    fun showSnackBar(collectableShared: SharedFlow<String>) {
         collectableShared.collectOnStart {
-            Snackbar.make(view, it, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show()
         }
     }
 
-    fun showSnackBar(text: String, view: View) {
-        Snackbar.make(view, text, Snackbar.LENGTH_SHORT).show()
+    fun showSnackBar(text: String) {
+        Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT).show()
     }
 
     fun shimmerShow(shimmerView: ShimmerFrameLayout, recyclerView: RecyclerView, visibility: Boolean) {
@@ -155,14 +157,13 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     fun showSaveCancelSnackBar(
         text: String,
-        view: View,
         timer: Int,
         coroutineScope: CoroutineScope,
         listener: View.OnClickListener,
     ) {
         var duration = timer
         try {
-            val snack = Snackbar.make(view, text, Snackbar.LENGTH_INDEFINITE)
+            val snack = Snackbar.make(requireView(), text, Snackbar.LENGTH_INDEFINITE)
             coroutineScope.launch(SupervisorJob()) {
                 snack.setActionTextColor(resources.getColor(R.color.button_not_pressed))
                 snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)

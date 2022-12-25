@@ -1,17 +1,12 @@
 package space.active.taskmanager1c.presentation.screens.mainactivity
 
 import android.os.Bundle
-import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import com.google.android.material.snackbar.Snackbar
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.ActivityMainBinding
@@ -24,7 +19,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
     private lateinit var binding: ActivityMainBinding
 
-    @Inject lateinit var logger: Logger
+    @Inject
+    lateinit var logger: Logger
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +36,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observers() {
-
 
 
 //        lifecycleScope.launchWhenStarted {
@@ -66,5 +61,23 @@ class MainActivity : AppCompatActivity() {
 //        binding.saveNewButton.setOnClickListener { viewModel.newTask() }
     }
 
-
+    private var lastPress: Long = 0
+    override fun onBackPressed() {
+        val navController = Navigation.findNavController(binding.fragmentContainerView)
+        val backDestination =
+            navController.previousBackStackEntry?.destination?.id
+//        logger.log(TAG,"backDestination $backDestination currentDestination $currentDestination") // todo delete
+        if (backDestination == null) {
+            val currentTime: Long = System.currentTimeMillis()
+            val delay: Long = 2000
+            if (currentTime - lastPress > delay) {
+                Toast.makeText(this, getString(R.string.exit_toast), delay.toInt()).show()
+                lastPress = System.currentTimeMillis()
+            } else {
+                super.onBackPressed()
+            }
+        } else {
+            super.onBackPressed()
+        }
+    }
 }

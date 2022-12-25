@@ -32,6 +32,7 @@ class TaskListViewModel @Inject constructor(
     @DefaultDispatcher private val defDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
+
     private val _saveTaskEvent = MutableSharedFlow<SaveEvents>()
     val saveTaskEvent = _saveTaskEvent.asSharedFlow()
 
@@ -45,7 +46,7 @@ class TaskListViewModel @Inject constructor(
 
     private val _searchFilter = MutableStateFlow<String>("")
     private val _bottomFilter = MutableStateFlow<TaskListFilterTypes>(TaskListFilterTypes.All)
-    private val _bottomOrder = MutableStateFlow<TaskListOrderTypes>(TaskListOrderTypes.StartDate())
+    private val _bottomOrder = MutableStateFlow<TaskListOrderTypes>(TaskListOrderTypes.StartDate(true))
     val bottomOrder = _bottomOrder.asStateFlow()
 
     private var searchJob: Job? = null
@@ -93,6 +94,7 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
+    // todo set task as unreadable
     // todo implement
     private fun changeIsSending(list: List<Task>, taskId: String): List<Task> {
         logger.log(TAG, "_incomeSavedId.combine $taskId")
@@ -268,8 +270,4 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    // open newtask
-    // set task as completed
-    // set task as not_completed
-    // set task as unreadable
 }

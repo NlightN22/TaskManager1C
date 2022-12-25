@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.databinding.ItemTaskBinding
 import space.active.taskmanager1c.domain.models.Task
 
@@ -52,7 +53,7 @@ class TaskListAdapter(
             holder.itemView.tag = task             // send to onClick
             taskStatus.tag = task             // send to onClick
             taskTitle.text = task.name
-            taskDate.text = task.date
+            taskDate.text = task.date.toShortDate()
             taskNumber.text = task.number
             taskAuthor.text = abbreviationName(task.users.author.name)
             isObserved.isVisible = task.users.observers.isNotEmpty()

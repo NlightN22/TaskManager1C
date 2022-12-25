@@ -62,6 +62,7 @@ class MainViewModel @Inject constructor(
                 }
             }
             is SaveEvents.Breakable -> {
+                // todo fix not break in list when open|close detailed
                 val cancelDuration = saveEvents.cancelDuration
                 viewModelScope.launch(SupervisorJob()) {
                     _savedTaskIdEvent.emit(saveEvents.task.id)
@@ -146,31 +147,31 @@ class MainViewModel @Inject constructor(
         if (updateJob == null && !runningJob.get()) {
             updateJob = viewModelScope.launch(coroutineContext) {
                 runningJob.compareAndSet(false, true)
-                while (true) {
+
                     try {
 //                        logger.log(TAG, "updateJob launch")
-                        /**
-                        set update work here
-                         */
-                        handleJobForUpdateDb.updateJob()
-                            .catch { e->
-                                exceptionHandler(e)
-                                delay(2000)
-                            }
-                            .collectLatest {
-                            if (it is ErrorRequest) {
-                                logger.log(TAG, it.exception.message.toString())
-                            }
+                        while (true) {
+                            /**
+                            set update work here
+                             */
+                            handleJobForUpdateDb.updateJob()
+                                .catch { e ->
+                                    exceptionHandler(e)
+                                    delay(2000)
+                                }
+                                .collectLatest {
+                                    if (it is ErrorRequest) {
+                                        logger.log(TAG, it.exception.message.toString())
+                                    }
+                                }
                         }
                     } catch (e: CancellationException) {
                         logger.log(TAG, "updateJob CancellationException ${e.message}")
-                        exceptionHandler(e)
                     } catch (e: Throwable) {
                         logger.log(TAG, "updateJob Exception ${e.message}")
                         exceptionHandler(e)
                     }
                 }
-            }
         }
     }
 //

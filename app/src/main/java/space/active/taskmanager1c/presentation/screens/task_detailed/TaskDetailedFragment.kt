@@ -10,9 +10,8 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
-import space.active.taskmanager1c.coreutils.PendingRequest
-import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.models.TaskChangesEvents
@@ -20,8 +19,9 @@ import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
-import space.active.taskmanager1c.presentation.screens.tasklist.TaskListAdapter
 import space.active.taskmanager1c.presentation.utils.*
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 
@@ -65,20 +65,20 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
         // messages observer
         viewModel.messageList.collectOnStart { request ->
-        when (request) {
-            is SuccessRequest -> {
-                messagesAdapter.messages = request.data
-                shimmerShow(binding.shimmerMessagesRV, binding.messagesRV,false)
+            when (request) {
+                is SuccessRequest -> {
+                    messagesAdapter.messages = request.data
+                    shimmerShow(binding.shimmerMessagesRV, binding.messagesRV, false)
+                }
+                is PendingRequest -> {
+                    shimmerShow(binding.shimmerMessagesRV, binding.messagesRV, true)
+                }
+                else -> {}
             }
-            is PendingRequest -> {
-                shimmerShow(binding.shimmerMessagesRV, binding.messagesRV,true)
-            }
-            else -> {}
-        }
         }
 
         // SnackBar observer
-        showSnackBar(viewModel.showSnackBar, binding.root)
+        showSnackBar(viewModel.showSnackBar)
 
         // Save observer
         viewModel.saveTaskEvent.collectOnStart {
@@ -128,7 +128,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 }
             }
         }
-
 
         //Expand cards observers
         viewModel.expandState.collectOnStart { expandState ->
@@ -229,7 +228,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         )
 
         binding.backButtonTaskDetailed.setOnClickListener {
-            findNavController().popBackStack()
+            onBackClick()
         }
     }
 
@@ -240,13 +239,17 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             .build()
         datePicker.show(this.childFragmentManager, "DatePicker")
         datePicker.addOnPositiveButtonClickListener {
-            viewModel.saveChangesSmart(TaskChangesEvents.EndDate(Date(it)))
+            viewModel.saveChangesSmart(
+                TaskChangesEvents.EndDate(
+                    it.millisecToLocalDateTime()
+                )
+            )
         }
         datePicker.addOnNegativeButtonClickListener {
-            showSnackBar(getString(R.string.toast_date_not_selected), binding.root)
+            showSnackBar(getString(R.string.toast_date_not_selected))
         }
         datePicker.addOnCancelListener {
-            showSnackBar(getString(R.string.toast_date_not_selected), binding.root)
+            showSnackBar(getString(R.string.toast_date_not_selected))
         }
     }
 

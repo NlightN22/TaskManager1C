@@ -42,7 +42,7 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
         binding.taskDeadlineTIL.setState(enabled = fieldsState.deadLine)
         if (fieldsState.deadLine) {
             binding.taskDeadline.setOnClickListener {
-                viewModel.showDatePicker()
+                viewModel.showDialog(DatePicker)
             }
         }
         // Performer

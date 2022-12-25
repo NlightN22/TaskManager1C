@@ -74,7 +74,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         }
 
         // SnackBar observer
-        showSnackBar(viewModel.showSnackBar, binding.root)
+        showSnackBar(viewModel.showSnackBar)
 
         // Save observer
         viewModel.saveTaskEvent.collectOnStart {
@@ -124,7 +124,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                     shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
                 }
                 is ErrorRequest -> {
-                    showSnackBar(request.exception.message.toString(), binding.root)
+                    showSnackBar(request.exception.message.toString())
                 }
             }
         }
@@ -179,23 +179,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         }
 
     }
-
-// todo delete
-//    private fun showShimmer() {
-//        binding.listTasksRV.visibility = View.GONE
-//        binding.shimmerTasksRV.apply {
-//            visibility = View.VISIBLE
-//            startShimmer()
-//        }
-//    }
-// todo delete
-//    private fun showRecyclerView() {
-//        binding.shimmerTasksRV.apply {
-//            stopShimmer()
-//            visibility = View.GONE
-//        }
-//        binding.listTasksRV.visibility = View.VISIBLE
-//    }
 
     private fun showOrderMenu() {
         orderMenu.show()

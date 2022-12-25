@@ -44,4 +44,5 @@
     <string name="menu_order_performer">Исполнитель</string>
     <string name="menu_order_start_date">Дата начала</string>
     <string name="menu_order_end_date">Дата окончания</string>
+    <string name="exit_toast">Press back again to exit</string>
 </resources>

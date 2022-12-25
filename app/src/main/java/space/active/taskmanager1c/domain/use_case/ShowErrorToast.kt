@@ -16,6 +16,5 @@ class ShowErrorToast @Inject constructor(
             val message = "ERROR:  ${e.message} "
             toast.toast(message)
         }
-
     }
 }
