@@ -32,13 +32,14 @@ class MainViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger
 ) : ViewModel() {
-//
+    //
     private val _showSaveSnack = MutableSharedFlow<SnackBarState>()
     val showSaveSnack = _showSaveSnack.asSharedFlow()
 
     private val _savedTaskIdEvent = MutableSharedFlow<String>()
     val savedIdEvent = _savedTaskIdEvent.asSharedFlow()
-//
+
+    //
     private var cancelListener: AtomicBoolean = AtomicBoolean(false)
     private val delayedJobsList: ArrayList<SaveJob> = arrayListOf()
 
@@ -51,7 +52,8 @@ class MainViewModel @Inject constructor(
      */
     private var updateJob: Job? = null
     private val runningJob: AtomicBoolean = AtomicBoolean(false)
-//
+
+    //
 //
     fun saveTask(saveEvents: SaveEvents) {
         // new or edit
@@ -136,45 +138,48 @@ class MainViewModel @Inject constructor(
             }
         }
     }
-//
+
+    //
     data class SaveJob(
         var job: Job? = null,
         val context: CoroutineContext
     )
-//
+
+    //
     fun updateJob() {
         logger.log(TAG, "updateJob.isActive ${updateJob?.isActive}")
         if (updateJob == null && !runningJob.get()) {
             updateJob = viewModelScope.launch(coroutineContext) {
                 runningJob.compareAndSet(false, true)
 
-                    try {
+                try {
+                    while (true) {
 //                        logger.log(TAG, "updateJob launch")
-                        while (true) {
-                            /**
-                            set update work here
-                             */
-                            handleJobForUpdateDb.updateJob()
-                                .catch { e ->
-                                    exceptionHandler(e)
-                                    delay(2000)
+                        /**
+                        set update work here
+                         */
+                        handleJobForUpdateDb.updateJob()
+                            .catch { e ->
+                                exceptionHandler(e)
+                                delay(2000)
+                            }
+                            .collectLatest {
+                                if (it is ErrorRequest) {
+                                    logger.log(TAG, it.exception.message.toString())
                                 }
-                                .collectLatest {
-                                    if (it is ErrorRequest) {
-                                        logger.log(TAG, it.exception.message.toString())
-                                    }
-                                }
-                        }
-                    } catch (e: CancellationException) {
-                        logger.log(TAG, "updateJob CancellationException ${e.message}")
-                    } catch (e: Throwable) {
-                        logger.log(TAG, "updateJob Exception ${e.message}")
-                        exceptionHandler(e)
+                            }
                     }
+                } catch (e: CancellationException) {
+                    logger.log(TAG, "updateJob CancellationException ${e.message}")
+                } catch (e: Throwable) {
+                    logger.log(TAG, "updateJob Exception ${e.message}")
+                    exceptionHandler(e)
                 }
+            }
         }
     }
-//
+
+    //
 //    /** TODO update job
 //     * - update only for authenticated user
 //     * - take data only from DB
@@ -194,7 +199,8 @@ class MainViewModel @Inject constructor(
             Log.w(TAG, "Warning updateJob already cancelled")
         }
     }
-//
+
+    //
     override fun onCleared() {
         stopUpdateJob()
         super.onCleared()

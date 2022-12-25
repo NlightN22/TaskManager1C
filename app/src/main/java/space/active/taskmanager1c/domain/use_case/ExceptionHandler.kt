@@ -10,7 +10,10 @@ class ExceptionHandler @Inject constructor(
 ) {
     operator fun invoke(e: Throwable) {
         when (e) {
-            is AuthException -> {}
+            is AuthException -> {
+                showErrorToast(e)
+                logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
+            }
             is EmptyObject -> {
                 showErrorToast(e)
                 logger.error(TAG, "${e::class.java.simpleName} ${e.message}")

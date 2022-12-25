@@ -2,12 +2,9 @@ package space.active.taskmanager1c.presentation.screens
 
 import android.content.Context
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.MenuItem
 import android.view.View
-import android.widget.FrameLayout
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -31,7 +28,6 @@ import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.Toasts
-import java.util.Date
 import javax.inject.Inject
 
 private const val TAG = "BaseFragment"
@@ -143,15 +139,15 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT).show()
     }
 
-    fun shimmerShow(shimmerView: ShimmerFrameLayout, recyclerView: RecyclerView, visibility: Boolean) {
+    fun shimmerShow(shimmerView: ShimmerFrameLayout, mainView: View, visibility: Boolean) {
         if (visibility) {
             shimmerView.visibility = View.VISIBLE
             shimmerView.startShimmer()
-            recyclerView.visibility = View.GONE
+            mainView.visibility = View.INVISIBLE
         } else {
-            shimmerView.visibility = View.GONE
+            shimmerView.visibility = View.INVISIBLE
             shimmerView.stopShimmer()
-            recyclerView.visibility = View.VISIBLE
+            mainView.visibility = View.VISIBLE
         }
     }
 

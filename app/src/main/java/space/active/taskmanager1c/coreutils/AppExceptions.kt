@@ -8,7 +8,6 @@ Class with all variant of exceptions in this application
 sealed class AppExceptions(override val message: String?): Throwable()
 
 object AuthException: AppExceptions(message = "AuthException")
-
 /**
  * Send object name
  */

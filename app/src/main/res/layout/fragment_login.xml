@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -13,30 +12,91 @@
         tools:ignore="MissingConstraints" />
 
 
-
     <TextView
         android:id="@+id/title"
-        app:layout_constraintBottom_toTopOf="@+id/textInputLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/poppins_bold"
         android:text="@string/login_title"
         android:textColor="@color/title_not_editable"
         android:textSize="30sp"
-        />
+        app:layout_constraintBottom_toTopOf="@+id/userNameTIL"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/loginShimmer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/shimmerUserName"
+            style="@style/TextInputLogin"
+            android:enabled="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="textNoSuggestions"
+                android:textColor="@color/editable_text"
+                android:textSize="@dimen/login_screen_text_size" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/passShimmer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userNameTIL"
+        tools:visibility="visible">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/TextInputPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/shimmerUserName">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:enabled="false"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/editable_text"
+                android:textSize="@dimen/login_screen_text_size" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout"
+        android:id="@+id/userNameTIL"
+        style="@style/TextInputLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        style="@style/TextInputLogin"
-        >
+        tools:visibility="invisible">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editTextUsername"
@@ -44,19 +104,19 @@
             android:layout_height="wrap_content"
             android:inputType="textNoSuggestions"
             android:textColor="@color/editable_text"
-            android:textSize="@dimen/login_screen_text_size"
- />
+            android:textSize="@dimen/login_screen_text_size" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/passTIL"
+        style="@style/TextInputPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
-        style="@style/TextInputPassword"
-        >
+        app:layout_constraintTop_toBottomOf="@+id/userNameTIL"
+        tools:visibility="invisible">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editTextPassword"
@@ -64,16 +124,35 @@
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:textColor="@color/editable_text"
-            android:textSize="@dimen/login_screen_text_size"
-            />
+            android:textSize="@dimen/login_screen_text_size" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/bottomShimmer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:visibility="visible">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            style="@style/BottomMenu"
+            android:enabled="false"
+            android:clickable="false"
+            app:menu="@menu/menu_login"
+            tools:ignore="MissingConstraints" />
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomMenu"
-        app:menu="@menu/menu_login"
         style="@style/BottomMenu"
-        tools:ignore="MissingConstraints" />
+        app:menu="@menu/menu_login"
+        tools:ignore="MissingConstraints"
+        tools:visibility="gone" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

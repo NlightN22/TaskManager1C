@@ -2,9 +2,13 @@ package space.active.taskmanager1c.presentation.screens.login
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.Loading
+import space.active.taskmanager1c.coreutils.OnWait
+import space.active.taskmanager1c.coreutils.Success
 import space.active.taskmanager1c.databinding.FragmentLoginBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 
@@ -14,37 +18,50 @@ private const val TAG = "LoginFragment"
 class LoginFragment : BaseFragment(R.layout.fragment_login) {
 
     lateinit var binding: FragmentLoginBinding
+    private val viewModel: LoginViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentLoginBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
-//        incoming()
-//        observers()
-        logger.log(TAG, "${childFragmentManager.backStackEntryCount}")
-        logger.log(TAG, "${parentFragmentManager.backStackEntryCount}")
-        logger.log(TAG, "${findNavController().currentBackStackEntry?.destination}")
-
+        observers()
         listeners()
     }
 
-    private fun incoming() {
-        TODO("Not yet implemented")
-    }
 
     private fun observers() {
-        TODO("Not yet implemented")
+        viewModel.authState.collectOnStart { state ->
+            when (state) {
+                is OnWait -> {
+                    renderLoading(false)
+                }
+                is Loading -> {
+                    renderLoading(true)
+                }
+                is Success -> {
+                    launchMainScreen(true)
+                }
+            }
+        }
+    }
+
+    private fun renderLoading(state: Boolean) {
+        shimmerShow(binding.loginShimmer, binding.userNameTIL, state)
+        shimmerShow(binding.passShimmer, binding.passTIL, state)
+        shimmerShow(binding.bottomShimmer, binding.bottomMenu, state)
     }
 
     private fun listeners() {
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.login_ok -> {
-                    launchMainScreen(true)
+                    val name = binding.editTextUsername.text?.toString() ?: ""
+                    val pass = binding.editTextPassword.text?.toString() ?: ""
+                    viewModel.auth(name, pass)
                 }
                 R.id.login_camera -> {
-                    launchSettings(R.id.action_loginFragment2_to_settingsFragment2)//                    TODO("Not yet implemented")
+                    // todo add scan credentials
                 }
             }
             return@setOnItemSelectedListener true

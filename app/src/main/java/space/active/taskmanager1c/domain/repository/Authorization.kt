@@ -6,5 +6,5 @@ import space.active.taskmanager1c.domain.models.AuthUser
 
 
 interface Authorization {
-    fun onServer(username: String, password: String): Flow<Request<AuthUser>>
+    fun auth(username: String, password: String): Flow<Request<AuthUser>>
 }
