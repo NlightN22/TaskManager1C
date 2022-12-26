@@ -10,6 +10,8 @@ import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetaile
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Formatter
 
 data class Task(
     val date: LocalDateTime,
@@ -39,9 +41,9 @@ data class Task(
     }
 
     fun toTaskInput(new: Boolean = false) = TaskInput(
-        date = this.date.toString(),
+        date = this.date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         description = this.description,
-        endDate = this.endDate?.toString() ?: "",
+        endDate = this.endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
         id = if (new) {
             this.hashCode().toString()
         } else {

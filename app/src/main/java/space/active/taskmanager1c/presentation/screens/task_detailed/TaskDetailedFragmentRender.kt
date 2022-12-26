@@ -3,11 +3,12 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.presentation.utils.setColorState
 import space.active.taskmanager1c.presentation.utils.setState
+import space.active.taskmanager1c.presentation.utils.updateText
 
 fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
     viewModel.taskState.collectOnCreate { taskState ->
         with(taskState.state) {
-            binding.taskTitleDetailed.setText(title)
+            binding.taskTitleDetailed.updateText(title)
             binding.taskNumberDetailed.text = number
             binding.taskStatus.text = status.name
             binding.taskDateDetailed.text = startDate
@@ -17,7 +18,7 @@ fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
             binding.taskPerformer.setText(performer)
             binding.taskCoPerformers.setText(coPerfomers)
             binding.taskObservers.setText(observers)
-            binding.taskDescription.setText(description)
+            binding.taskDescription.updateText(description)
             binding.taskBaseObject.setText(taskObject)
             binding.taskMain.setText(mainTask)
             binding.taskInner.setText(innerTasks)

@@ -7,6 +7,7 @@ import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.domain.repository.MessagesRepository
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class MessagesRepositoryImpl @Inject constructor(
@@ -24,11 +25,11 @@ class MessagesRepositoryImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override fun sendReadingStatus(taskId: String): Flow<Request<Any?>> {
+    override fun sendReadingStatus(taskId: String, dataTime: LocalDateTime): Flow<Request<Any?>> {
         TODO("Not yet implemented")
     }
 
-    override fun sendNotReadingFlag(taskId: String): Flow<Request<Any?>> {
+    override fun sendNotReadingFlag(taskId: String, state: Boolean): Flow<Request<Any?>> {
         TODO("Not yet implemented")
     }
 }

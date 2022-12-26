@@ -19,7 +19,7 @@ class GetDetailedTask @Inject constructor(
     private val repository: TasksRepository,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-        operator fun invoke(taskId: String): Flow<Task?> = repository.getTask(taskId)
+        operator fun invoke(taskId: String): Flow<Task?> = repository.getTask(taskId).flowOn(ioDispatcher)
 //    operator fun invoke(taskId: String) = flow<Request<TaskInput>> {
 //        val res = inputTaskRepository.getTask(taskId)
 //        emit(SuccessRequest(res))

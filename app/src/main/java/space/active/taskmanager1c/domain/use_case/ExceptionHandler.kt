@@ -4,6 +4,7 @@ import space.active.taskmanager1c.coreutils.*
 import javax.inject.Inject
 
 private const val TAG = "ExceptionHandler"
+
 class ExceptionHandler @Inject constructor(
     private val showErrorToast: ShowErrorToast,
     private val logger: space.active.taskmanager1c.coreutils.logger.Logger
@@ -36,13 +37,20 @@ class ExceptionHandler @Inject constructor(
             }
             is BackendException -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} \nCODE: ${e.errorCode} \nBODY: ${e.errorBody}")
+                logger.error(
+                    TAG,
+                    "${e::class.java.simpleName} \nCODE: ${e.errorCode} \nBODY: ${e.errorBody}"
+                )
             }
             is ConnectionException -> {
                 showErrorToast(e)
                 logger.error(TAG, "${e::class.java.simpleName} ${e.inEx.message}")
             }
-            else -> {showErrorToast(e)}
+            else -> {
+                showErrorToast(e)
+                logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
+                logger.error(TAG,e.stackTrace.joinToString("\n"))
+            }
         }
     }
 }

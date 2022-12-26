@@ -5,22 +5,20 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
+import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.CantShowSnackBar
 import space.active.taskmanager1c.coreutils.logger.Logger
@@ -54,6 +52,17 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
                 showSaveCancelSnackBar(it.text, it.duration, lifecycleScope) {
                     baseMainVM.saveTask(SaveEvents.BreakSave)
                 }
+            }
+        }
+    }
+
+    var textChangeJob: Job? = null
+    fun TextInputEditText.changeListener(block: (String) -> Unit) {
+        addTextChangedListener {
+            textChangeJob?.cancel()
+            textChangeJob = lifecycleScope.launchWhenStarted {
+                delay(200)
+                block(it?.toString() ?: "")
             }
         }
     }
@@ -145,7 +154,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             shimmerView.startShimmer()
             mainView.visibility = View.INVISIBLE
         } else {
-            shimmerView.visibility = View.INVISIBLE
+            shimmerView.visibility = View.GONE
             shimmerView.stopShimmer()
             mainView.visibility = View.VISIBLE
         }

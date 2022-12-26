@@ -30,7 +30,7 @@ fun <T,R> Map<T,R>.diff(incomingMapToCompare: Map<T,R>): Map<T,R> {
     this.forEach { (key, value) ->
         if (incomingMapToCompare[key] != value) {
             // todo delete debug
-            if (key == "observers") { Log.d("Map.diff", "observers: $value -- ${incomingMapToCompare[key]}" )}
+            if (key == "endDate") { Log.d("Map.diff", "endDate: $value -- ${incomingMapToCompare[key]}" )}
             diff += Pair(key,value)
         }
     }

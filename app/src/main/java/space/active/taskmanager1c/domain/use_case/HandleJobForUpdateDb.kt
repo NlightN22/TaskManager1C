@@ -75,10 +75,10 @@ class HandleJobForUpdateDb
                         val inputDTO = TaskDto.fromInputTask(existingInputTask)
                         val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
                         // send in Map
-//                        val res = taskApi.sendEditedTaskMappedChanges(inputDTO.id, mappedDiffs)
-//                        result = SuccessRequest(res)
+                        val res = taskApi.sendEditedTaskMappedChanges(inputDTO.id, mappedDiffs)
+                        result = SuccessRequest(res)
                         //mock
-                        result = SuccessRequest(inputDTO)
+//                        result = SuccessRequest(inputDTO)
                     }
                 } else {
                     // if task is not new
@@ -93,6 +93,7 @@ class HandleJobForUpdateDb
                 when (result) {
                     is SuccessRequest -> {
                         // TODO if task send with delete label
+//                        logger.log(TAG, result.data.toString())
                         inputTaskRepository.insertTask(result.data.toTaskInput())
                         outputTaskRepository.deleteTasks(listOf(outputTask))
                         emit(SuccessRequest(Any()))

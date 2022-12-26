@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.*
@@ -57,41 +59,52 @@ class TaskDetailedViewModel @Inject constructor(
         name = "Михайлов Олег Федорович"
     ) // TODO replace to shared preferences
 
-    private val _inputTaskId = MutableStateFlow<String?>(null)
+    private val _inputTaskId = MutableStateFlow<String>("")
 
-    private val currentTask: Flow<Task?> = _inputTaskId.transformLatest { inputId ->
-//        logger.log(TAG, "currentTask transform $inputId")
-        if (inputId.isNullOrEmpty()) {
-            emit(Task.newTask(whoAmI))
+    private val currentTask: Flow<Task?> = _inputTaskId.flatMapLatest {
+        if (it.isNotBlank()) {
+//            logger.log(TAG, "id $it")
+            getDetailedTask(it)
         } else {
-            emit(getDetailedTask(inputId).first())
+//            logger.log(TAG, "id $it")
+            flow { emit(Task.newTask(whoAmI)) }
         }
-    }.flowOn(ioDispatcher)
+    }
 
-    init {
+    private fun collectCurrentTask() {
         viewModelScope.launch {
-            currentTask.collect { task ->
-                if (task != null) {
-                    //If task is not new
-                    if (task.id.isNotBlank()) {
-                        _taskState.value = TaskDetailedViewState.Edit(task.toTaskState())
-                        setDependentTasks(task)
-                        // get base and inner tasks from db
-                        _enabledFields.value = TaskUserIs.userIs(task, whoAmI).fields
-                        showMessages(task.id)
-                    } else
-                    // If new task
-                    {
-                        _taskState.value = TaskDetailedViewState.New(task.toTaskState())
+            logger.log(TAG, "collectCurrentTask launch")
+            currentTask.collectLatest { curTask ->
+//                logger.log(TAG, "collectCurrentTask collect $curTask")
+                if (curTask != null) {
+                    if (curTask.id.isNotBlank()) {
+                        // Edit
+                        updateUIState(oldState = _taskState.value, newTask = curTask)
+                    } else {
+                        // New
+                        _taskState.value = TaskDetailedViewState.New(curTask.toTaskState())
                         _enabledFields.value = TaskUserIs.Author().fields
                         _messagesList.value = SuccessRequest(emptyList<Messages>())
                     }
-                }
-                // If cant get task from DB
-                else {
+                } else {
                     exceptionHandler(EmptyObject("currentTask"))
                 }
             }
+        }
+    }
+
+    private fun updateUIState(oldState: TaskDetailedViewState, newTask: Task) {
+        val newState = TaskDetailedViewState.Edit(newTask.toTaskState())
+        if (oldState != newState) {
+            logger.log(TAG, "state changed")
+            _taskState.value = newState
+            // get base and inner tasks from db
+            setDependentTasks(newTask)
+            if (oldState.state.performer != newState.state.performer || oldState.state.author != newState.state.author) {
+                _enabledFields.value = TaskUserIs.userIs(newTask, whoAmI).fields
+            }
+            logger.log(TAG, "showMessages(${newTask.id})")
+            showMessages(newTask.id)
         }
     }
 
@@ -99,9 +112,7 @@ class TaskDetailedViewModel @Inject constructor(
         viewModelScope.launch {
             getTaskMessages(taskId).collect { request ->
                 when (request) {
-                    is PendingRequest -> {
-                        _messagesList.value = PendingRequest()
-                    }
+                    is PendingRequest -> {}
                     is ErrorRequest -> {
                         exceptionHandler(request.exception)
                     }
@@ -125,8 +136,11 @@ class TaskDetailedViewModel @Inject constructor(
     }
 
     fun setTaskFlow(taskId: String) {
-//            logger.log(TAG, "setTaskFlow $taskId")
-        _inputTaskId.value = taskId
+        logger.log(TAG, "_inputTaskId $taskId")
+        viewModelScope.launch {
+            _inputTaskId.emit(taskId)
+        }
+        collectCurrentTask()
     }
 
     fun saveChangesSmart(event: TaskChangesEvents) {
@@ -135,10 +149,6 @@ class TaskDetailedViewModel @Inject constructor(
             val textChangeDelay = 2
             if (task != null) {
                 // validation
-                // save in cancellable job
-                // start job with duration
-                // show snackbar with duration
-                //
                 when (event) {
                     is TaskChangesEvents.Title -> {
                         val changes = event.title

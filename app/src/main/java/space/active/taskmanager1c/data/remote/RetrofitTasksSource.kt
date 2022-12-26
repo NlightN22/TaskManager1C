@@ -43,13 +43,14 @@ class RetrofitTasksSource @Inject constructor
         TODO("Not yet implemented")
     }
 
-    override suspend fun sendEditedTaskMappedChanges(taskId: String, changeMap: Map<String, Any?>) = wrapRetrofitExceptions<TaskDto> {
-        val mapWId = mutableMapOf<String, Any?>()
+    override suspend fun sendEditedTaskMappedChanges(taskId: String, changeMap: Map<String, Any>) = wrapRetrofitExceptions<TaskDto> {
+        val mapWId = mutableMapOf<String, Any>()
         mapWId["id"] = taskId
         mapWId.putAll(changeMap)
         val changes = converters.mapToJson(mapWId)
         logger.log(TAG, "Send to server: $changes")
-        retrofitApi.saveChanges(changes)
+        val res = retrofitApi.saveChanges(changes)
+        return@wrapRetrofitExceptions res.tasks.first()
     }
 
     override suspend fun getMessages(taskId: String): TaskMessagesDTO = wrapRetrofitExceptions {

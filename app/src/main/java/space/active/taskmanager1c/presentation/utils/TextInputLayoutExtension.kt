@@ -1,12 +1,39 @@
 package space.active.taskmanager1c.presentation.utils
 
 import android.content.res.ColorStateList
-import android.util.Log
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.MultiAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
 
+
+fun TextInputEditText.getChanges(block: (String) -> Unit) {
+        addTextChangedListener(object : TextWatcher {
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                //
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                block(p0?.toString() ?: "")
+            }
+        })
+}
+
+fun TextInputEditText.updateText(newText: String) {
+    val curText = this.text?.toString() ?: ""
+    if (curText != newText) {
+        this.setText(newText)
+    }
+}
 
 fun TextInputLayout.setState(enabled: Boolean, editable: Boolean = false) {
     val hintColorDisabled: ColorStateList =

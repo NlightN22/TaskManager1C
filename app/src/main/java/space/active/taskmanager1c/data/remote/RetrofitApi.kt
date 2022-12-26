@@ -1,10 +1,8 @@
 package space.active.taskmanager1c.data.remote
 
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Query
+import android.text.TextPaint
+import com.google.gson.JsonElement
+import retrofit2.http.*
 import space.active.taskmanager1c.data.remote.dto.MessageDto
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.TaskListDto
@@ -36,7 +34,8 @@ interface RetrofitApi {
     }
      */
     @PUT("tasks")
-    suspend fun saveChanges(@Body changes: String): TaskDto
+    @Headers("Content-Type: application/json")
+    suspend fun saveChanges(@Body changes: String): TaskListDto
 
     /**
      * POST

@@ -11,7 +11,7 @@ interface TaskApi {
     fun getTaskListFlow(): Flow<Request<TaskListDto>>
     suspend fun getTaskList(): Request<TaskListDto>
     suspend fun sendNewTask(task: TaskDto): Request<TaskDto>
-    suspend fun sendEditedTaskMappedChanges(taskId: String, changeMap: Map<String, Any?>): TaskDto
+    suspend fun sendEditedTaskMappedChanges(taskId: String, changeMap: Map<String, Any>): TaskDto
     suspend fun authUser(username: String, password: String): Request<AuthDto>
     suspend fun getMessages(taskId: String): TaskMessagesDTO
     suspend fun getMessagesTimes(taskIds: List<String>): List<TaskMessagesDTO>

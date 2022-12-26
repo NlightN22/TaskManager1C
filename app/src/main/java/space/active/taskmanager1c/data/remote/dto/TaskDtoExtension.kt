@@ -4,7 +4,7 @@ import space.active.taskmanager1c.coreutils.diff
 import space.active.taskmanager1c.data.local.db.Converters
 import kotlin.reflect.full.memberProperties
 
-fun TaskDto.compareWithAndGetDiffs(compareWith: TaskDto): Map<String, Any?> {
+fun TaskDto.compareWithAndGetDiffs(compareWith: TaskDto): Map<String, Any> {
     // prepare data class for compare clear values witch is always different
     val incomeWithoutId = compareWith.copy(id = "")
     val thisWithoutId = this.copy(id = "")
@@ -32,18 +32,17 @@ fun TaskDto.parameterDiffs(toCompare: TaskDto): List<Any> {
     return differenceList
 }
 
-fun TaskDto.getParameterMap(): Map<String,Any?> {
+fun TaskDto.getParameterMap(): Map<String,Any> {
 
-    val mapProperties: MutableMap<String, Any?> = mutableMapOf()
+    val mapProperties: MutableMap<String, Any> = mutableMapOf()
 
     TaskDto::class.memberProperties.forEach { member ->
         val name = member.name
         // broke at List<String>
         val value = member.get(this)
 
-        mapProperties += Pair(name,value)
+        mapProperties += Pair(name,value?:"")
     }
-
     return mapProperties
 }
 

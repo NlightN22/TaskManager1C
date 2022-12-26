@@ -4,14 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
-import space.active.taskmanager1c.coreutils.OnSwipeTouchListener
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.models.TaskChangesEvents
@@ -20,8 +17,6 @@ import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.*
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.*
 
 
@@ -50,10 +45,10 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun income() {
+        logger.log(TAG, "create")
         val taskId = TaskDetailedFragmentArgs.fromBundle(requireArguments()).taskId
-        if (taskId != null) {
-            viewModel.setTaskFlow(taskId)
-        }
+        logger.log(TAG, "send $taskId")
+        viewModel.setTaskFlow(taskId ?: "")
     }
 
     private fun observers() {
@@ -154,13 +149,29 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             return@setOnItemSelectedListener true
         }
 
-        binding.taskTitleDetailed.addTextChangedListener {
-            viewModel.saveChangesSmart(TaskChangesEvents.Title(it.toString()))
+        binding.taskTitleDetailed.changeListener {
+            viewModel.saveChangesSmart(TaskChangesEvents.Title(it))
         }
 
-        binding.taskDescription.addTextChangedListener {
-            viewModel.saveChangesSmart(TaskChangesEvents.Description(it.toString()))
+        binding.taskDescription.changeListener {
+            viewModel.saveChangesSmart(TaskChangesEvents.Description(it))
         }
+
+//        binding.taskTitleDetailed.addTextChangedListener {
+////            viewModel.saveChangesSmart(TaskChangesEvents.Title(it.toString()))
+//            viewModel.saveTextChange(it.toString())
+//        }
+
+//        binding.taskDescription.addTextChangedListener {
+//
+//            viewModel.saveChangesSmart(TaskChangesEvents.Description(it.toString()))
+//        }
+
+//        binding.taskDescription.getChanges {
+////            viewModel.saveChangesSmart(TaskChangesEvents.Description(it))
+////            logger.log(TAG, "input text: $it")
+//            viewModel.saveTextChange(it)
+//        }
 
         binding.mainDetailCard.setOnTouchListener(object :
             OnSwipeTouchListener(binding.mainDetailCard.context) {
