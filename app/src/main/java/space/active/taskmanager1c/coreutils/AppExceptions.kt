@@ -27,8 +27,8 @@ object TaskIsNewAndInSendingState :
 object TaskHasNotCorrectState :
     AppExceptions(text = UiText.Resource(R.string.exception_not_correct_status))
 
-class CantShowSnackBar(text: String) :
-    AppExceptions(text = UiText.Resource(R.string.exception_show_snackbar, text))
+class CantShowSnackBar:
+    AppExceptions(text = UiText.Resource(R.string.exception_show_snackbar, ))
 
 class ParseBackendException(val inEx: Throwable) :
     AppExceptions(text = UiText.Resource(R.string.exception_parse_server_answer))

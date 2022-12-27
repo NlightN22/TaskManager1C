@@ -139,13 +139,14 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         }
     }
 
-    fun showSnackBar(collectableShared: SharedFlow<UiText>) {
+    fun showSnackBar(collectableShared: SharedFlow<UiText>) = wrapSnackExceptions {
         collectableShared.collectOnStart {
-            Snackbar.make(requireView(), it.getString(requireContext()), Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), it.getString(requireContext()), Snackbar.LENGTH_SHORT)
+                .show()
         }
     }
 
-    fun showSnackBar(text: UiText) {
+    fun showSnackBar(text: UiText) = wrapSnackExceptions {
         Snackbar.make(requireView(), text.getString(requireContext()), Snackbar.LENGTH_SHORT).show()
     }
 
@@ -166,24 +167,28 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         timer: Int,
         coroutineScope: CoroutineScope,
         listener: View.OnClickListener,
-    ) {
+    ) = wrapSnackExceptions {
         var duration = timer
-        try {
-            val snack = Snackbar.make(requireView(), text, Snackbar.LENGTH_INDEFINITE)
-            coroutineScope.launch(SupervisorJob()) {
-                snack.setActionTextColor(resources.getColor(R.color.button_not_pressed))
+        val snack = Snackbar.make(requireView(), text, Snackbar.LENGTH_INDEFINITE)
+        coroutineScope.launch(SupervisorJob()) {
+            snack.setActionTextColor(resources.getColor(R.color.button_not_pressed))
+            snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
+            snack.show()
+            while (duration > 0) {
                 snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
-                snack.show()
-                while (duration > 0) {
-                    snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
-                    delay(1000)
-                    duration -= 1
-                }
-                snack.dismiss()
-
+                delay(1000)
+                duration -= 1
             }
-        } catch (e: IllegalArgumentException) {
-            exceptionHandler(CantShowSnackBar(e.message ?: ""))
+            snack.dismiss()
+
+        }
+    }
+
+    private fun wrapSnackExceptions(block: () -> Unit) {
+        try {
+            block()
+        } catch (e: Throwable) {
+            exceptionHandler(CantShowSnackBar())
         }
     }
 }

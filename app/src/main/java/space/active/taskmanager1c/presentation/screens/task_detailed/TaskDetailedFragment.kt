@@ -54,6 +54,17 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
     private fun observers() {
 
+        viewModel.sendMessageEvent.collectOnStart { progress ->
+            when (progress) {
+                is Loading -> {
+                    binding.messageTIL.isEndIconVisible = false
+                }
+                else -> {
+                    binding.messageTIL.isEndIconVisible = true
+                }
+            }
+        }
+
         renderState(viewModel)
 
         // Render enabled fields
@@ -137,6 +148,11 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun listeners() {
+
+        binding.messageTIL.setEndIconOnClickListener {
+            val text: String = binding.messageInput.text?.toString() ?: ""
+            viewModel.sendMessage(text)
+        }
 
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {

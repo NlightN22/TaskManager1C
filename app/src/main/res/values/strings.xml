@@ -55,8 +55,8 @@
     <string name="Cancelled">Отменена</string>
 
     <string name="title_valid_error">Заголовок не может быть пустым или больше %d символов</string>
-    <string name="author_valid_error">Автор может установить только статусы: s%, s%</string>
-    <string name="performer_valid_error">Испольнитель может установить только статус: s%</string>
+    <string name="author_valid_error">Автор может установить только статусы: %s, %s</string>
+    <string name="performer_valid_error">Испольнитель может установить только статус: %s</string>
     <string name="status_valid_error">Статус может менять только Автор или Исполнитель</string>
     <string name="common_valid_error">Не указан тип изменения для проверки</string>
     <string name="exception_auth">Ошибка авторизации. Проверьте имя пользователя или пароль</string>
@@ -70,4 +70,5 @@
     <string name="exception_parse_server_answer">Неожиданный ответ от сервера. Подробнее в логе</string>
     <string name="exception_connection">Ошибка подключения. Проверьте ваше соединение с сервером</string>
     <string name="exception_server_answer">Ошибка ответа от сервера %s. Подробнее в логе</string>
+    <string name="error_new_task_send_message">Ошибка отправки сообщения. Сохраните новую задачу</string>
 </resources>

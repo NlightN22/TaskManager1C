@@ -18,7 +18,7 @@ import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.fi
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.domain.use_case.GetTaskStatus
-import space.active.taskmanager1c.domain.use_case.ValidationTaskChanges
+import space.active.taskmanager1c.domain.use_case.ValidateTaskChanges
 import javax.inject.Inject
 
 private const val TAG = "TaskListViewModel"
@@ -122,7 +122,7 @@ class TaskListViewModel @Inject constructor(
                 val userIs = TaskUserIs.userIs(task, whoAmI)
                 // smart set status
                 val getStatus = GetTaskStatus()(userIs, event.status)
-                val validation = ValidationTaskChanges()(
+                val validation = ValidateTaskChanges()(
                     changeType = event,
                     userIs = userIs,
                     getStatus

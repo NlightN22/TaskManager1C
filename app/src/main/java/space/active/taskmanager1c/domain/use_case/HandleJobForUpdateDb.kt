@@ -77,7 +77,7 @@ class HandleJobForUpdateDb
                         // send in Map
                         val res = taskApi.sendEditedTaskMappedChanges(inputDTO.id, mappedDiffs)
                         result = SuccessRequest(res)
-                        //mock
+//                        mock todo delete
 //                        result = SuccessRequest(inputDTO)
                     }
                 } else {
@@ -108,25 +108,6 @@ class HandleJobForUpdateDb
             }
         }
         emit(SuccessRequest(Any()))
-    }
-
-    private suspend fun inputFetchJob(): Request<Any> {
-        val result = taskApi.getTaskList()
-        when (result) {
-            is SuccessRequest -> {
-                // add Task to DB
-                inputTaskRepository.insertTasks(result.data.toTaskInputList())
-                // add Users to DB
-                inputTaskRepository.insertUsers(result.data.toUserInputList())
-                return SuccessRequest(Any())
-            }
-            is ErrorRequest -> {
-                return ErrorRequest(result.exception)
-            }
-            is PendingRequest -> {
-                return PendingRequest()
-            }
-        }
     }
 
     fun inputFetchJobFlow() = flow<Request<Any>> {

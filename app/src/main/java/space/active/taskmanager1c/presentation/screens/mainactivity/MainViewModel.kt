@@ -13,10 +13,7 @@ import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.SaveEvents
-import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.domain.use_case.HandleJobForUpdateDb
-import space.active.taskmanager1c.domain.use_case.SaveNewTaskToDb
-import space.active.taskmanager1c.domain.use_case.SaveTaskChangesToDb
+import space.active.taskmanager1c.domain.use_case.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -28,6 +25,8 @@ class MainViewModel @Inject constructor(
     private val handleJobForUpdateDb: HandleJobForUpdateDb,
     private val saveNewTaskToDb: SaveNewTaskToDb,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
+    private val saveBreakable: SaveBreakable,
+    private val saveDelayed: SaveDelayed,
     private val exceptionHandler: ExceptionHandler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger
@@ -39,11 +38,6 @@ class MainViewModel @Inject constructor(
     private val _savedTaskIdEvent = MutableSharedFlow<String>()
     val savedIdEvent = _savedTaskIdEvent.asSharedFlow()
 
-    //
-    private var cancelListener: AtomicBoolean = AtomicBoolean(false)
-    private val delayedJobsList: ArrayList<SaveJob> = arrayListOf()
-
-
     val coroutineContext: CoroutineContext = SupervisorJob() + ioDispatcher
 
     /**
@@ -53,8 +47,6 @@ class MainViewModel @Inject constructor(
     private var updateJob: Job? = null
     private val runningJob: AtomicBoolean = AtomicBoolean(false)
 
-    //
-//
     fun saveTask(saveEvents: SaveEvents) {
         // new or edit
         when (saveEvents) {
@@ -64,88 +56,29 @@ class MainViewModel @Inject constructor(
                 }
             }
             is SaveEvents.Breakable -> {
-                // todo fix not break in list when open|close detailed
-                val cancelDuration = saveEvents.cancelDuration
                 viewModelScope.launch(SupervisorJob()) {
                     _savedTaskIdEvent.emit(saveEvents.task.id)
                     _showSaveSnack.emit(
                         SnackBarState(
                             saveEvents.task.name,
-                            cancelDuration
+                            saveEvents.cancelDuration
                         )
                     )
-                    //set when new start
-                    cancelListener.set(false)
-                    // delay for user decision
-                    var timer = cancelDuration
-                    while (timer > 0 && !cancelListener.get()) {
-                        delay(1000)
-                        timer -= 1
-                    }
-
-                    // check only after timer user decision
-                    if (cancelListener.get()) {
-                        logger.log(TAG, "save task break")
-                        currentCoroutineContext().cancel(null)
-                        cancelListener.compareAndSet(true, false)
-                    } else {
-                        // save changes to DB
-                        saveTaskChangesToDb(saveEvents.task)
-                    }
+                    saveBreakable(this, saveEvents.cancelDuration, saveEvents.task)
                 }
             }
-            is SaveEvents.Delayed -> {
-                val newJob: SaveJob = SaveJob(context = CoroutineName(saveEvents.jobKey))
-                val delay: Long = saveEvents.delay.toLong() * 1000
-                val task = saveEvents.task
-//                logger.log(TAG, "Input list: $delayedJobsList")
-                if (delayedJobsList.map { it.context }.contains(newJob.context)) {
-                    val filteredContext = delayedJobsList.filter { it.context == newJob.context }
-                    filteredContext.forEach {
-//                        logger.log(TAG, "ToCancel list: $delayedJobsList")
-//                        logger.log(TAG, "Job key ${it.context} Active: ${it.job?.isActive}")
-                        it.job?.cancel()
-//                        logger.log(TAG, "Job key ${it.context} Active: ${it.job?.isActive}")
-                    }
-                }
-//                logger.log(TAG, "Started list: $delayedJobsList")
-                // all cancellable jobs must have supervisor for work
-                newJob.job = viewModelScope.launch(newJob.context + SupervisorJob()) {
-
-                    // Add new job if list not contains same key
-                    if (!delayedJobsList.map { it.context }.contains(newJob.context)) {
-                        delayedJobsList.add(newJob)
-                    } else {
-                        // or update job if we have it
-                        delayedJobsList.map {
-                            if (it.context == newJob.context) {
-                                it.job = newJob.job
-                            } else {
-                                it
-                            }
-                        }
-                    }
-//                    logger.log(TAG, "Final list: $delayedJobsList")
-                    delay(delay)
-                    delayedJobsList.remove(newJob)
-//                    logger.log(TAG, "Removed list: $delayedJobsList")
-//                    logger.log(TAG, "Task to save: $task")
-                    saveTaskChangesToDb(task)
-                }
-            }
+            is SaveEvents.Delayed -> saveDelayed(
+                viewModelScope,
+                saveEvents.jobKey,
+                saveEvents.task,
+                saveEvents.delay
+            )
             is SaveEvents.BreakSave -> {
-                cancelListener.set(true)
+                saveBreakable.cancelListener.set(true)
             }
         }
     }
 
-    //
-    data class SaveJob(
-        var job: Job? = null,
-        val context: CoroutineContext
-    )
-
-    //
     fun updateJob() {
         logger.log(TAG, "updateJob.isActive ${updateJob?.isActive}")
         if (updateJob == null && !runningJob.get()) {

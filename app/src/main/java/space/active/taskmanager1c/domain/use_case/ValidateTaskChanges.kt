@@ -7,7 +7,7 @@ import space.active.taskmanager1c.domain.models.TaskChangesEvents
 import space.active.taskmanager1c.domain.models.TaskUserIs
 import space.active.taskmanager1c.domain.models.ValidationResult
 
-class ValidationTaskChanges {
+class ValidateTaskChanges {
 
     private object Rules {
         const val TITLE_MAX_LENGTH = 120
@@ -56,13 +56,23 @@ class ValidationTaskChanges {
                         if (status == Task.Status.Reviewed) {
                             return ValidationResult.Success
                         }
-                        return ValidationResult.Error(UiText.Resource(R.string.performer_valid_error, status.getResId(Task.Status.Reviewed)))
+                        return ValidationResult.Error(
+                            UiText.ResInRes(
+                                R.string.performer_valid_error,
+                                listOf(status.getResId(Task.Status.Reviewed))
+                            )
+                        )
                     }
                     is TaskUserIs.PerformerInReviewed -> {
                         if (status == Task.Status.Accepted) {
                             return ValidationResult.Success
                         }
-                        return ValidationResult.Error(UiText.Resource(R.string.performer_valid_error, status.getResId(Task.Status.Accepted)))
+                        return ValidationResult.Error(
+                            UiText.ResInRes(
+                                R.string.performer_valid_error,
+                                listOf(status.getResId(Task.Status.Accepted))
+                            )
+                        )
                     }
                     else -> {
                         // nothing to change

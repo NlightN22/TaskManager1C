@@ -4,10 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
@@ -27,6 +26,7 @@ class TaskDetailedViewModel @Inject constructor(
     private val exceptionHandler: ExceptionHandler,
     private val getDetailedTask: GetDetailedTask,
     private val getTaskMessages: GetTaskMessages,
+    private val sendTaskMessages: SendTaskMessages,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -51,6 +51,9 @@ class TaskDetailedViewModel @Inject constructor(
 
     private val _messagesList = MutableStateFlow<Request<List<Messages>>>(PendingRequest())
     val messageList = _messagesList.asStateFlow()
+
+    private val _sendMessageEvent = MutableSharedFlow<StateProgress<Any>>()
+    val sendMessageEvent = _sendMessageEvent.asSharedFlow()
 
 
     // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
@@ -132,6 +135,32 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
+    fun sendMessage(text: String) {
+        viewModelScope.launch {
+            val task = currentTask.first()
+            if (task != null) {
+                if (task.id.isNotBlank()) {
+                    sendTaskMessages(task.id, text).collect { res ->
+                        when (res) {
+                            is PendingRequest -> {
+                                _sendMessageEvent.emit(Loading())
+                            }
+                            is SuccessRequest -> {
+                                showMessages(task.id)
+                                _sendMessageEvent.emit(Success(Any())) //todo replace to update from fetch
+                            }
+                            else -> {}
+                        }
+                    }
+                } else {
+                    _showSnackBar.emit(UiText.Resource(R.string.error_new_task_send_message))
+                }
+            } else {
+                exceptionHandler(EmptyObject("currentTask"))
+            }
+        }
+    }
+
     fun setTaskFlow(taskId: String) {
         logger.log(TAG, "_inputTaskId $taskId")
         viewModelScope.launch {
@@ -152,7 +181,7 @@ class TaskDetailedViewModel @Inject constructor(
                         if (changes != _taskState.first().state.title) {
                             task = task.copy(name = changes)
 
-                            val validationRes = ValidationTaskChanges()
+                            val validationRes = ValidateTaskChanges()
                             _saveTaskEvent.emit(
                                 SaveEvents.Delayed(
                                     task,
@@ -203,7 +232,7 @@ class TaskDetailedViewModel @Inject constructor(
                         // smart set status
                         val getStatus = GetTaskStatus()(userIs, event.status)
 
-                        val validation = ValidationTaskChanges()(
+                        val validation = ValidateTaskChanges()(
                             changeType = event,
                             userIs = userIs,
                             getStatus

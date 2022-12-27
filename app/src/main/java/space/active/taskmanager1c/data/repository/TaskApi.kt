@@ -6,6 +6,7 @@ import space.active.taskmanager1c.data.remote.dto.AuthDto
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.TaskListDto
 import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
+import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTOTemp
 
 interface TaskApi {
     fun getTaskListFlow(): Flow<Request<TaskListDto>>
@@ -14,5 +15,6 @@ interface TaskApi {
     suspend fun sendEditedTaskMappedChanges(taskId: String, changeMap: Map<String, Any>): TaskDto
     suspend fun authUser(username: String, password: String): Request<AuthDto>
     suspend fun getMessages(taskId: String): TaskMessagesDTO
+    suspend fun sendMessage(taskId: String, text: String): TaskMessagesDTOTemp
     suspend fun getMessagesTimes(taskIds: List<String>): List<TaskMessagesDTO>
 }

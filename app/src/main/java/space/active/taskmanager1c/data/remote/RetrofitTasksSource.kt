@@ -9,6 +9,7 @@ import space.active.taskmanager1c.data.remote.dto.AuthDto
 import space.active.taskmanager1c.data.remote.dto.TaskDto
 import space.active.taskmanager1c.data.remote.dto.TaskListDto
 import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
+import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTOTemp
 import space.active.taskmanager1c.data.repository.TaskApi
 import javax.inject.Inject
 
@@ -55,6 +56,10 @@ class RetrofitTasksSource @Inject constructor
 
     override suspend fun getMessages(taskId: String): TaskMessagesDTO = wrapRetrofitExceptions {
         retrofitApi.getMessages(taskId)
+    }
+
+    override suspend fun sendMessage(taskId: String, text: String): TaskMessagesDTOTemp = wrapRetrofitExceptions{
+        retrofitApi.sendMessages(mapOf("id" to taskId,"text" to text))
     }
 
     override suspend fun getMessagesTimes(taskIds: List<String>): List<TaskMessagesDTO> = wrapRetrofitExceptions{

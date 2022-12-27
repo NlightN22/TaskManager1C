@@ -6,6 +6,7 @@ import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
+import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTOTemp
 import space.active.taskmanager1c.domain.repository.MessagesRepository
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -21,8 +22,9 @@ class MessagesRepositoryImpl @Inject constructor(
         emit(SuccessRequest(taskApi.getMessages(taskId)))
     }
 
-    override fun sendNewMessage(taskId: String): Flow<Request<Any?>> {
-        TODO("Not yet implemented")
+    override fun sendNewMessage(taskId: String, text: String): Flow<Request<TaskMessagesDTOTemp>> = flow {
+        emit(PendingRequest())
+        emit(SuccessRequest(taskApi.sendMessage(taskId, text)))
     }
 
     override fun sendReadingStatus(taskId: String, dataTime: LocalDateTime): Flow<Request<Any?>> {
