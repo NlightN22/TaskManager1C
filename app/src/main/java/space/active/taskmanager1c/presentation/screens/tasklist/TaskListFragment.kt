@@ -12,6 +12,7 @@ import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
+import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.models.Task
@@ -124,7 +125,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                     shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
                 }
                 is ErrorRequest -> {
-                    showSnackBar(request.exception.message.toString())
+                    showSnackBar(UiText.Dynamic(request.exception.message.toString()))
                 }
             }
         }

@@ -19,8 +19,6 @@ class ExceptionHandler @Inject constructor(
                 showErrorToast(e)
                 logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
             }
-            is ServerNoAnswer -> {}
-            is NullAnswerFromServer -> {}
             is DbUnexpectedResult -> {
                 showErrorToast(e)
                 logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
@@ -29,7 +27,6 @@ class ExceptionHandler @Inject constructor(
             is ThisTaskIsNotNew -> {}
             is TaskIsNewAndInSendingState -> {}
             is TaskHasNotCorrectState -> {}
-            is JobIsNotStarted -> {}
             is ParseBackendException -> {
                 showErrorToast(e)
                 logger.error(TAG, "${e::class.java.simpleName} ${e.inEx.message}")

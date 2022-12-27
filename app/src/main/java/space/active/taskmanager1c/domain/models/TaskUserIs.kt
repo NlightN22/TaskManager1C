@@ -13,7 +13,8 @@ sealed class TaskUserIs (
             coPerfomers = true,
             observers = true,
             description = true,
-            bottomPerformer = true
+            bottomOk = true,
+            bottomCancel = true
         )
     ) : TaskUserIs(fields)
 
@@ -23,7 +24,14 @@ sealed class TaskUserIs (
 
     data class Performer(
         override val fields: EditableFields = EditableFields(
-            bottomPerformer = false
+            bottomOk = true,
+            bottomCancel = true
+        )
+    ) : TaskUserIs(fields)
+
+    data class PerformerInReviewed(
+        override val fields: EditableFields = EditableFields(
+            bottomCancel = true
         )
     ) : TaskUserIs(fields)
 
@@ -33,8 +41,13 @@ sealed class TaskUserIs (
         fun userIs(task: Task, whoAmI: User): TaskUserIs {
             if (task.users.author == whoAmI) {
                 return Author()
-            } else if (task.users.performer == whoAmI && task.users.coPerformers.contains(whoAmI) ) {
-                return Performer()
+            } else if (task.users.performer == whoAmI || task.users.coPerformers.contains(whoAmI) ) {
+                //if performer in reviewed can only resume task
+                if (task.status == Task.Status.Reviewed) {
+                    return PerformerInReviewed()
+                } else {
+                    return Performer()
+                }
             } else if (task.users.observers.contains(whoAmI)){
                 return Observer
             } else {

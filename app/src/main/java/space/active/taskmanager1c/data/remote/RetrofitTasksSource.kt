@@ -31,7 +31,7 @@ class RetrofitTasksSource @Inject constructor
     override suspend fun getTaskList(): Request<TaskListDto> =
         wrapRetrofitExceptions {
             val taskDto = retrofitApi.getTasks()
-            logger.log(TAG, "getTaskList ${taskDto.tasks.joinToString("\n") { it.name }}")
+//            logger.log(TAG, "getTaskList ${taskDto.tasks.joinToString("\n") { it.name }}")
             if (taskDto.tasks.isEmpty() or taskDto.users.isEmpty()) {
                 return@wrapRetrofitExceptions ErrorRequest(EmptyObject("TaskListDto"))
             } else {

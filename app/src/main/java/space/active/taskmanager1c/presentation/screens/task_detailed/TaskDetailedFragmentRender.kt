@@ -10,7 +10,7 @@ fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
         with(taskState.state) {
             binding.taskTitleDetailed.updateText(title)
             binding.taskNumberDetailed.text = number
-            binding.taskStatus.text = status.name
+            binding.taskStatus.text = resources.getString(status.getResId())
             binding.taskDateDetailed.text = startDate
             binding.taskDeadline.setText(deadLine)
             binding.taskAuthor.setText(author)
@@ -77,7 +77,8 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
             editable = fieldsState.description
         )
         // bottom menu state
+        binding.bottomMenu.menu.findItem(R.id.detailed_ok).isVisible = fieldsState.bottomOk
         binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible =
-            fieldsState.bottomPerformer
+            fieldsState.bottomCancel
     }
 }

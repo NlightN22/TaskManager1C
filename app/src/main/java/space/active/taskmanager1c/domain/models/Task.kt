@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.domain.models
 
+import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
 import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.coreutils.toShortDateTime
@@ -11,7 +12,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.Formatter
 
 data class Task(
     val date: LocalDateTime,
@@ -37,8 +37,32 @@ data class Task(
         Reviewed, // условно завершена - ставит исполнитель todo отображение snackbar с отменой
         Finished, // принята - ставит автор
         Deferred, // отложена используется редко - испольнитель todo иконка для испольнителя bottom menu
-        Cancelled // отклоненная - не используется
+        Cancelled; // отклоненная - не используется
+
+        fun getResId(status: Status): Int {
+            return when (status) {
+                New -> R.string.New
+                Accepted -> R.string.Accepted
+                Performed -> R.string.Performed
+                Reviewed -> R.string.Reviewed
+                Finished -> R.string.Finished
+                Deferred -> R.string.Deferred
+                Cancelled -> R.string.Cancelled
+            }
+        }
+        fun getResId(): Int {
+            return when (this) {
+                New -> R.string.New
+                Accepted -> R.string.Accepted
+                Performed -> R.string.Performed
+                Reviewed -> R.string.Reviewed
+                Finished -> R.string.Finished
+                Deferred -> R.string.Deferred
+                Cancelled -> R.string.Cancelled
+            }
+        }
     }
+
 
     fun toTaskInput(new: Boolean = false) = TaskInput(
         date = this.date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
@@ -168,9 +192,7 @@ data class Task(
 
         fun toTaskStatus(status: String): Status {
             return when (status) {
-                "new" -> {
-                    Status.New
-                }
+                "new" -> Status.New
                 "accepted" -> Status.Accepted
                 "performed" -> Status.Performed
                 "reviewed" -> Status.Reviewed

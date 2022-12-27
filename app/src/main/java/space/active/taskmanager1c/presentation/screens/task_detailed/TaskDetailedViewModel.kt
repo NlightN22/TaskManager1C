@@ -46,7 +46,7 @@ class TaskDetailedViewModel @Inject constructor(
     private val _saveTaskEvent = MutableSharedFlow<SaveEvents>()
     val saveTaskEvent = _saveTaskEvent.asSharedFlow()
 
-    private val _showSnackBar = MutableSharedFlow<String>()
+    private val _showSnackBar = MutableSharedFlow<UiText>()
     val showSnackBar = _showSnackBar.asSharedFlow()
 
     private val _messagesList = MutableStateFlow<Request<List<Messages>>>(PendingRequest())
@@ -63,10 +63,8 @@ class TaskDetailedViewModel @Inject constructor(
 
     private val currentTask: Flow<Task?> = _inputTaskId.flatMapLatest {
         if (it.isNotBlank()) {
-//            logger.log(TAG, "id $it")
             getDetailedTask(it)
         } else {
-//            logger.log(TAG, "id $it")
             flow { emit(Task.newTask(whoAmI)) }
         }
     }
@@ -75,6 +73,7 @@ class TaskDetailedViewModel @Inject constructor(
         viewModelScope.launch {
             logger.log(TAG, "collectCurrentTask launch")
             currentTask.collectLatest { curTask ->
+                // todo delete
 //                logger.log(TAG, "collectCurrentTask collect $curTask")
                 if (curTask != null) {
                     if (curTask.id.isNotBlank()) {
@@ -96,14 +95,12 @@ class TaskDetailedViewModel @Inject constructor(
     private fun updateUIState(oldState: TaskDetailedViewState, newTask: Task) {
         val newState = TaskDetailedViewState.Edit(newTask.toTaskState())
         if (oldState != newState) {
-            logger.log(TAG, "state changed")
             _taskState.value = newState
             // get base and inner tasks from db
             setDependentTasks(newTask)
             if (oldState.state.performer != newState.state.performer || oldState.state.author != newState.state.author) {
                 _enabledFields.value = TaskUserIs.userIs(newTask, whoAmI).fields
             }
-            logger.log(TAG, "showMessages(${newTask.id})")
             showMessages(newTask.id)
         }
     }
@@ -154,6 +151,8 @@ class TaskDetailedViewModel @Inject constructor(
                         val changes = event.title
                         if (changes != _taskState.first().state.title) {
                             task = task.copy(name = changes)
+
+                            val validationRes = ValidationTaskChanges()
                             _saveTaskEvent.emit(
                                 SaveEvents.Delayed(
                                     task,

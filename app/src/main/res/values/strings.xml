@@ -44,5 +44,30 @@
     <string name="menu_order_performer">Исполнитель</string>
     <string name="menu_order_start_date">Дата начала</string>
     <string name="menu_order_end_date">Дата окончания</string>
-    <string name="exit_toast">Press back again to exit</string>
+    <string name="exit_toast">Нажмите назад для выхода</string>
+<!--    Task statuses-->
+    <string name="New">Новая</string>
+    <string name="Accepted">В работе</string>
+    <string name="Performed">На доработке</string>
+    <string name="Reviewed">На проверке</string>
+    <string name="Finished">Принята</string>
+    <string name="Deferred">Отложена</string>
+    <string name="Cancelled">Отменена</string>
+
+    <string name="title_valid_error">Заголовок не может быть пустым или больше %d символов</string>
+    <string name="author_valid_error">Автор может установить только статусы: s%, s%</string>
+    <string name="performer_valid_error">Испольнитель может установить только статус: s%</string>
+    <string name="status_valid_error">Статус может менять только Автор или Исполнитель</string>
+    <string name="common_valid_error">Не указан тип изменения для проверки</string>
+    <string name="exception_auth">Ошибка авторизации. Проверьте имя пользователя или пароль</string>
+    <string name="exception_empty_object">Неожиданное пустое значение или объект: %s</string>
+    <string name="exception_db">Неожиданное исключение в базе данных</string>
+    <string name="exception_not_editable">Эта задача не редактируемая %s</string>
+    <string name="exception_not_new">Это не новая задача</string>
+    <string name="exception_is_sending">Это новая задача и находится в статусе отправки</string>
+    <string name="exception_not_correct_status">У задачи не корректный статус</string>
+    <string name="exception_show_snackbar">Ошибка при отображении сообщения в snackbar: %s</string>
+    <string name="exception_parse_server_answer">Неожиданный ответ от сервера. Подробнее в логе</string>
+    <string name="exception_connection">Ошибка подключения. Проверьте ваше соединение с сервером</string>
+    <string name="exception_server_answer">Ошибка ответа от сервера %s. Подробнее в логе</string>
 </resources>

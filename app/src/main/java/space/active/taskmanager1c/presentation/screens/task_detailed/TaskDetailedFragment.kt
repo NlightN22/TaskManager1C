@@ -45,9 +45,10 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun income() {
-        logger.log(TAG, "create")
+        //todo delete
+//        logger.log(TAG, "create")
         val taskId = TaskDetailedFragmentArgs.fromBundle(requireArguments()).taskId
-        logger.log(TAG, "send $taskId")
+//        logger.log(TAG, "send $taskId")
         viewModel.setTaskFlow(taskId ?: "")
     }
 
@@ -157,22 +158,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             viewModel.saveChangesSmart(TaskChangesEvents.Description(it))
         }
 
-//        binding.taskTitleDetailed.addTextChangedListener {
-////            viewModel.saveChangesSmart(TaskChangesEvents.Title(it.toString()))
-//            viewModel.saveTextChange(it.toString())
-//        }
-
-//        binding.taskDescription.addTextChangedListener {
-//
-//            viewModel.saveChangesSmart(TaskChangesEvents.Description(it.toString()))
-//        }
-
-//        binding.taskDescription.getChanges {
-////            viewModel.saveChangesSmart(TaskChangesEvents.Description(it))
-////            logger.log(TAG, "input text: $it")
-//            viewModel.saveTextChange(it)
-//        }
-
         binding.mainDetailCard.setOnTouchListener(object :
             OnSwipeTouchListener(binding.mainDetailCard.context) {
             override fun onSwipeDown() {
@@ -257,10 +242,10 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             )
         }
         datePicker.addOnNegativeButtonClickListener {
-            showSnackBar(getString(R.string.toast_date_not_selected))
+            showSnackBar(UiText.Resource(R.string.toast_date_not_selected))
         }
         datePicker.addOnCancelListener {
-            showSnackBar(getString(R.string.toast_date_not_selected))
+            showSnackBar(UiText.Resource(R.string.toast_date_not_selected))
         }
     }
 

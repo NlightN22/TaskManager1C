@@ -38,7 +38,7 @@ class TaskListViewModel @Inject constructor(
 
     private val _incomeSavedId = MutableSharedFlow<String>() // for block tasks in list
 
-    private val _showSnackBar = MutableSharedFlow<String>()
+    private val _showSnackBar = MutableSharedFlow<UiText>()
     val showSnackBar = _showSnackBar.asSharedFlow()
 
     private val _listTask = MutableStateFlow<Request<List<Task>>>(PendingRequest())
@@ -67,7 +67,6 @@ class TaskListViewModel @Inject constructor(
         _searchFilter,
         _bottomOrder
     ) { input, bottomFilter, searchFilter, bottomOrder ->
-        _listTask.value = PendingRequest()
 
 //        logger.log(TAG, "_bottomFilter.combine $bottomFilter")
         val bottomList = filterByBottom(input, bottomFilter)

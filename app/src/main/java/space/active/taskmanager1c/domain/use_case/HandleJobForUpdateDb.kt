@@ -41,9 +41,9 @@ class HandleJobForUpdateDb
         outputSendJob().collect {
             send(it)
         }
-//        inputFetchJobFlow().collect {
-//            send(it)
-//        }
+        inputFetchJobFlow().collect {
+            send(it)
+        }
             delay(updateDelay)
 //            logger.log(TAG, "Job end")
     }.flowOn(ioDispatcher)

@@ -39,5 +39,5 @@ object RetrofitModule {
 
     @Provides
     fun provideLogginInterceptor(): HttpLoggingInterceptor = HttpLoggingInterceptor()
-    .setLevel(HttpLoggingInterceptor.Level.BODY)
+    .setLevel(HttpLoggingInterceptor.Level.NONE)
 }

@@ -1,26 +1,43 @@
 package space.active.taskmanager1c.coreutils
 
-import retrofit2.http.Body
+import space.active.taskmanager1c.R
 
 /*
 Class with all variant of exceptions in this application
  */
-sealed class AppExceptions(override val message: String?): Throwable()
+sealed class AppExceptions(val text: UiText) : Throwable()
 
-object AuthException: AppExceptions(message = "AuthException")
+object AuthException : AppExceptions(text = UiText.Resource(R.string.exception_auth))
+
 /**
  * Send object name
  */
-class EmptyObject(objectName: String): AppExceptions(message = "Unexpected null or empty object: $objectName")
-object ServerNoAnswer: AppExceptions(message = "ServerNoAnswer")
-class NullAnswerFromServer: AppExceptions(message = "NullAnswerFromServer")
-object DbUnexpectedResult: AppExceptions(message = "DbUnexpectedResult")
-class ThisTaskIsNotEdited(message: String): AppExceptions(message = "ThisTaskIsNotEdited $message")
-object ThisTaskIsNotNew: AppExceptions(message = "ThisTaskIsNotNew")
-object TaskIsNewAndInSendingState: AppExceptions(message = "TaskIsNewAndInSendingState")
-object TaskHasNotCorrectState: AppExceptions(message = "TaskHasNotCorrectState")
-object JobIsNotStarted: AppExceptions(message = "JobIsNotStarted")
-class CantShowSnackBar(message: String): AppExceptions(message = "Cant show snackbar $message")
-class ParseBackendException(val inEx: Throwable): AppExceptions(message = "Unexpected answer from server. See log for details")
-class BackendException(val errorBody: String, val errorCode: String): AppExceptions("Error answer from server $errorCode. See log for details")
-class ConnectionException(val inEx: Throwable): AppExceptions("Can't connect to server. Please check your internet connection")
+
+class EmptyObject(objectName: String) :
+    AppExceptions(text = UiText.Resource(R.string.exception_empty_object, objectName))
+
+object DbUnexpectedResult : AppExceptions(text = UiText.Resource(R.string.exception_db))
+class ThisTaskIsNotEdited(text: String) :
+    AppExceptions(text = UiText.Resource(R.string.exception_not_editable, text))
+
+object ThisTaskIsNotNew : AppExceptions(text = UiText.Resource(R.string.exception_not_new))
+object TaskIsNewAndInSendingState :
+    AppExceptions(text = UiText.Resource(R.string.exception_is_sending))
+
+object TaskHasNotCorrectState :
+    AppExceptions(text = UiText.Resource(R.string.exception_not_correct_status))
+
+class CantShowSnackBar(text: String) :
+    AppExceptions(text = UiText.Resource(R.string.exception_show_snackbar, text))
+
+class ParseBackendException(val inEx: Throwable) :
+    AppExceptions(text = UiText.Resource(R.string.exception_parse_server_answer))
+
+class BackendException(val errorBody: String, val errorCode: String) : AppExceptions(
+    UiText.Resource(
+        R.string.exception_server_answer, errorCode
+    )
+)
+
+class ConnectionException(val inEx: Throwable) :
+    AppExceptions(UiText.Resource(R.string.exception_connection))

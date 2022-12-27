@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.CantShowSnackBar
+import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
@@ -138,14 +139,14 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         }
     }
 
-    fun showSnackBar(collectableShared: SharedFlow<String>) {
+    fun showSnackBar(collectableShared: SharedFlow<UiText>) {
         collectableShared.collectOnStart {
-            Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), it.getString(requireContext()), Snackbar.LENGTH_SHORT).show()
         }
     }
 
-    fun showSnackBar(text: String) {
-        Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT).show()
+    fun showSnackBar(text: UiText) {
+        Snackbar.make(requireView(), text.getString(requireContext()), Snackbar.LENGTH_SHORT).show()
     }
 
     fun shimmerShow(shimmerView: ShimmerFrameLayout, mainView: View, visibility: Boolean) {
