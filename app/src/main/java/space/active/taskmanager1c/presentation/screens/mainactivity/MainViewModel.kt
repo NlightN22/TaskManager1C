@@ -5,14 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.SaveEvents
+import space.active.taskmanager1c.domain.models.UserSettings
+import space.active.taskmanager1c.domain.repository.UpdateJobInterface
 import space.active.taskmanager1c.domain.use_case.*
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -22,7 +21,8 @@ private const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val handleJobForUpdateDb: HandleJobForUpdateDb,
+    private val updateJobInterface: UpdateJobInterface,
+    private val userSettings: GetUserSettingsFromDataStore,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
     private val saveBreakable: SaveBreakable,
     private val saveDelayed: SaveDelayed,
@@ -90,7 +90,7 @@ class MainViewModel @Inject constructor(
                         /**
                         set update work here
                          */
-                        handleJobForUpdateDb.updateJob()
+                        updateJobInterface.updateJob(userSettings().first(), 1000L)
                             .catch { e ->
                                 exceptionHandler(e)
                                 delay(2000)

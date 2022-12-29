@@ -140,7 +140,7 @@ class TaskDetailedViewModel @Inject constructor(
 
     private fun showMessages(taskId: String) {
         viewModelScope.launch {
-            getTaskMessages(taskId).collect { request ->
+            getTaskMessages(userSettings().first(), taskId).collect { request ->
                 when (request) {
                     is PendingRequest -> {}
                     is ErrorRequest -> {
@@ -169,7 +169,7 @@ class TaskDetailedViewModel @Inject constructor(
             val task = currentTask.first()
             if (task != null) {
                 if (task.id.isNotBlank()) {
-                    sendTaskMessages(task.id, text).collect { res ->
+                    sendTaskMessages(userSettings().first(), task.id, text).collect { res ->
                         when (res) {
                             is PendingRequest -> {
                                 _sendMessageEvent.emit(Loading())

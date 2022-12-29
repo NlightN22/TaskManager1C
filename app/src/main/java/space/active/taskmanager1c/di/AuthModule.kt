@@ -4,10 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import space.active.taskmanager1c.data.remote.RetrofitConfig
-import space.active.taskmanager1c.data.remote.test.AuthMockImpl
+import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.repository.AuthorizationImpl
-import space.active.taskmanager1c.data.repository.TaskApi
 import space.active.taskmanager1c.domain.repository.Authorization
 
 @Module

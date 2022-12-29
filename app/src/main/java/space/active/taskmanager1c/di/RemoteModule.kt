@@ -6,9 +6,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.Converters
-import space.active.taskmanager1c.data.remote.RetrofitConfig
-import space.active.taskmanager1c.data.remote.RetrofitTasksSource
-import space.active.taskmanager1c.data.repository.TaskApi
+import space.active.taskmanager1c.data.local.db.retrofit.RetrofitConfig
+import space.active.taskmanager1c.data.local.db.retrofit.RetrofitTasksSource
+import space.active.taskmanager1c.data.remote.TaskApi
 import javax.inject.Singleton
 
 

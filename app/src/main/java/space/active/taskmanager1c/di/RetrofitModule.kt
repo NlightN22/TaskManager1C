@@ -10,11 +10,9 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import space.active.taskmanager1c.data.remote.BasicAuthInterceptor
+import space.active.taskmanager1c.data.local.db.retrofit.BasicAuthInterceptor
 
 private const val BASE_URL = "http://172.16.17.242/torg_develop/hs/taskmgr/"
-private const val API_USERNAME = "Михайлов Олег Федорович"
-private const val API_PASSWORD = "test"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,7 +32,6 @@ object RetrofitModule {
     @Provides
     fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient  = OkHttpClient().newBuilder()
         .addInterceptor(loggingInterceptor)
-        .addInterceptor(BasicAuthInterceptor(API_USERNAME, API_PASSWORD))
         .build()
 
     @Provides

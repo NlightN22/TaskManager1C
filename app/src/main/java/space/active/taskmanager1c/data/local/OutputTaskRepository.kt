@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.data.repository
+package space.active.taskmanager1c.data.local
 
 import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.Request

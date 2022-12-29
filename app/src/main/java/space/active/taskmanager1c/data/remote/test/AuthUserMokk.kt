@@ -1,6 +1,6 @@
 package space.active.taskmanager1c.data.remote.test
 
-import space.active.taskmanager1c.data.remote.model.AuthUser
+import space.active.taskmanager1c.data.remote.model.AuthUserDto
 
 data class AuthUserMock(
     val tokenId: String,
@@ -8,7 +8,7 @@ data class AuthUserMock(
     val userName: String,
     val pass: String
 ) {
-    fun toAuthUser() = AuthUser (
+    fun toAuthUser() = AuthUserDto (
         tokenId = tokenId,
         userId = userId,
         userName = userName

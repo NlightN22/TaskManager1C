@@ -4,7 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import space.active.taskmanager1c.coreutils.*
-import space.active.taskmanager1c.data.remote.model.AuthUser
+import space.active.taskmanager1c.data.remote.model.AuthUserDto
 import space.active.taskmanager1c.domain.repository.Authorization
 
 class AuthMockImpl : Authorization {
@@ -18,7 +18,7 @@ class AuthMockImpl : Authorization {
         pass = "test"
     )
 
-    override fun auth(username: String, password: String): Flow<Request<AuthUser>> = flow {
+    override fun auth(username: String, password: String): Flow<Request<AuthUserDto>> = flow {
         emit(PendingRequest())
         delay(1000)
         emit(

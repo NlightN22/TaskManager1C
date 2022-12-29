@@ -1,10 +1,11 @@
-package space.active.taskmanager1c.data.remote
+package space.active.taskmanager1c.data.local.db.retrofit
 
 import okhttp3.Credentials
 import okhttp3.Interceptor
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
+// TODO Delete
 class BasicAuthInterceptor(user: String, password: String) : Interceptor {
 
     private val credentials: String = Credentials.basic(user, password, StandardCharsets.UTF_8)

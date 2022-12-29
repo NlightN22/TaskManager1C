@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.data.remote
+package space.active.taskmanager1c.data.local.db.retrofit
 
 import com.squareup.moshi.Moshi
 import retrofit2.Retrofit

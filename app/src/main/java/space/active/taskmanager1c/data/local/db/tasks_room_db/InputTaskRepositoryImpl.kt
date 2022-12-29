@@ -8,7 +8,7 @@ import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
-import space.active.taskmanager1c.data.repository.InputTaskRepository
+import space.active.taskmanager1c.data.local.InputTaskRepository
 
 class InputTaskRepositoryImpl(
     private val inputDao: TaskInputDao

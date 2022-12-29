@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.data.remote
+package space.active.taskmanager1c.data.local.db.retrofit
 
 import retrofit2.http.*
 import space.active.taskmanager1c.data.remote.model.TaskDto
@@ -22,14 +22,19 @@ interface RetrofitApi {
      * http://172.16.17.242/torg_develop/hs/taskmgr/tasks
      */
     @GET("tasks")
-    suspend fun getTasks(): TaskListDto
+    suspend fun getTasks(
+        @Header("Authorization") auth: String,
+    ): TaskListDto
 
     /**
      * POST
      * http://172.16.17.242/torg_develop/hs/taskmgr/tasks
      */
     @POST("tasks")
-    suspend fun sendNew(@Body taskDto: TaskDto): TaskListDto
+    suspend fun sendNew(
+        @Header("Authorization") auth: String,
+        @Body taskDto: TaskDto
+    ): TaskListDto
 
     /**
      * POST
@@ -41,7 +46,10 @@ interface RetrofitApi {
      */
     @POST("tasks")
     @Headers("Content-Type: application/json")
-    suspend fun saveChanges(@Body changes: String): TaskListDto
+    suspend fun saveChanges(
+        @Header("Authorization") auth: String,
+        @Body changes: String
+    ): TaskListDto
 
     /**
      * GET
@@ -49,7 +57,10 @@ interface RetrofitApi {
      * http://172.16.17.242/torg_develop/hs/tasks/messages?id=4ce6cb44-a3c4-11ea-8d5a-00155d28010b
      */
     @GET("tasks/messages")
-    suspend fun getMessages(@Query("id") taskId: String): TaskMessagesDTO
+    suspend fun getMessages(
+        @Header("Authorization") auth: String,
+        @Query("id") taskId: String
+    ): TaskMessagesDTO
 
     /**
      * POST
@@ -61,7 +72,10 @@ interface RetrofitApi {
     }
      */
     @POST("tasks/messages")
-    suspend fun sendMessages(@Body map: Map<String, String>): TaskMessagesDTO
+    suspend fun sendMessages(
+        @Header("Authorization") auth: String,
+        @Body map: Map<String, String>
+    ): TaskMessagesDTO
 
     /**
      * POST
@@ -69,7 +83,10 @@ interface RetrofitApi {
      * http://172.16.17.242/torg_develop/hs/taskmgr/tasks/status
      */
     @POST("tasks/status")
-    suspend fun getReadingTimes(@Body taskListIds: List<String>): List<TasksReadingTimeDTO>
+    suspend fun getReadingTimes(
+        @Header("Authorization") auth: String,
+        @Body taskListIds: List<String>
+    ): List<TasksReadingTimeDTO>
 
     /**
      * POST
@@ -79,7 +96,10 @@ interface RetrofitApi {
     "readTime": "2099-12-31T23:59:59"
      */
     @POST("tasks/status/time")
-    suspend fun setReadingTime(@Body map: Map<String, String>): TasksReadingTimeDTO
+    suspend fun setReadingTime(
+        @Header("Authorization") auth: String,
+        @Body map: Map<String, String>
+    ): TasksReadingTimeDTO
 
     /**
      * POST
@@ -89,11 +109,11 @@ interface RetrofitApi {
      */
     @POST("tasks/status/unread")
     suspend fun setReadingFlag(
-        @Body taskId: String,
-        @Body readingFlag: Boolean
+        @Header("Authorization") auth: String,
+        @Body map: Map<String, Boolean>
     ): TaskUserReadingFlagDTO // TODO change to Map
 
     @GET("auth")
-    suspend fun authUser(): UserDto
+    suspend fun authUser(@Header("Authorization") auth: String): UserDto
 
 }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.flowOn
 import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.di.IoDispatcher
+import space.active.taskmanager1c.domain.models.UserSettings
 import space.active.taskmanager1c.domain.repository.MessagesRepository
 import javax.inject.Inject
 
@@ -15,8 +16,8 @@ class SendTaskMessages @Inject constructor(
     private val exceptionHandler: ExceptionHandler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    operator fun invoke(taskId: String, text: String): Flow<Request<TaskMessagesDTO>> =
-        messagesRepository.sendNewMessage(taskId, text).catch { e ->
+    operator fun invoke(userSettings: UserSettings, taskId: String, text: String): Flow<Request<TaskMessagesDTO>> =
+        messagesRepository.sendNewMessage(userSettings, taskId, text).catch { e ->
             exceptionHandler(e)
         }.flowOn(ioDispatcher)
 }

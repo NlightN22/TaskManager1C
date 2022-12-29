@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.flowOn
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.UserSettings
 import space.active.taskmanager1c.domain.repository.TasksRepository
+import space.active.taskmanager1c.domain.repository.UpdateJobInterface
 import javax.inject.Inject
 
 private const val TRIES_TO_FETCH = 10
@@ -17,10 +19,10 @@ private const val FETCH_TIMEOUT = 5000L
 // todo delete
 class HandleEmptyTaskList @Inject constructor(
     private val repository: TasksRepository,
-    private val updateJob: HandleJobForUpdateDb,
+    private val updateJob: UpdateJobInterface,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    operator fun invoke() = flow<Request<List<Task>>> {
+    operator fun invoke(userSettings: UserSettings) = flow<Request<List<Task>>> {
         // Если список пустой, то мы пытаемся получить его с сервера
         //Если ответ с сервера успешный, то выводим информацию об отсутствии задач
         //Если нет, то обрабатываем исключения
@@ -29,7 +31,7 @@ class HandleEmptyTaskList @Inject constructor(
         if (listTasks.isEmpty()) {
             var iterator = 0
             while (iterator < TRIES_TO_FETCH) {
-                updateJob.inputFetchJobFlow().collect { fetchResult ->
+                updateJob.inputFetchJobFlow(userSettings).collect { fetchResult ->
                     when (fetchResult) {
                         is SuccessRequest -> {
                             listTasks = repository.listTasksFlow.first()

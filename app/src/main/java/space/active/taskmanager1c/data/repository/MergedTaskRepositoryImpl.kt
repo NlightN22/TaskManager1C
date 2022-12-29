@@ -4,6 +4,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.data.local.InputTaskRepository
+import space.active.taskmanager1c.data.local.OutputTaskRepository
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput.Companion.toListUserDomain
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
@@ -208,6 +210,4 @@ class MergedTaskRepositoryImpl(
         inputTaskRepository.getUser(userId)?.toUserDomain()
             ?: User(id = userId, name = userId)
 
-    override fun getUserByName(userName: String): Flow<User?> =
-        flow { emit(inputTaskRepository.getUserByName(userName)?.fromUserInput()) }.flowOn(ioDispatcher)
 }

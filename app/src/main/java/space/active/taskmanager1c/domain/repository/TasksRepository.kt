@@ -13,5 +13,4 @@ interface TasksRepository {
     fun editTask(task: Task): Flow<Request<Any>>
     fun createNewTask(task: Task): Flow<Request<Any>>
     fun attachFileToTask(file: ByteArray, taskId: String): Flow<Request<Any>>
-    fun getUserByName(userName: String): Flow<User?>
 }

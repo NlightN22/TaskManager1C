@@ -3,9 +3,7 @@ package space.active.taskmanager1c.data.local.db.tasks_room_db
 import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
-import space.active.taskmanager1c.data.repository.OutputTaskRepository
-import javax.inject.Inject
-import javax.inject.Singleton
+import space.active.taskmanager1c.data.local.OutputTaskRepository
 
 private const val TAG = "OutputTaskRepositoryImpl"
 
