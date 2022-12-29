@@ -26,11 +26,6 @@ class RetrofitTasksSource @Inject constructor
 
     private val retrofitApi = retrofit.create(RetrofitApi::class.java)
 
-    override fun getTaskListFlow(auth: AuthBasicDto): Flow<Request<TaskListDto>> = flow {
-        emit(PendingRequest())
-        emit(getTaskList(auth))
-    }
-
     override suspend fun authUser(auth: AuthBasicDto): UserDto = wrapRetrofitExceptions {
         retrofitApi.authUser(auth.toBasic())
     }

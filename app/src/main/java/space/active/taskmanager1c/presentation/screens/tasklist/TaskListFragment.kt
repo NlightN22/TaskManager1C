@@ -41,8 +41,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         binding = FragmentTaskListBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
-        // Start autoupdate job
-        mainVM.updateJob()
+
 
         recyclerTasks = TaskListAdapter(object : TaskActionListener {
             override fun onTaskStatusClick(task: Task) {
@@ -68,6 +67,11 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun observers() {
+
+        // start updateJob in MainVM
+        viewModel.startUpdateJob.collectOnStart {
+            if (it) {mainVM.updateJob()}
+        }
 
         // collect saveId events to change isSaved status
         mainVM.savedIdEvent.collectOnStart {

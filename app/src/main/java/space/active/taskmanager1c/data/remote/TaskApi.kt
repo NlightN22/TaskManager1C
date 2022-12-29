@@ -9,7 +9,6 @@ import space.active.taskmanager1c.data.remote.model.UserDto
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 
 interface TaskApi {
-    fun getTaskListFlow(auth: AuthBasicDto): Flow<Request<TaskListDto>>
     suspend fun authUser(auth: AuthBasicDto): UserDto
     suspend fun getTaskList(auth: AuthBasicDto): Request<TaskListDto>
     suspend fun sendNewTask(auth: AuthBasicDto, task: TaskDto): Request<TaskDto>

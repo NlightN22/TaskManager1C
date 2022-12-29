@@ -86,7 +86,7 @@ class MainViewModel @Inject constructor(
 
                 try {
                     while (true) {
-//                        logger.log(TAG, "updateJob launch")
+                        logger.log(TAG, "updateJob start")
                         /**
                         set update work here
                          */

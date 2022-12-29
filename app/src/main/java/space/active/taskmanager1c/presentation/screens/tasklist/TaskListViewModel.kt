@@ -25,6 +25,7 @@ private const val TAG = "TaskListViewModel"
 class TaskListViewModel @Inject constructor(
     private val repository: TasksRepository,
     private val userSettings: GetUserSettingsFromDataStore,
+    private val handleEmptyTaskList: HandleEmptyTaskList,
     private val exceptionHandler: ExceptionHandler,
     private val whoUserInTask: DefineUserInTask,
     private val validate: Validate,
@@ -33,6 +34,8 @@ class TaskListViewModel @Inject constructor(
     @DefaultDispatcher private val defDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
+    private val _startUpdateJob = MutableStateFlow<Boolean>(false)
+    val startUpdateJob = _startUpdateJob.asStateFlow()
 
     private val _saveTaskEvent = MutableSharedFlow<SaveEvents>()
     val saveTaskEvent = _saveTaskEvent.asSharedFlow()
@@ -47,7 +50,8 @@ class TaskListViewModel @Inject constructor(
 
     private val _searchFilter = MutableStateFlow<String>("")
     private val _bottomFilter = MutableStateFlow<TaskListFilterTypes>(TaskListFilterTypes.All)
-    private val _bottomOrder = MutableStateFlow<TaskListOrderTypes>(TaskListOrderTypes.StartDate(true))
+    private val _bottomOrder =
+        MutableStateFlow<TaskListOrderTypes>(TaskListOrderTypes.StartDate(true))
     val bottomOrder = _bottomOrder.asStateFlow()
 
     private var searchJob: Job? = null
@@ -85,8 +89,30 @@ class TaskListViewModel @Inject constructor(
         viewModelScope.launch {
             inputListTask.collect { inputList ->
 //                logger.log(TAG, "inputListTask.collect")
-                _listTask.value = SuccessRequest(inputList)
+                tryToGetTasksAtFirstStart(inputList)
             }
+        }
+    }
+
+    private suspend fun tryToGetTasksAtFirstStart(inputList: List<Task>) {
+        if (inputList.isEmpty()) {
+            handleEmptyTaskList(userSettings().first()).collect { request ->
+                when (request) {
+                    is SuccessRequest -> {
+                        _listTask.value = SuccessRequest(inputList)
+                        _startUpdateJob.value = true
+                    }
+                    is PendingRequest -> {
+                        _listTask.value = PendingRequest()
+                    }
+                    is ErrorRequest -> {
+                        _listTask.value = ErrorRequest(request.exception)
+                    }
+                }
+            }
+        } else {
+            _listTask.value = SuccessRequest(inputList)
+            _startUpdateJob.value = true
         }
     }
 

@@ -2,16 +2,19 @@ package space.active.taskmanager1c.data.repository
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
-import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
-import space.active.taskmanager1c.data.remote.model.TaskDto
-import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
 import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.remote.TaskApi
+import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
+import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.UserSettings
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
@@ -27,28 +30,29 @@ class UpdateJobInterfaceImpl
     private val taskApi: TaskApi,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger,
-): UpdateJobInterface {
-    override fun updateJob(userSettings: UserSettings, updateDelay: Long): Flow<Request<Any>> = channelFlow<Request<Any>> {
-        // Проверяем таблицу исходящих задач. С определенной переодичностью
-        // Если в таблице исходящих есть задачи, то сравниваем их с таблицей входящих задач.
-        // При совпадении исходящих и входящих задач удаляем совпадающие из таблицы исходящих.
-        // Оставшиеся исходящие задачи отправляем на сервер.
-        // При успешной отправке на сервер:
-        //  в качестве подтверждения получаем входящую задачу с актуальными значениями
-        //  записываем задачу во входящие задачи и удаляем из исходящих отправленную
-        // Далее запрашиваем с сервера входящие задачи.
-        // Обновляем список входящих задач в таблице.
-        // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
+) : UpdateJobInterface {
+    override fun updateJob(userSettings: UserSettings, updateDelay: Long): Flow<Request<Any>> =
+        channelFlow<Request<Any>> {
+            // Проверяем таблицу исходящих задач. С определенной переодичностью
+            // Если в таблице исходящих есть задачи, то сравниваем их с таблицей входящих задач.
+            // При совпадении исходящих и входящих задач удаляем совпадающие из таблицы исходящих.
+            // Оставшиеся исходящие задачи отправляем на сервер.
+            // При успешной отправке на сервер:
+            //  в качестве подтверждения получаем входящую задачу с актуальными значениями
+            //  записываем задачу во входящие задачи и удаляем из исходящих отправленную
+            // Далее запрашиваем с сервера входящие задачи.
+            // Обновляем список входящих задач в таблице.
+            // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
 //            logger.log(TAG, "Job start")
-        outputSendJob(userSettings).collect {
-            send(it)
-        }
-        inputFetchJobFlow(userSettings).collect {
-            send(it)
-        }
+            outputSendJob(userSettings).collect {
+                send(it)
+            }
+            inputFetchJobFlow(userSettings).collect {
+                send(it)
+            }
             delay(updateDelay)
 //            logger.log(TAG, "Job end")
-    }.flowOn(ioDispatcher)
+        }.flowOn(ioDispatcher)
 
     private fun outputSendJob(userSettings: UserSettings) = flow<Request<Any>> {
         val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
@@ -77,7 +81,11 @@ class UpdateJobInterfaceImpl
                         val inputDTO = TaskDto.fromInputTask(existingInputTask)
                         val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
                         // send in Map
-                        val res = taskApi.sendEditedTaskMappedChanges(userSettings.toAuthBasicDto(), inputDTO.id, mappedDiffs)
+                        val res = taskApi.sendEditedTaskMappedChanges(
+                            userSettings.toAuthBasicDto(),
+                            inputDTO.id,
+                            mappedDiffs
+                        )
                         result = SuccessRequest(res)
 //                        mock todo delete
 //                        result = SuccessRequest(inputDTO)
@@ -115,19 +123,18 @@ class UpdateJobInterfaceImpl
     }
 
     override fun inputFetchJobFlow(userSettings: UserSettings) = flow<Request<Any>> {
-        taskApi.getTaskListFlow(userSettings.toAuthBasicDto()).collect { request ->
-            when (request) {
-                is SuccessRequest -> {
-                    inputTaskRepository.insertTasks(request.data.toTaskInputList())
-                    inputTaskRepository.insertUsers(request.data.toUserInputList())
-                    emit(SuccessRequest(Any()))
-                }
-                is ErrorRequest -> {
-                    emit(ErrorRequest(request.exception))
-                }
-                is PendingRequest -> {
-                    emit(PendingRequest())
-                }
+        val request = taskApi.getTaskList(userSettings.toAuthBasicDto())
+        when (request) {
+            is SuccessRequest -> {
+                inputTaskRepository.insertTasks(request.data.toTaskInputList())
+                inputTaskRepository.insertUsers(request.data.toUserInputList())
+                emit(SuccessRequest(Any()))
+            }
+            is ErrorRequest -> {
+                emit(ErrorRequest(request.exception))
+            }
+            is PendingRequest -> {
+                emit(PendingRequest())
             }
         }
     }.flowOn(ioDispatcher)
