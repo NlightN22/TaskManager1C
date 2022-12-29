@@ -6,7 +6,7 @@ import android.widget.Toast
 class ToastsImpl(
     private val appContext: Context
 ): Toasts {
-    override fun toast(message: String) {
+    override fun invoke(message: String) {
         Toast.makeText(appContext, message, Toast.LENGTH_SHORT).show()
     }
 }

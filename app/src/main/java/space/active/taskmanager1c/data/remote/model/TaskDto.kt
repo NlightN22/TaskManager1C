@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.data.remote.dto
+package space.active.taskmanager1c.data.remote.model
 
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.UsersInTask
@@ -12,13 +12,11 @@ data class TaskDto(
     val endDate: String,
     val id: String,
     val mainTaskId: String,
-    val messages: List<MessageDto>,
     val name: String,
     val number: String,
     val objName: String,
     val observers: List<String>,
     val performerId: String,
-    val photos: List<String>,
     val priority: String,
     val status: String
 ) {
@@ -37,7 +35,6 @@ data class TaskDto(
             name = name ?: "",
             number = number ?: "",
             objName = objName ?: "",
-            photos = photos?: emptyList(),
             priority = priority,
             status = status,
         )
@@ -51,13 +48,11 @@ data class TaskDto(
             endDate = outputTask.taskInput.endDate,
             id = outputTask.taskInput.id,
             mainTaskId = outputTask.taskInput.mainTaskId,
-            messages = emptyList(), // TODO separate message to another request
             name = outputTask.taskInput.name,
             number = outputTask.taskInput.number,
             objName = outputTask.taskInput.objName,
             observers = outputTask.taskInput.usersInTask.observers,
             performerId = outputTask.taskInput.usersInTask.performerId,
-            photos = emptyList(), // TODO separate photos to another request
             priority = outputTask.taskInput.priority,
             status = outputTask.taskInput.status
         )
@@ -70,13 +65,11 @@ data class TaskDto(
             endDate = inputTask.endDate,
             id = inputTask.id,
             mainTaskId = inputTask.mainTaskId,
-            messages = emptyList(), // TODO separate message to another request
             name = inputTask.name,
             number = inputTask.number,
             objName = inputTask.objName,
             observers = inputTask.usersInTask.observers,
             performerId = inputTask.usersInTask.performerId,
-            photos = emptyList(), // TODO separate photos to another request
             priority = inputTask.priority,
             status = inputTask.status
         )

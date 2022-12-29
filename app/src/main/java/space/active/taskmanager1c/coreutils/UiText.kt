@@ -1,7 +1,7 @@
 package space.active.taskmanager1c.coreutils
 
 import android.content.Context
-import java.util.UnknownFormatConversionException
+import java.util.*
 
 private const val TAG = "UiText"
 
@@ -25,6 +25,8 @@ sealed class UiText {
                     context.getString(resourceId, *args)
                 } catch (e: UnknownFormatConversionException) {
                     context.getString(resourceId)
+                } catch (e: MissingFormatArgumentException) {
+                    context.getString(resourceId)
                 }
             }
             is ResInRes ->
@@ -32,6 +34,8 @@ sealed class UiText {
                     val listString = listRes.map { context.getString(it) }
                     context.getString(baseRes, *listString.toTypedArray())
                 } catch (e: UnknownFormatConversionException) {
+                    context.getString(baseRes)
+                } catch (e: MissingFormatArgumentException) {
                     context.getString(baseRes)
                 }
         }

@@ -15,13 +15,4 @@ data class UsersInTaskDomain(
         coPerformers = this.coPerformers.map { it.id },
         observers = this.observers.map { it.id },
     )
-
-    companion object {
-//        fun fromInputTask(inputUsers: UserInput): UsersInTaskDomain = UsersInTaskDomain(
-//            author = inputUsers.toUserDomain(),
-//            performer = inTaskUsers.performerId,
-//            coPerformers = inTaskUsers.coPerformers,
-//            observers = inTaskUsers.observers,
-//        )
-    }
 }

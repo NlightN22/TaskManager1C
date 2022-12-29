@@ -3,7 +3,7 @@ package space.active.taskmanager1c.data.local.db
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.google.gson.reflect.TypeToken
-import space.active.taskmanager1c.data.remote.dto.TaskListDto
+import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.utils.JsonParser
 
 @ProvidedTypeConverter

@@ -5,11 +5,10 @@ import kotlinx.coroutines.flow.flow
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.Converters
-import space.active.taskmanager1c.data.remote.dto.AuthDto
-import space.active.taskmanager1c.data.remote.dto.TaskDto
-import space.active.taskmanager1c.data.remote.dto.TaskListDto
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTOTemp
+import space.active.taskmanager1c.data.remote.model.TaskDto
+import space.active.taskmanager1c.data.remote.model.TaskListDto
+import space.active.taskmanager1c.data.remote.model.UserDto
+import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.repository.TaskApi
 import javax.inject.Inject
 
@@ -29,6 +28,10 @@ class RetrofitTasksSource @Inject constructor
         emit(getTaskList())
     }
 
+    override suspend fun authUser(): UserDto = wrapRetrofitExceptions {
+        retrofitApi.authUser()
+    }
+
     override suspend fun getTaskList(): Request<TaskListDto> =
         wrapRetrofitExceptions {
             val taskDto = retrofitApi.getTasks()
@@ -40,8 +43,11 @@ class RetrofitTasksSource @Inject constructor
             }
         }
 
-    override suspend fun sendNewTask(task: TaskDto): Request<TaskDto> {
-        TODO("Not yet implemented")
+    override suspend fun sendNewTask(task: TaskDto): Request<TaskDto> = wrapRetrofitExceptions{
+        logger.log(TAG, "sendNewTask: $task")
+        val res = retrofitApi.sendNew(task).tasks.first()
+        logger.log(TAG, "Get from server task: $res")
+        SuccessRequest(res)
     }
 
     override suspend fun sendEditedTaskMappedChanges(taskId: String, changeMap: Map<String, Any>) = wrapRetrofitExceptions<TaskDto> {
@@ -49,16 +55,16 @@ class RetrofitTasksSource @Inject constructor
         mapWId["id"] = taskId
         mapWId.putAll(changeMap)
         val changes = converters.mapToJson(mapWId)
-        logger.log(TAG, "Send to server: $changes")
+        logger.log(TAG, "Send changes: $changes")
         val res = retrofitApi.saveChanges(changes)
-        return@wrapRetrofitExceptions res.tasks.first()
+        res.tasks.first()
     }
 
     override suspend fun getMessages(taskId: String): TaskMessagesDTO = wrapRetrofitExceptions {
         retrofitApi.getMessages(taskId)
     }
 
-    override suspend fun sendMessage(taskId: String, text: String): TaskMessagesDTOTemp = wrapRetrofitExceptions{
+    override suspend fun sendMessage(taskId: String, text: String): TaskMessagesDTO = wrapRetrofitExceptions{
         retrofitApi.sendMessages(mapOf("id" to taskId,"text" to text))
     }
 
@@ -66,7 +72,5 @@ class RetrofitTasksSource @Inject constructor
         TODO("Not yet implemented")
     }
 
-    override suspend fun authUser(username: String, password: String): Request<AuthDto> = wrapRetrofitExceptions {
-        TODO("Not yet implemented")
-    }
+
 }

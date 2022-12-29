@@ -23,15 +23,25 @@ private const val TAG = "TaskDetailedViewModel"
 class TaskDetailedViewModel @Inject constructor(
     private val repository: TasksRepository,
     private val logger: Logger,
+    private val userSettings: GetUserSettingsFromDataStore,
+    private val saveNewTaskToDb: SaveNewTaskToDb,
+    private val validate: Validate,
     private val exceptionHandler: ExceptionHandler,
     private val getDetailedTask: GetDetailedTask,
     private val getTaskMessages: GetTaskMessages,
     private val sendTaskMessages: SendTaskMessages,
+    private val whoUserInTask: DefineUserInTask,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _taskState = MutableStateFlow<TaskDetailedViewState>(TaskDetailedViewState.New())
     val taskState = _taskState.asStateFlow()
+
+    private val _taskErrorState = MutableSharedFlow<TaskDetailedErrorState>()
+    val taskErrorState = _taskErrorState.asSharedFlow()
+
+    private val _validationEvent = MutableSharedFlow<Boolean>()
+    val validationEvent = _validationEvent.asSharedFlow()
 
     private val _expandState = MutableStateFlow(TaskDetailedExpandState())
     val expandState = _expandState.asStateFlow()
@@ -55,39 +65,46 @@ class TaskDetailedViewModel @Inject constructor(
     private val _sendMessageEvent = MutableSharedFlow<StateProgress<Any>>()
     val sendMessageEvent = _sendMessageEvent.asSharedFlow()
 
-
-    // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
-    val whoAmI: User = User(
-        id = "c49a0b62-c192-11e1-8a03-f46d0490adee",
-        name = "Михайлов Олег Федорович"
-    ) // TODO replace to shared preferences
+    private val whoAmI: Flow<User> = userSettings.getUserFlow()
 
     private val _inputTaskId = MutableStateFlow<String>("")
 
-    private val currentTask: Flow<Task?> = _inputTaskId.flatMapLatest {
-        if (it.isNotBlank()) {
-            getDetailedTask(it)
+    private val _changedNewTask = MutableStateFlow<Task?>(null)
+    private val _newTask: Flow<Task> = whoAmI.map {
+//        logger.log(TAG, "whoAmI.map")
+        Task.newTask(it)
+    }.combine(_changedNewTask) { inTask, changedTask ->
+        if (changedTask == null) {
+//            logger.log(TAG, "collect newTask")
+            inTask
         } else {
-            flow { emit(Task.newTask(whoAmI)) }
+//            logger.log(TAG, "collect _changed")
+            changedTask
         }
     }
+
+    private val currentTask: Flow<Task?> = _inputTaskId.flatMapLatest {
+        if (it.isNotBlank()) {
+//            logger.log(TAG, "collect from DB")
+            getDetailedTask(it)
+        } else {
+//            logger.log(TAG, "collect from mutable")
+            _newTask
+        }
+    }
+
+    // view state for new task
+    // bottom menu with save cancel
+    // another behavior model for save changes
+    // save only on buttons
+    // preset for some fields
 
     private fun collectCurrentTask() {
         viewModelScope.launch {
             logger.log(TAG, "collectCurrentTask launch")
             currentTask.collectLatest { curTask ->
-                // todo delete
-//                logger.log(TAG, "collectCurrentTask collect $curTask")
                 if (curTask != null) {
-                    if (curTask.id.isNotBlank()) {
-                        // Edit
-                        updateUIState(oldState = _taskState.value, newTask = curTask)
-                    } else {
-                        // New
-                        _taskState.value = TaskDetailedViewState.New(curTask.toTaskState())
-                        _enabledFields.value = TaskUserIs.Author().fields
-                        _messagesList.value = SuccessRequest(emptyList<Messages>())
-                    }
+                    updateUIState(oldState = _taskState.value, newTask = curTask)
                 } else {
                     exceptionHandler(EmptyObject("currentTask"))
                 }
@@ -96,15 +113,28 @@ class TaskDetailedViewModel @Inject constructor(
     }
 
     private fun updateUIState(oldState: TaskDetailedViewState, newTask: Task) {
-        val newState = TaskDetailedViewState.Edit(newTask.toTaskState())
-        if (oldState != newState) {
-            _taskState.value = newState
-            // get base and inner tasks from db
-            setDependentTasks(newTask)
-            if (oldState.state.performer != newState.state.performer || oldState.state.author != newState.state.author) {
-                _enabledFields.value = TaskUserIs.userIs(newTask, whoAmI).fields
+        viewModelScope.launch {
+            if (newTask.id.isNotBlank()) {
+                val newState = TaskDetailedViewState.Edit(newTask.toTaskState())
+                logger.log(TAG, "Update Edit")
+                if (oldState != newState) {
+                    _taskState.value = newState
+                    // get base and inner tasks from db
+                    setDependentTasks(newTask)
+                    if (oldState.state.performer != newState.state.performer || oldState.state.author != newState.state.author) {
+                        _enabledFields.value = whoUserInTask(newTask, whoAmI.first()).fields
+                    }
+                    showMessages(newTask.id)
+                }
+            } else {
+                val newState = TaskDetailedViewState.New(newTask.toTaskState())
+                if (oldState != newState) {
+                    logger.log(TAG, "Update new")
+                    _taskState.value = newState
+                    _enabledFields.value = TaskUserIs.AuthorInNewTask().fields
+                    _messagesList.value = SuccessRequest(emptyList<Messages>())
+                }
             }
-            showMessages(newTask.id)
         }
     }
 
@@ -118,11 +148,10 @@ class TaskDetailedViewModel @Inject constructor(
                     }
                     is SuccessRequest -> {
                         val messagesList = request.data.messages
-                        val convertedMessages = messagesList
-                            .toMessages(request.data.users)
+                        val convertedMessages = messagesList.toMessages(request.data.users)
                             .sortedByDescending { it.dateTime }
                         val setMyList = convertedMessages.map {
-                            if (it.authorId == whoAmI.id) {
+                            if (it.authorId == whoAmI.first().id) {
                                 it.copy(my = true)
                             } else {
                                 it.copy(my = false)
@@ -146,10 +175,13 @@ class TaskDetailedViewModel @Inject constructor(
                                 _sendMessageEvent.emit(Loading())
                             }
                             is SuccessRequest -> {
+//                                logger.log(TAG, res.data.messages.toString())
                                 showMessages(task.id)
-                                _sendMessageEvent.emit(Success(Any())) //todo replace to update from fetch
+                                _sendMessageEvent.emit(Success(Any()))
                             }
-                            else -> {}
+                            else -> {
+                                _sendMessageEvent.emit(Success(Any()))
+                            }
                         }
                     }
                 } else {
@@ -169,86 +201,133 @@ class TaskDetailedViewModel @Inject constructor(
         collectCurrentTask()
     }
 
-    fun saveChangesSmart(event: TaskChangesEvents) {
+    fun saveNewTask() {
         viewModelScope.launch {
-            var task = currentTask.first()
-            val textChangeDelay = 2
-            if (task != null) {
-                // validation
-                when (event) {
-                    is TaskChangesEvents.Title -> {
-                        val changes = event.title
-                        if (changes != _taskState.first().state.title) {
-                            task = task.copy(name = changes)
+            val task = currentTask.first()
+            task?.let {
+                val titleResult = validate.title(task.name)
+                val endDateResult = validate.endDate(task.endDate)
+                val authorResult = validate.author(task.users.author)
+                val performerResult = validate.performer(task.users.performer)
+                val listRes = listOf(
+                    titleResult, endDateResult, authorResult, performerResult
+                )
+                val hasError = listRes.any { !it.success }
 
-                            val validationRes = ValidateTaskChanges()
-                            _saveTaskEvent.emit(
-                                SaveEvents.Delayed(
-                                    task,
-                                    event.javaClass.simpleName,
-                                    textChangeDelay
+                _taskErrorState.emit(
+                    TaskDetailedErrorState(
+                        title = titleResult.errorMessage,
+                        endDate = endDateResult.errorMessage,
+                        author = authorResult.errorMessage,
+                        performer = performerResult.errorMessage
+                    )
+                )
+                if (hasError) {
+
+                    return@launch
+                }
+                saveNewTaskToDb(task).collect { request ->
+                    when (request) {
+                        is SuccessRequest -> _validationEvent.emit(true)
+                        is ErrorRequest -> exceptionHandler(request.exception)
+                        is PendingRequest -> {}
+                    }
+                }
+            }
+        }
+    }
+
+    fun saveEditChanges(saveEvents: TaskChangesEvents) {
+        viewModelScope.launch {
+            val res = validateChangeEvents(saveEvents)
+            if (_taskState.value is TaskDetailedViewState.Edit) {
+                res?.let { _saveTaskEvent.emit(res) }
+            }
+        }
+    }
+
+    /**
+     * Return validated Save Event
+     */
+    private suspend fun validateChangeEvents(event: TaskChangesEvents): SaveEvents? {
+        var saveEvent: SaveEvents? = null
+        var task = currentTask.first()
+        val textChangeDelay = 1
+        if (task != null) {
+            // validation
+            when (event) {
+                is TaskChangesEvents.Title -> {
+                    val changes = event.title
+                    if (changes != _taskState.first().state.title) {
+                        val validateResult = validate.title(event.title)
+                        when (validateResult.success) {
+                            true -> {
+                                task = task.copy(name = changes)
+                                saveEvent = SaveEvents.Delayed(
+                                    task, event.javaClass.simpleName, textChangeDelay
                                 )
-                            )
-                        }
-                    }
-                    is TaskChangesEvents.EndDate -> {
-                        val changes = event.date
-                        task = task.copy(endDate = changes)
-                        _saveTaskEvent.emit(SaveEvents.Simple(task))
-                    }
-                    is TaskChangesEvents.Performer -> {
-                        val changes = event.user
-                        task = task.copy(users = task.users.copy(performer = changes))
-                        _saveTaskEvent.emit(SaveEvents.Simple(task))
-                    }
-                    is TaskChangesEvents.CoPerformers -> {
-                        val changes = event.users
-                        task = task.copy(users = task.users.copy(coPerformers = changes))
-                        _saveTaskEvent.emit(SaveEvents.Simple(task))
-                    }
-                    is TaskChangesEvents.Observers -> {
-                        val changes = event.users
-                        task = task.copy(users = task.users.copy(observers = changes))
-                        _saveTaskEvent.emit(SaveEvents.Simple(task))
-                    }
-                    is TaskChangesEvents.Description -> {
-                        val changes = event.text
-                        if (changes != _taskState.first().state.description) {
-                            task = task.copy(description = changes)
-                            _saveTaskEvent.emit(
-                                SaveEvents.Delayed(
-                                    task,
-                                    event.javaClass.simpleName,
-                                    textChangeDelay
-                                )
-                            )
-                        }
-                    }
-                    is TaskChangesEvents.Status -> {
-                        val cancelDuration = 5
-                        val changes = event.status
-                        val userIs = TaskUserIs.userIs(task, whoAmI)
-
-                        // smart set status
-                        val getStatus = GetTaskStatus()(userIs, event.status)
-
-                        val validation = ValidateTaskChanges()(
-                            changeType = event,
-                            userIs = userIs,
-                            getStatus
-                        )
-                        if (validation is ValidationResult.Success) {
-                            task = task.copy(status = getStatus)
-                            _saveTaskEvent.emit(SaveEvents.Breakable(task, cancelDuration))
-                        } else if (validation is ValidationResult.Error) {
-                            _showSnackBar.emit(validation.message)
+                            }
+                            false -> {
+                                _taskErrorState.emit(TaskDetailedErrorState(title = validateResult.errorMessage))
+                            }
                         }
                     }
                 }
-            } else {
-                exceptionHandler(EmptyObject("currentTask"))
+                is TaskChangesEvents.EndDate -> {
+                    val changes = event.date
+                    task = task.copy(endDate = changes)
+                    saveEvent = SaveEvents.Simple(task)
+                }
+                is TaskChangesEvents.Performer -> {
+                    val changes = event.user
+                    task = task.copy(users = task.users.copy(performer = changes))
+                    saveEvent = SaveEvents.Simple(task)
+                }
+                is TaskChangesEvents.CoPerformers -> {
+                    val changes = event.users
+                    task = task.copy(users = task.users.copy(coPerformers = changes))
+                    saveEvent = SaveEvents.Simple(task)
+                }
+                is TaskChangesEvents.Observers -> {
+                    val changes = event.users
+                    task = task.copy(users = task.users.copy(observers = changes))
+                    saveEvent = SaveEvents.Simple(task)
+                }
+                is TaskChangesEvents.Description -> {
+                    val changes = event.text
+                    if (changes != _taskState.first().state.description) {
+                        task = task.copy(description = changes)
+                        saveEvent = SaveEvents.Delayed(
+                            task, event.javaClass.simpleName, textChangeDelay
+                        )
+                    }
+                }
+                is TaskChangesEvents.Status -> {
+                    val cancelDuration = 5
+                    val userIs = whoUserInTask(task, whoAmI.first())
+                    // smart set status
+                    val taskStatus = GetTaskStatus()(userIs, event.status)
+
+                    val validationResult = validate.okCancelChoose(
+                        event.status, userIs = userIs, taskStatus
+                    )
+                    when (validationResult.success) {
+                        true -> {
+                            task = task.copy(status = taskStatus)
+                            saveEvent = SaveEvents.Breakable(task, cancelDuration)
+                        }
+                        false -> {
+                            validationResult.errorMessage?.let { _showSnackBar.emit(it) }
+                        }
+                    }
+                }
             }
+//            logger.log(TAG, "Task after changes: ${task}")
+            _changedNewTask.emit(task)
+        } else {
+            exceptionHandler(EmptyObject("currentTask"))
         }
+        return saveEvent
     }
 
     private fun setDependentTasks(task: Task) {
@@ -277,22 +356,21 @@ class TaskDetailedViewModel @Inject constructor(
     fun showDialog(eventType: TaskDetailedDialogs) {
         viewModelScope.launch(ioDispatcher) {
             val listUsers: List<User> = repository.listUsersFlow.first()
-            val currentTask = repository.getTask(_taskState.value.state.id).first()
-            if (currentTask != null) {
+            val task: Task? = currentTask.first()
+            if (task != null) {
                 val usersIds: List<String>
                 when (eventType) {
                     is PerformerDialog -> {
-                        val listItems =
-                            listUsers.toDialogItems(listOf(currentTask.users.performer.id))
+                        val listItems = listUsers.toDialogItems(listOf(task.users.performer.id))
                         _showDialogEvent.emit(PerformerDialog(listItems))
                     }
                     is CoPerformersDialog -> {
-                        usersIds = currentTask.users.coPerformers.map { it.id }
+                        usersIds = task.users.coPerformers.map { it.id }
                         val dialogItems = listUsers.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(CoPerformersDialog(dialogItems))
                     }
                     is ObserversDialog -> {
-                        usersIds = currentTask.users.observers.map { it.id }
+                        usersIds = task.users.observers.map { it.id }
                         val dialogItems = listUsers.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(ObserversDialog(dialogItems))
                     }
@@ -319,8 +397,7 @@ class TaskDetailedViewModel @Inject constructor(
 
     // Expand description
     fun expandCloseDescription() {
-        _expandState.value =
-            _expandState.value.copy(description = !_expandState.value.description)
+        _expandState.value = _expandState.value.copy(description = !_expandState.value.description)
     }
 
     fun expandDescription() {

@@ -7,6 +7,7 @@ import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.ConnectionException
 import space.active.taskmanager1c.coreutils.ParseBackendException
 import java.io.IOException
+import java.nio.charset.Charset
 
 open class BaseRetrofitSource (
     retrofitConfig: RetrofitConfig

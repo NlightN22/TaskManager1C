@@ -76,9 +76,16 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
             enabled = fieldsState.description,
             editable = fieldsState.description
         )
-        // bottom menu state
-        binding.bottomMenu.menu.findItem(R.id.detailed_ok).isVisible = fieldsState.bottomOk
-        binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible =
-            fieldsState.bottomCancel
+        // bottom menu state items
+        binding.bottomMenu.menu.clear()
+        if (fieldsState.bottomNew) {
+            binding.bottomMenu.inflateMenu(R.menu.menu_save_cancel)
+        } else {
+            binding.bottomMenu.inflateMenu(R.menu.menu_detailed)
+            binding.bottomMenu.menu.findItem(R.id.detailed_ok).isVisible = fieldsState.bottomOk
+            binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible =
+                fieldsState.bottomCancel
+        }
     }
 }
+

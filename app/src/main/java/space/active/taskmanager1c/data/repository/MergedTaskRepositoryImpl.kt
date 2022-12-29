@@ -7,10 +7,10 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput.Companion.toListUserDomain
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.Task.Companion.mapAndReplaceById
 import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.User.Companion.fromUserInput
 import space.active.taskmanager1c.domain.models.UsersInTaskDomain
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import java.time.format.DateTimeFormatter
@@ -103,7 +103,8 @@ class MergedTaskRepositoryImpl(
         // При отправке у меня нет taskInput id.
         // А значит при получении задач с сервера и удалении задачи из исходящего кэша
         // Может быть такая ситуация при которой пользователь будет находиться
-        // в новой сохраненной для отправки задачи. И при получении её в качестве подтверждения она уже будет считаться другой...
+        // в новой сохраненной для отправки задаче.
+        // И при получении её в качестве подтверждения она уже будет считаться другой...
         // какие есть варианты:
         // - Не давать менять новые задачи до момента отправки их на сервер и получения её с сервера
         // - Обрабатывать 3 статуса: Новая задача. Редактирование входящей задачи. Редактирование новой задачи.
@@ -118,8 +119,6 @@ class MergedTaskRepositoryImpl(
         } else {
             emit(ErrorRequest(ThisTaskIsNotNew))
         }
-    }.catch { e ->
-        emit(ErrorRequest(e))
     }.flowOn(ioDispatcher)
 
     override fun attachFileToTask(file: ByteArray, taskId: String) = flow<Request<Any>> {
@@ -170,15 +169,14 @@ class MergedTaskRepositoryImpl(
         name = inputTask.name,
         number = inputTask.number,
         objName = inputTask.objName,
-        photos = inputTask.photos,
         priority = inputTask.priority,
         status = Task.toTaskStatus(inputTask.status),
         users = UsersInTaskDomain
             (
-            author = getUserForTaskInput(inputTask.usersInTask.authorId),
-            performer = getUserForTaskInput(inputTask.usersInTask.performerId),
-            coPerformers = inputTask.usersInTask.coPerformers.map { getUserForTaskInput(it) },
-            observers = inputTask.usersInTask.observers.map { getUserForTaskInput(it) },
+            author = getUserTaskInput(inputTask.usersInTask.authorId),
+            performer = getUserTaskInput(inputTask.usersInTask.performerId),
+            coPerformers = inputTask.usersInTask.coPerformers.map { getUserTaskInput(it) },
+            observers = inputTask.usersInTask.observers.map { getUserTaskInput(it) },
         )
     )
 
@@ -191,24 +189,25 @@ class MergedTaskRepositoryImpl(
         name = outputTask.taskInput.name,
         number = outputTask.taskInput.number,
         objName = outputTask.taskInput.objName,
-        photos = outputTask.taskInput.photos,
         priority = outputTask.taskInput.priority,
         status = Task.toTaskStatus(outputTask.taskInput.status),
         users = UsersInTaskDomain(
-            author = getUserForTaskInput(outputTask.taskInput.usersInTask.authorId),
-            performer = getUserForTaskInput(outputTask.taskInput.usersInTask.performerId),
+            author = getUserTaskInput(outputTask.taskInput.usersInTask.authorId),
+            performer = getUserTaskInput(outputTask.taskInput.usersInTask.performerId),
             coPerformers = outputTask.taskInput.usersInTask.coPerformers.map {
-                getUserForTaskInput(
+                getUserTaskInput(
                     it
                 )
             },
-            observers = outputTask.taskInput.usersInTask.observers.map { getUserForTaskInput(it) },
+            observers = outputTask.taskInput.usersInTask.observers.map { getUserTaskInput(it) },
         ),
         isSending = outputTask.newTask
     )
 
-    private suspend fun getUserForTaskInput(userId: String): User =
+    private suspend fun getUserTaskInput(userId: String): User =
         inputTaskRepository.getUser(userId)?.toUserDomain()
             ?: User(id = userId, name = userId)
 
+    override fun getUserByName(userName: String): Flow<User?> =
+        flow { emit(inputTaskRepository.getUserByName(userName)?.fromUserInput()) }.flowOn(ioDispatcher)
 }

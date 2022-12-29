@@ -1,6 +1,8 @@
 package space.active.taskmanager1c.domain.models
 
-import java.text.SimpleDateFormat
+import android.util.Log
+import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.UiText
 import java.time.LocalDateTime
 import java.util.*
 
@@ -12,16 +14,7 @@ sealed class TaskChangesEvents {
 
     data class EndDate(
         val date: LocalDateTime
-    ) : TaskChangesEvents() {
-        // todo delete
-        fun toTaskDate(): String {
-            val formatter = SimpleDateFormat(
-                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                Locale.getDefault()
-            )
-            return formatter.format(this.date)
-        }
-    }
+    ) : TaskChangesEvents()
 
     data class Performer(
         val user: User
@@ -41,5 +34,6 @@ sealed class TaskChangesEvents {
 
     data class Status(
         val status: Boolean
-    ) : TaskChangesEvents()
+    ) : TaskChangesEvents() {
+    }
 }

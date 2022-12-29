@@ -13,19 +13,19 @@ class ExceptionHandler @Inject constructor(
         when (e) {
             is AuthException -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
+                logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
             }
             is EmptyObject -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
+                logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
             }
             is DbUnexpectedResult -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
+                logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
             }
             is CantShowSnackBar -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
+                logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
             }
             is ParseBackendException -> {
                 showErrorToast(e)

@@ -9,7 +9,7 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomMenu"
-        app:menu="@menu/menu_settings"
+        app:menu="@menu/menu_save_cancel"
         style="@style/BottomMenu"
         tools:ignore="MissingConstraints" />
 

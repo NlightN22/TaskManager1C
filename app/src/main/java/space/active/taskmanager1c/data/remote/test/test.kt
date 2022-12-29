@@ -1,13 +1,5 @@
 package space.active.taskmanager1c.data.remote
 
-import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.*
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import space.active.taskmanager1c.data.remote.dto.TaskListDto
-
 //private val API_USERNAME = "Михайлов Олег Федорович"
 //private val API_PASSWORD = "test"
 //private val API_URL = "http://172.16.17.242/torg_develop/hs/taskmgr/"

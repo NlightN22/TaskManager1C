@@ -552,7 +552,7 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomMenu"
         style="@style/BottomMenu"
-        app:menu="@menu/menu_detailed"
+        tools:menu="@menu/menu_detailed"
         tools:ignore="MissingConstraints" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

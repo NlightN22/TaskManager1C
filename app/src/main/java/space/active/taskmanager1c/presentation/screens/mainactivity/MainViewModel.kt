@@ -23,7 +23,6 @@ private const val TAG = "MainViewModel"
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val handleJobForUpdateDb: HandleJobForUpdateDb,
-    private val saveNewTaskToDb: SaveNewTaskToDb,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
     private val saveBreakable: SaveBreakable,
     private val saveDelayed: SaveDelayed,

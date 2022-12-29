@@ -2,6 +2,7 @@ package space.active.taskmanager1c.domain.models
 
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
+import space.active.taskmanager1c.coreutils.nowDiffInDays
 import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.coreutils.toShortDateTime
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
@@ -12,6 +13,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import kotlin.reflect.full.memberProperties
 
 data class Task(
     val date: LocalDateTime,
@@ -35,21 +37,10 @@ data class Task(
         Accepted, // в работе - по умолчанию создаётся автором. может меняться исполнителем
         Performed, // на доработке - ставит автор только для Reviewed
         Reviewed, // условно завершена - ставит исполнитель
-        Finished, // принята - ставит автор
-        Deferred, // отложена используется редко - испольнитель todo иконка для испольнителя bottom menu
+        Finished, // принята - ставит автор только для Reviewed
+        Deferred, // отложена используется редко - испольнитель todo иконка для испольнителя bottom menu in Accepted status
         Cancelled; // отклоненная - не используется
 
-        fun getResId(status: Status): Int {
-            return when (status) {
-                New -> R.string.New
-                Accepted -> R.string.Accepted
-                Performed -> R.string.Performed
-                Reviewed -> R.string.Reviewed
-                Finished -> R.string.Finished
-                Deferred -> R.string.Deferred
-                Cancelled -> R.string.Cancelled
-            }
-        }
         fun getResId(): Int {
             return when (this) {
                 New -> R.string.New
@@ -64,7 +55,7 @@ data class Task(
     }
 
 
-    fun toTaskInput(new: Boolean = false) = TaskInput(
+    private fun toTaskInput(new: Boolean = false) = TaskInput(
         date = this.date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         description = this.description,
         endDate = this.endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
@@ -77,7 +68,6 @@ data class Task(
         name = this.name,
         number = this.number,
         objName = this.objName,
-        photos = this.photos,
         priority = this.priority,
         status = this.fromTaskStatus(this.status),
         usersInTask = this.users.toTaskInput(),
@@ -111,7 +101,7 @@ data class Task(
         status = this.status
     )
 
-    fun fromTaskStatus(status: Status): String {
+    private fun fromTaskStatus(status: Status): String {
         return when (status) {
             Status.New -> "new"
             Status.Accepted -> "accepted"
@@ -123,44 +113,18 @@ data class Task(
         }
     }
 
-    //    /**
-//     * Return days deadline in string
-//     */
-
-    fun getDeadline(): String {
+    /**
+     * Return days deadline in string
+     */
+    private fun getDeadline(): String {
         if (this.endDate != null) {
-            val today: Long = LocalDate.now().toEpochDay()
-            val end: Long = this.endDate.toEpochSecond(ZoneOffset.UTC) / 60 / 60 / 24
-            val difference: Int = (end - today).toInt()
+            val difference = this.endDate.nowDiffInDays()
             return "$difference дней"
         } else {
             return ""
         }
 
     }
-
-
-    // todo delete
-//    /**
-//     * Return days deadline in string
-//     */
-//    fun getDeadline(): String {
-//        val end = this.endDate
-//        if (end.isNotBlank()) {
-//            val today = LocalDate.now().toEpochDay()
-//            try {
-//                // 2022-04-07T00:52:37
-//                val endDate = LocalDate.parse(end, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-//                val end = endDate.toEpochDay()
-//                val difference: Long = end - today
-//                return "${difference.toString()} дней"
-//            } catch (e: Exception) {
-//                return e.message.toString()
-//            }
-//        } else {
-//            return ""
-//        }
-//    }
 
     companion object {
 

@@ -14,6 +14,7 @@ import javax.inject.Inject
 private const val TRIES_TO_FETCH = 10
 private const val FETCH_TIMEOUT = 5000L
 
+// todo delete
 class HandleEmptyTaskList @Inject constructor(
     private val repository: TasksRepository,
     private val updateJob: HandleJobForUpdateDb,

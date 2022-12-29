@@ -1,8 +1,8 @@
 package space.active.taskmanager1c.domain.models
 
 import space.active.taskmanager1c.coreutils.toDateTime
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessageDTO
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesUserDTO
+import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessageDTO
+import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesUserDTO
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

@@ -13,6 +13,9 @@ import space.active.taskmanager1c.data.utils.GsonParserImpl
 import space.active.taskmanager1c.data.utils.JsonParser
 import javax.inject.Singleton
 
+private const val TAG = "RoomModule"
+private const val DB_NAME = "tasks_db"
+
 @Module
 @InstallIn(SingletonComponent::class)
 class RoomModule {
@@ -27,16 +30,18 @@ class RoomModule {
 
     @Provides
     @Singleton
-    fun provideTaskWithUsersDatabase(app: Application, converters: Converters): TaskWithUsersDatabase {
-        return Room.databaseBuilder(
+    fun provideTaskWithUsersDatabase(
+        app: Application,
+        converters: Converters,
+    ): TaskWithUsersDatabase =
+        Room.databaseBuilder(
             app,
             TaskWithUsersDatabase::class.java,
-            "tasks_db"
+            DB_NAME
         )
             .fallbackToDestructiveMigration()
             .addTypeConverter(converters)
             .build()
-    }
 
     @Provides
     @Singleton

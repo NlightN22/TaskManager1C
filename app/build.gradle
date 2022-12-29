@@ -7,6 +7,7 @@ plugins {
     id 'com.google.dagger.hilt.android'
     id 'androidx.navigation.safeargs.kotlin'
     id "kotlin-parcelize"
+    id 'kotlinx-serialization'
 }
 
 android {
@@ -103,6 +104,9 @@ dependencies {
 
     // Kotlin Reflection
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
+
+    // Kotlin serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
     // Facebook shimmer
     implementation 'com.facebook.shimmer:shimmer:0.5.0'

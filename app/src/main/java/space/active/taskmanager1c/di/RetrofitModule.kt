@@ -29,7 +29,7 @@ object RetrofitModule {
         .build()
 
     @Provides
-    fun provideMoshi(): Moshi = Moshi.Builder().build()
+    fun provideMoshi(): Moshi = Moshi.Builder().build() // todo replace by Kotlin Serialization Library
 
     @Provides
     fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient  = OkHttpClient().newBuilder()

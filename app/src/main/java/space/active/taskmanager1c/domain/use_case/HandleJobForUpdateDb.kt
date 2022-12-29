@@ -7,7 +7,7 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
-import space.active.taskmanager1c.data.remote.dto.TaskDto
+import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
 import space.active.taskmanager1c.data.repository.InputTaskRepository
 import space.active.taskmanager1c.data.repository.OutputTaskRepository
@@ -87,7 +87,9 @@ class HandleJobForUpdateDb
                     if (outputTask.newTask) {
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
-                        result = taskApi.sendNewTask(withoutId)
+//                        result = taskApi.sendNewTask(withoutId)
+                        //mock todo delete
+                        result = SuccessRequest(withoutId)
                     }
                 }
                 when (result) {

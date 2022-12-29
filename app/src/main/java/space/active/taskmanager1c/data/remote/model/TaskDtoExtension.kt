@@ -1,7 +1,7 @@
 package space.active.taskmanager1c.data.remote.dto
 
 import space.active.taskmanager1c.coreutils.diff
-import space.active.taskmanager1c.data.local.db.Converters
+import space.active.taskmanager1c.data.remote.model.TaskDto
 import kotlin.reflect.full.memberProperties
 
 fun TaskDto.compareWithAndGetDiffs(compareWith: TaskDto): Map<String, Any> {

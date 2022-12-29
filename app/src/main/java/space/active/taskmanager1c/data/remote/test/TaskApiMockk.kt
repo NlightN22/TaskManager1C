@@ -1,7 +1,6 @@
 package space.active.taskmanager1c.data.remote.test
 
 import android.content.Context
-import space.active.taskmanager1c.data.remote.dto.TaskDto
 
 class TaskApiMockk(
     private val context: Context

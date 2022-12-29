@@ -4,21 +4,29 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
+import space.active.taskmanager1c.domain.models.UserSettings
 import space.active.taskmanager1c.domain.repository.Authorization
-import space.active.taskmanager1c.domain.repository.DataStoreRepository
+import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
+import space.active.taskmanager1c.domain.use_case.GetUserSettingsFromDataStore
+import space.active.taskmanager1c.domain.use_case.SaveUserSettingsToDataStore
 import javax.inject.Inject
 
 private const val TAG = "LoginViewModel"
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val dataStoreRepository: DataStoreRepository,
+    private val userSettings: GetUserSettingsFromDataStore,
+    private val saveUserSettings: SaveUserSettingsToDataStore,
+    private val tasksRepository: TasksRepository,
     private val authorization: Authorization,
     private val exceptionHandler: ExceptionHandler,
     private val logger: Logger,
@@ -28,25 +36,12 @@ class LoginViewModel @Inject constructor(
     private val _authState = MutableStateFlow<StateProgress<String>>(OnWait())
     val authState = _authState.asStateFlow()
 
-    private val _userName = dataStoreRepository.getUserName().catch { exceptionHandler(it) }
-    private val _userPass = dataStoreRepository.getUserPass().catch { exceptionHandler(it) }
-
-    private val _credentials: Flow<Pair<String, String>> =
-        combine(_userName, _userPass) { name, pass ->
-            if (name != null && pass != null) {
-                Pair(name, pass)
-            } else {
-                Pair("", "")
-            }
-        }
-
     init {
         viewModelScope.launch {
-            _credentials.collect { cred ->
-                val name = cred.first
-                val pass = cred.second
-                logger.log(TAG, "name $name pass $pass")
-                if (name.isBlank() || pass.isBlank()) {
+            userSettings().collectLatest { settings ->
+                val name = settings.username
+                val pass = settings.password
+                if (name == null || pass == null) {
                     _authState.value = OnWait()
                 } else {
                     _authState.value = Loading()
@@ -56,12 +51,14 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    // check saved datastore if empty show login else auth
-    // auth user
-    // if success save to datastore
     fun auth(name: String, pass: String) {
         viewModelScope.launch {
-            authorization.auth(name, pass).collect { request ->
+            authorization.auth(name, pass)
+                .catch {
+                    exceptionHandler(it)
+                    _authState.value = OnWait()
+                }
+                .collect { request ->
                 when (request) {
                     is PendingRequest -> {
                         _authState.value = Loading()
@@ -71,9 +68,11 @@ class LoginViewModel @Inject constructor(
                         exceptionHandler(request.exception)
                     }
                     is SuccessRequest -> {
-                        with(request.data) {
-                            saveUserToStore(userName = userName, userId = userId, userPass = request.data.pass)
-                        }
+                        saveUserToStore(
+                            userName = request.data.userName,
+                            userId = request.data.userId, // todo get userid from server response
+                            userPass = pass
+                        )
                         _authState.value = Success("")
                     }
                 }
@@ -85,11 +84,13 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             try {
                 logger.log(TAG, "saveUserToStore $userName $userId $userPass")
-                with(dataStoreRepository) {
-                    setUserId(userId)
-                    setUserName(userName)
-                    setUserPass(userPass)
-                }
+                saveUserSettings(
+                    UserSettings(
+                        userName,
+                        userId,
+                        userPass
+                    )
+                )
             } catch (e: Exception) {
                 exceptionHandler(e)
             }

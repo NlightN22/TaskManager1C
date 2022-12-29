@@ -1,11 +1,12 @@
 package space.active.taskmanager1c.data.remote
 
 import retrofit2.http.*
-import space.active.taskmanager1c.data.remote.dto.TaskListDto
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTO
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskMessagesDTOTemp
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TaskUserReadingFlagDTO
-import space.active.taskmanager1c.data.remote.dto.messages_dto.TasksReadingTimeDTO
+import space.active.taskmanager1c.data.remote.model.TaskDto
+import space.active.taskmanager1c.data.remote.model.TaskListDto
+import space.active.taskmanager1c.data.remote.model.UserDto
+import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
+import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
+import space.active.taskmanager1c.data.remote.model.messages_dto.TasksReadingTimeDTO
 
 interface RetrofitApi {
 //    tasks: get - получение списка задач
@@ -22,6 +23,13 @@ interface RetrofitApi {
      */
     @GET("tasks")
     suspend fun getTasks(): TaskListDto
+
+    /**
+     * POST
+     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks
+     */
+    @POST("tasks")
+    suspend fun sendNew(@Body taskDto: TaskDto): TaskListDto
 
     /**
      * POST
@@ -53,8 +61,7 @@ interface RetrofitApi {
     }
      */
     @POST("tasks/messages")
-    suspend fun sendMessages(@Body map: Map<String, String>): TaskMessagesDTOTemp
-
+    suspend fun sendMessages(@Body map: Map<String, String>): TaskMessagesDTO
 
     /**
      * POST
@@ -74,10 +81,19 @@ interface RetrofitApi {
     @POST("tasks/status/time")
     suspend fun setReadingTime(@Body map: Map<String, String>): TasksReadingTimeDTO
 
+    /**
+     * POST
+     * enable/disable unread flag for user
+    "id": "f54c2dfb-59ab-11ed-a023-da2dec3fdf49",
+    "flag": true
+     */
     @POST("tasks/status/unread")
     suspend fun setReadingFlag(
         @Body taskId: String,
         @Body readingFlag: Boolean
-    ): TaskUserReadingFlagDTO
+    ): TaskUserReadingFlagDTO // TODO change to Map
+
+    @GET("auth")
+    suspend fun authUser(): UserDto
 
 }

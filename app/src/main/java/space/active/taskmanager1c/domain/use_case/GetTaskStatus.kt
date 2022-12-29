@@ -5,7 +5,7 @@ import space.active.taskmanager1c.domain.models.TaskUserIs
 
 class GetTaskStatus {
     operator fun invoke(userIs: TaskUserIs, status: Boolean): Task.Status {
-        if (userIs is TaskUserIs.Author) {
+        if (userIs is TaskUserIs.AuthorInReviewed || userIs is TaskUserIs.Author) {
             // if user is author and press OK set Finished
             if (status) {
                 return Task.Status.Finished

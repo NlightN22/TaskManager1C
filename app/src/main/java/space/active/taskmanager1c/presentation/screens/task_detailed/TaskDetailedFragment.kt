@@ -54,6 +54,21 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
     private fun observers() {
 
+        //observe save event
+        viewModel.validationEvent.collectOnStart {
+            if (it) { onBackClick() }
+        }
+
+        //validate errors observer
+        viewModel.taskErrorState.collectOnStart { state ->
+            binding.taskTitleTIL.error = state.title?.getString(requireContext())
+            binding.taskDeadlineTIL.error = state.endDate?.getString(requireContext())
+            binding.taskPerformerTIL.error = state.performer?.getString(requireContext())
+            binding.taskAuthorTIL.error = state.author?.getString(requireContext())
+        }
+
+
+        // message sender
         viewModel.sendMessageEvent.collectOnStart { progress ->
             when (progress) {
                 is Loading -> {
@@ -61,6 +76,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 }
                 else -> {
                     binding.messageTIL.isEndIconVisible = true
+                    binding.messageInput.setText("")
                 }
             }
         }
@@ -157,21 +173,27 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.detailed_cancel -> {
-                    viewModel.saveChangesSmart(TaskChangesEvents.Status(false))
+                    viewModel.saveEditChanges(TaskChangesEvents.Status(false))
                 }
                 R.id.detailed_ok -> {
-                    viewModel.saveChangesSmart(TaskChangesEvents.Status(true))
+                    viewModel.saveEditChanges(TaskChangesEvents.Status(true))
+                }
+                R.id.menu_save -> {
+                    viewModel.saveNewTask()
+                }
+                R.id.menu_cancel -> {
+                    onBackClick()
                 }
             }
             return@setOnItemSelectedListener true
         }
 
         binding.taskTitleDetailed.changeListener {
-            viewModel.saveChangesSmart(TaskChangesEvents.Title(it))
+            viewModel.saveEditChanges(TaskChangesEvents.Title(it))
         }
 
         binding.taskDescription.changeListener {
-            viewModel.saveChangesSmart(TaskChangesEvents.Description(it))
+            viewModel.saveEditChanges(TaskChangesEvents.Description(it))
         }
 
         binding.mainDetailCard.setOnTouchListener(object :
@@ -251,7 +273,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             .build()
         datePicker.show(this.childFragmentManager, "DatePicker")
         datePicker.addOnPositiveButtonClickListener {
-            viewModel.saveChangesSmart(
+            viewModel.saveEditChanges(
                 TaskChangesEvents.EndDate(
                     it.millisecToLocalDateTime()
                 )
@@ -298,12 +320,12 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun setupMultiChooseDialog() {
         val listener: CustomInputDialogListener = { requestKey, listItems ->
             when (requestKey) {
-                REQUEST_COPERFOMREFRS -> viewModel.saveChangesSmart(
+                REQUEST_COPERFOMREFRS -> viewModel.saveEditChanges(
                     TaskChangesEvents.CoPerformers(
                         listItems.fromDialogItems()
                     )
                 )
-                REQUEST_OBSERVERS -> viewModel.saveChangesSmart(
+                REQUEST_OBSERVERS -> viewModel.saveEditChanges(
                     TaskChangesEvents.Observers(
                         listItems.fromDialogItems()
                     )
@@ -322,7 +344,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun setupSingleChooseDialog() {
         SingleChooseDialog.setupListener(parentFragmentManager, this) {
             it?.let {
-                viewModel.saveChangesSmart(TaskChangesEvents.Performer(User.fromDialogItem(it)))
+                viewModel.saveEditChanges(TaskChangesEvents.Performer(User.fromDialogItem(it)))
             }
         }
     }

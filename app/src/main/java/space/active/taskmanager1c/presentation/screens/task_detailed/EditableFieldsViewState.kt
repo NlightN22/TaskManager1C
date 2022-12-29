@@ -7,6 +7,7 @@ data class EditableFields(
     val coPerfomers: Boolean = false,
     val observers: Boolean = false,
     val description: Boolean = false,
+    val bottomNew: Boolean = false,
     val bottomOk: Boolean = false,
     val bottomCancel: Boolean = false
 )

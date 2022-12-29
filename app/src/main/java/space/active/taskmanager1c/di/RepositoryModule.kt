@@ -3,25 +3,30 @@ package space.active.taskmanager1c.di
 import android.app.Application
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.dataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import space.active.taskmanager1c.coreutils.CryptoManager
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.InputTaskRepositoryImpl
 import space.active.taskmanager1c.data.local.db.tasks_room_db.OutputTaskRepositoryImpl
 import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskInputDao
 import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskOutputDao
+import space.active.taskmanager1c.data.remote.MessagesRepositoryImpl
 import space.active.taskmanager1c.data.repository.*
-import space.active.taskmanager1c.domain.repository.DataStoreRepository
+import space.active.taskmanager1c.domain.models.UserSettings
+import space.active.taskmanager1c.domain.models.UserSettingsSerializer
 import space.active.taskmanager1c.domain.repository.MessagesRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import javax.inject.Singleton
 
-private val Context.dataStore by preferencesDataStore("settings")
+private val Context.dataStore by dataStore(
+    "user-settings.json",
+    serializer = UserSettingsSerializer(CryptoManager())
+)
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -63,6 +68,7 @@ class RepositoryModule {
     @Singleton
     fun providesDataStoreRepository(
         application: Application,
-    ): DataStoreRepository = DataStoreRepositoryImpl(application.dataStore)
+    ): DataStore<UserSettings> = application.dataStore
+
 
 }

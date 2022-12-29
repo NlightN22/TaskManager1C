@@ -8,13 +8,11 @@ import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskAndMessages
 import space.active.taskmanager1c.data.repository.InputTaskRepository
 
 class InputTaskRepositoryImpl(
     private val inputDao: TaskInputDao
 ) : InputTaskRepository {
-
 
 
     override val listTaskFlow: Flow<List<TaskInput>> get() = inputDao.getTasksFlow()
@@ -27,9 +25,6 @@ class InputTaskRepositoryImpl(
                 ErrorRequest(EmptyObject("List<TaskInput>"))
             }
         }
-
-    override fun getTaskAndMessages(taskId: String): Flow<TaskAndMessages> =
-        inputDao.getTaskAndMessages(taskId)
 
     override fun getTaskFlow(taskId: String): Flow<TaskInput?> = inputDao.getTaskFlow(taskId)
 
@@ -53,6 +48,9 @@ class InputTaskRepositoryImpl(
     override val listUsersFlow: Flow<List<UserInput>> = inputDao.getUsersFlow()
 
     override suspend fun getUser(userId: String): UserInput? = inputDao.getUser(userId)
+
+    override suspend fun getUserByName(username: String): UserInput? =
+        inputDao.getUserByName(username)
 
     override suspend fun insertUser(userInput: UserInput) {
         val currentVersionUser = getUser(userInput.id)

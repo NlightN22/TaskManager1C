@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.domain.models
 
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.presentation.utils.DialogItem
 
 data class User(
@@ -11,6 +12,11 @@ data class User(
     }
 
     companion object {
+
+        fun UserInput.fromUserInput(): User = User (
+            id = this.id,
+            name = this.name
+                )
 
         fun blankUser() = User (id = "", name = "")
 

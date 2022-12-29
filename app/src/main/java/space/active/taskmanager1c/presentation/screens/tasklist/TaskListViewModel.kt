@@ -16,9 +16,7 @@ import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.fi
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDo
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIObserve
 import space.active.taskmanager1c.domain.repository.TasksRepository
-import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.domain.use_case.GetTaskStatus
-import space.active.taskmanager1c.domain.use_case.ValidateTaskChanges
+import space.active.taskmanager1c.domain.use_case.*
 import javax.inject.Inject
 
 private const val TAG = "TaskListViewModel"
@@ -26,7 +24,10 @@ private const val TAG = "TaskListViewModel"
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
     private val repository: TasksRepository,
+    private val userSettings: GetUserSettingsFromDataStore,
     private val exceptionHandler: ExceptionHandler,
+    private val whoUserInTask: DefineUserInTask,
+    private val validate: Validate,
     private val logger: Logger,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @DefaultDispatcher private val defDispatcher: CoroutineDispatcher,
@@ -51,11 +52,7 @@ class TaskListViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
-    val whoAmI: User = User(
-        id = "c49a0b62-c192-11e1-8a03-f46d0490adee",
-        name = "Михайлов Олег Федорович"
-    ) // TODO replace to shared preferences
+    private val whoAmI: Flow<User> = userSettings.getUserFlow()
 
     private val inputUserList = repository.listUsersFlow
     val userList: StateFlow<List<User>> =
@@ -118,20 +115,20 @@ class TaskListViewModel @Inject constructor(
             var task = repository.getTask(taskIn.id).first()
             if (task != null) {
                 val cancelDuration = 5
-                val event = TaskChangesEvents.Status(true)
-                val userIs = TaskUserIs.userIs(task, whoAmI)
+                val ok = TaskChangesEvents.Status(true)
+                val userIs = whoUserInTask(task, whoAmI.first())
                 // smart set status
-                val getStatus = GetTaskStatus()(userIs, event.status)
-                val validation = ValidateTaskChanges()(
-                    changeType = event,
+                val taskStatus = GetTaskStatus()(userIs, ok.status)
+                val validateResult = validate.okCancelChoose(
+                    ok.status,
                     userIs = userIs,
-                    getStatus
+                    taskStatus
                 )
-                if (validation is ValidationResult.Success) {
-                    task = task.copy(status = getStatus)
+                if (validateResult.success) {
+                    task = task.copy(status = taskStatus)
                     _saveTaskEvent.emit(SaveEvents.Breakable(task, cancelDuration))
-                } else if (validation is ValidationResult.Error) {
-                    _showSnackBar.emit(validation.message)
+                } else {
+                    validateResult.errorMessage?.let { _showSnackBar.emit(it) }
                 }
             } else {
                 exceptionHandler(EmptyObject("task"))
@@ -211,6 +208,7 @@ class TaskListViewModel @Inject constructor(
 
     private suspend fun filterByBottom(list: List<Task>, filter: TaskListFilterTypes): List<Task> {
         val finalRes = viewModelScope.async(defDispatcher) {
+            val whoAmI = whoAmI.first()
             var result: List<Task> = emptyList()
             when (filter) {
                 is TaskListFilterTypes.IDo -> {

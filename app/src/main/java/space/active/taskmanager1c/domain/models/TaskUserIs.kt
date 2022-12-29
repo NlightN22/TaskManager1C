@@ -30,6 +30,10 @@ sealed class TaskUserIs(
         )
     ) : TaskUserIs(fields)
 
+    data class AuthorInNewTask(
+        override val fields: EditableFields = Author().fields.copy(bottomNew = true)
+    ) : TaskUserIs(fields)
+
     data class NotAuthorOrPerformer(
         override val fields: EditableFields = EditableFields()
     ) : TaskUserIs(fields)
@@ -46,25 +50,8 @@ sealed class TaskUserIs(
         )
     ) : TaskUserIs(fields)
 
+
+
     object Observer : TaskUserIs()
 
-    companion object {
-        fun userIs(task: Task, whoAmI: User): TaskUserIs {
-            if (task.users.author == whoAmI) {
-                if (task.status == Task.Status.Reviewed) {
-                    return AuthorInReviewed()
-                }
-                return Author()
-            } else if (task.users.performer == whoAmI || task.users.coPerformers.contains(whoAmI)) {
-                //if performer in reviewed can only resume task
-                if (task.status == Task.Status.Reviewed) {
-                    return PerformerInReviewed()
-                }
-                return Performer()
-            } else if (task.users.observers.contains(whoAmI)) {
-                return Observer
-            }
-            return NotAuthorOrPerformer()
-        }
-    }
 }
