@@ -10,7 +10,7 @@ import java.io.OutputStream
 
 class UserSettingsSerializer(
     private val cryptoManager: CryptoManager
-): Serializer<UserSettings>  {
+) : Serializer<UserSettings> {
 
     override val defaultValue: UserSettings
         get() = UserSettings()
@@ -18,8 +18,10 @@ class UserSettingsSerializer(
     override suspend fun readFrom(input: InputStream): UserSettings {
         val decryptedBytes = cryptoManager.decrypt(input)
         return try {
-            Json.decodeFromString(deserializer = UserSettings.serializer(),
-            string = decryptedBytes.decodeToString())
+            Json.decodeFromString(
+                deserializer = UserSettings.serializer(),
+                string = decryptedBytes.decodeToString()
+            )
         } catch (e: SerializationException) {
             e.printStackTrace()
             defaultValue
@@ -28,7 +30,7 @@ class UserSettingsSerializer(
 
     override suspend fun writeTo(t: UserSettings, output: OutputStream) {
         cryptoManager.encrypt(
-            byteArray = Json.encodeToString(
+            bytes = Json.encodeToString(
                 serializer = UserSettings.serializer(),
                 value = t
             ).encodeToByteArray(),

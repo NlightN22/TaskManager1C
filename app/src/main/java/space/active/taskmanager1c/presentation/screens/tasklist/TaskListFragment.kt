@@ -6,6 +6,8 @@ import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavDirections
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
@@ -14,7 +16,6 @@ import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
-import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
 import space.active.taskmanager1c.domain.models.TaskListOrderTypes
@@ -40,6 +41,12 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskListBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
+        val backdest = findNavController().previousBackStackEntry
+        val res = backdest?.let { findNavController().clearBackStack(R.id.action_taskListFragment_to_taskDetailedFragment) }
+        logger.log(TAG, "clearBackStack: ${res}")
+        logger.log(TAG, "backdest: ${backdest?.destination}")
+        val current = findNavController().currentDestination
+        logger.log(TAG, "currentDestination: ${current?.displayName}")
 
 
 
@@ -59,9 +66,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         )
         binding.listTasksRV.adapter = recyclerTasks
 
-
         initOrderMenu()
-        //        incoming()
         observers()
         listeners()
     }
@@ -155,10 +160,10 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                 setOnOptionsMenuClickListener(optionsMenu) {
                     when (it.itemId) {
                         R.id.options_settings -> {
-                            launchSettings(R.id.action_taskListFragment_to_settingsFragment)
+                            navigate(TaskListFragmentDirections.actionTaskListFragmentToSettingsFragment())
                         }
                         R.id.options_logout -> {
-                            onBackClick()
+                            clearUserCredentialsAndExit()
                         }
                     }
                 }
@@ -242,7 +247,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun launchTaskDetailed(taskId: String) {
-        val direction =
+        val direction: NavDirections =
             TaskListFragmentDirections.actionTaskListFragmentToTaskDetailedFragment(taskId)
         findNavController().navigate(
             direction,

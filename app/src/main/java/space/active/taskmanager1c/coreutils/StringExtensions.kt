@@ -1,6 +1,5 @@
 package space.active.taskmanager1c.coreutils
 
-import java.time.Instant.ofEpochSecond
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -11,7 +10,7 @@ fun String.toDateTime(formatter: DateTimeFormatter): LocalDateTime {
     return try {
         LocalDateTime.parse(this, formatter)
     } catch (e: Exception) {
-        LocalDateTime.ofEpochSecond(0L,0, ZoneOffset.UTC)
+        LocalDateTime.ofEpochSecond(0L, 0, ZoneOffset.UTC)
     }
 }
 

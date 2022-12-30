@@ -19,12 +19,12 @@ class OutputTaskRepositoryImpl (
          * check for the same task in table by input taskId
          */
         val existingInTable = getTask(outputTask.taskInput.id)
-        if (existingInTable != null) {
+        existingInTable?.let {
             /**
              *  check the same without output task fields
              */
             val incomeWithoutId = outputTask.copy(outputId = 0)
-            val existingWithoutId = existingInTable.copy(outputId = 0)
+            val existingWithoutId = it.copy(outputId = 0)
             if (incomeWithoutId == existingWithoutId) {
                 logger.error(
                     TAG,
@@ -33,7 +33,7 @@ class OutputTaskRepositoryImpl (
             } else {
                 taskOutputDao.insertTask(outputTask)
             }
-        } else {
+        } ?: kotlin.run {
             taskOutputDao.insertTask(outputTask)
         }
     }

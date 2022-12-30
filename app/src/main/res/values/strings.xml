@@ -10,11 +10,16 @@
     <string name="username_login">username</string>
     <string name="password_login">password</string>
 
+
     <string name="menu_order">Order</string>
     <string name="menu_attach">Attach</string>
     <string name="menu_new">New</string>
     <string name="menu_save">Save</string>
-    <string name="hint_author">автор</string>
+
+    <string name="task_hint_author">автор</string>
+    <string name="settings_username">имя пользователя</string>
+    <string name="settings_userId">ID пользователя</string>
+    <string name="settings_server_address">Адресс сервера</string>
     <string name="task_deadline_hint">срок выполнения</string>
     <string name="task_days_end_hint">осталось</string>
     <string name="task_performer_hint">исполнитель</string>
@@ -76,4 +81,5 @@
     <string name="exception_connection">Ошибка подключения. Проверьте ваше соединение с сервером</string>
     <string name="exception_server_answer">Ошибка ответа от сервера %s. Подробнее в логе</string>
     <string name="error_new_task_send_message">Ошибка отправки сообщения. Сохраните новую задачу</string>
+    <string name="exception_not_correct_URL">Некорректный адрес сервера</string>
 </resources>

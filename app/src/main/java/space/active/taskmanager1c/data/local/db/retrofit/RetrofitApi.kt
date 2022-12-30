@@ -110,7 +110,7 @@ interface RetrofitApi {
     @POST("tasks/status/unread")
     suspend fun setReadingFlag(
         @Header("Authorization") auth: String,
-        @Body map: Map<String, Boolean>
+        @Body map: Map<String, String>
     ): TaskUserReadingFlagDTO // TODO change to Map
 
     @GET("auth")

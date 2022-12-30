@@ -39,5 +39,7 @@ class BackendException(val errorBody: String, val errorCode: String) : AppExcept
     )
 )
 
+object NotCorrectServerAddress : AppExceptions(text = UiText.Resource(R.string.exception_not_correct_URL))
+
 class ConnectionException(val inEx: Throwable) :
     AppExceptions(UiText.Resource(R.string.exception_connection))

@@ -1,6 +1,8 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.TaskManager1C" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+
+<!--    TODO add night theme-->
+    <style name="Theme.TaskManager1C" parent="Theme.MaterialComponents.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/edit_text_stroke</item>
         <item name="colorPrimaryVariant">@color/hint_text</item>
@@ -8,7 +10,7 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/title_not_editable</item>
         <item name="colorSecondaryVariant">@color/hint_text</item>
-        <item name="colorOnSecondary">@color/app_background</item>
+        <item name="colorOnSecondary">@color/editable_text_background</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->

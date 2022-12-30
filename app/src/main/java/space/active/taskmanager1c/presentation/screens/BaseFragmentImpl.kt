@@ -9,6 +9,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -48,11 +49,9 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // SnackBar observer
-        lifecycleScope.launchWhenStarted {
-            baseMainVM.showSaveSnack.collectLatest {
-                showSaveCancelSnackBar(it.text, it.duration, lifecycleScope) {
-                    baseMainVM.saveTask(SaveEvents.BreakSave)
-                }
+        baseMainVM.showSaveSnack.collectOnStart {
+            showSaveCancelSnackBar(it.text, it.duration, lifecycleScope) {
+                baseMainVM.saveTask(SaveEvents.BreakSave)
             }
         }
     }
@@ -92,18 +91,37 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         }
     }
 
-    fun launchSettings(action: Int) {
-        findNavController().navigate(action)
+    fun clearUserCredentialsAndExit() {
+        baseMainVM.clearAndExit()
+    }
+
+    fun navigate(directions: NavDirections) {
+        try {
+            val backDest = findNavController().previousBackStackEntry?.destination
+            val current = findNavController().currentDestination
+            logger.log(TAG, "Nav: $directions  cur: ${current?.displayName} backdest: ${backDest?.displayName}")
+            findNavController().navigate(directions)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
     }
 
     fun onBackClick() {
-        val destination = findNavController().currentBackStackEntry?.destination?.id
-        destination?.let {
-            if (it == findNavController().currentDestination?.id) {
-                requireActivity().onBackPressed()
-            } else {
-                findNavController().popBackStack()
+        try {
+            val destination = findNavController().currentBackStackEntry?.destination
+            val backDest = findNavController().previousBackStackEntry?.destination
+            val current = findNavController().currentDestination
+            logger.log(TAG, "Nav back: ${backDest?.displayName} cur: ${current?.displayName} ")
+            destination?.let {
+                if (it.id == current?.id) {
+                    requireActivity().onBackPressed()
+                } else {
+                    logger.log("onBackClick", "")
+                    findNavController().popBackStack()
+                }
             }
+        } catch (e:Throwable) {
+            e.printStackTrace()
         }
     }
 

@@ -11,6 +11,9 @@ class ExceptionHandler @Inject constructor(
 ) {
     operator fun invoke(e: Throwable) {
         when (e) {
+            is NotCorrectServerAddress -> {
+                showErrorToast(e)
+            }
             is AuthException -> {
                 showErrorToast(e)
                 logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
@@ -21,32 +24,38 @@ class ExceptionHandler @Inject constructor(
             }
             is DbUnexpectedResult -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
+                e.printStackTrace()
+//                logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
             }
             is CantShowSnackBar -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
+                e.printStackTrace()
+//                logger.error(TAG, "${e::class.java.simpleName} ${e.text}")
             }
             is ParseBackendException -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.inEx.message}")
+                e.printStackTrace()
+//                logger.error(TAG, "${e::class.java.simpleName} ${e.inEx.message}")
 
             }
             is BackendException -> {
                 showErrorToast(e)
-                logger.error(
-                    TAG,
-                    "${e::class.java.simpleName} \nCODE: ${e.errorCode} \nBODY: ${e.errorBody}"
-                )
+                e.printStackTrace()
+//                logger.error(
+//                    TAG,
+//                    "${e::class.java.simpleName} \nCODE: ${e.errorCode} \nBODY: ${e.errorBody}"
+//                )
             }
             is ConnectionException -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.inEx.message}")
+                e.printStackTrace()
+//                logger.error(TAG, "${e::class.java.simpleName} ${e.inEx.message}")
             }
             else -> {
                 showErrorToast(e)
-                logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
-                logger.error(TAG,e.stackTrace.joinToString("\n"))
+                e.printStackTrace()
+//                logger.error(TAG, "${e::class.java.simpleName} ${e.message}")
+//                logger.error(TAG,e.stackTrace.joinToString("\n"))
             }
         }
     }

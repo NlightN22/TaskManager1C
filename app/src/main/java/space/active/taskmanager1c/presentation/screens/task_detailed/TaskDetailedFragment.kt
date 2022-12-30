@@ -115,20 +115,20 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         viewModel.showDialogEvent.collectOnStart { event ->
             when (event) {
                 is PerformerDialog -> {
-                    if (event.listUsers != null) {
+                    event.listUsers?.let {
                         SingleChooseDialog.show(
                             parentFragmentManager,
-                            event.listUsers, // todo replace to dialog item in class
+                            it, // todo replace to dialog item in class
                             ok = false,
                             cancel = true
                         )
                     }
                 }
                 is CoPerformersDialog -> {
-                    if (event.listDialogItems != null) {
+                    event.listDialogItems?.let {
                         MultiChooseDialog.show(
                             parentFragmentManager,
-                            event.listDialogItems,
+                            it,
                             ok = true,
                             cancel = true,
                             REQUEST_COPERFOMREFRS
@@ -136,10 +136,10 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                     }
                 }
                 is ObserversDialog -> {
-                    if (event.listDialogItems != null) {
+                    event.listDialogItems?.let {
                         MultiChooseDialog.show(
                             parentFragmentManager,
-                            event.listDialogItems,
+                            it,
                             ok = true,
                             cancel = true,
                             REQUEST_OBSERVERS

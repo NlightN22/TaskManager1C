@@ -64,21 +64,21 @@ class UpdateJobInterfaceImpl
             outputTaskRepository.deleteTasks(deleteOutputTaskList)
             // get only not deleted output tasks
             val outputTasksAfterDelete: List<OutputTask> = outputTaskRepository.getTasks()
+            var result: Request<TaskDto>? = null
             outputTasksAfterDelete.forEach { outputTask ->
                 // prepare to send changes
                 val existingInputTask = inputTaskRepository.getTask(outputTask.taskInput.id)
-                var result: Request<TaskDto>
                 // convert to DTO
                 val outToDTO = TaskDto.fromOutputTask(outputTask)
                 // find diffs with TaskInput if id in input table or send as is
-                if (existingInputTask != null) {
-                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(existingInputTask.name))
+                existingInputTask?.let {
+                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(it.name))
                     // if task is not edited and existing in input table
                     if (!outputTask.newTask) {
                         // get taskDTO with id and only diffs params
                         val outDTOWithoutId = outToDTO.copy(id = "")
                         // get diff map key value
-                        val inputDTO = TaskDto.fromInputTask(existingInputTask)
+                        val inputDTO = TaskDto.fromInputTask(it)
                         val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
                         // send in Map
                         val res = taskApi.sendEditedTaskMappedChanges(
@@ -90,31 +90,33 @@ class UpdateJobInterfaceImpl
 //                        mock todo delete
 //                        result = SuccessRequest(inputDTO)
                     }
-                } else {
+                } ?: kotlin.run {
                     // if task is not new
                     result = ErrorRequest<TaskDto>(ThisTaskIsNotNew)
                     // clear id for new tasks
                     if (outputTask.newTask) {
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
-//                        result = taskApi.sendNewTask(withoutId)
+                        result = taskApi.sendNewTask(userSettings.toAuthBasicDto(),withoutId)
                         //mock todo delete
-                        result = SuccessRequest(withoutId)
+//                        result = SuccessRequest(withoutId)
                     }
                 }
-                when (result) {
-                    is SuccessRequest -> {
-                        // TODO if task send with delete label
+                result?.let { res->
+                    when (res) {
+                        is SuccessRequest -> {
+                            // TODO if task send with delete label
 //                        logger.log(TAG, result.data.toString())
-                        inputTaskRepository.insertTask(result.data.toTaskInput())
-                        outputTaskRepository.deleteTasks(listOf(outputTask))
-                        emit(SuccessRequest(Any()))
-                    }
-                    is ErrorRequest -> {
-                        emit(ErrorRequest(result.exception))
-                    }
-                    is PendingRequest -> {
-                        emit(PendingRequest())
+                            inputTaskRepository.insertTask(res.data.toTaskInput())
+                            outputTaskRepository.deleteTasks(listOf(outputTask))
+                            emit(SuccessRequest(Any()))
+                        }
+                        is ErrorRequest -> {
+                            emit(ErrorRequest(res.exception))
+                        }
+                        is PendingRequest -> {
+                            emit(PendingRequest())
+                        }
                     }
                 }
             }

@@ -12,7 +12,6 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
 import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.Task.Companion.mapAndReplaceById
 import space.active.taskmanager1c.domain.models.User
-import space.active.taskmanager1c.domain.models.User.Companion.fromUserInput
 import space.active.taskmanager1c.domain.models.UsersInTaskDomain
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import java.time.format.DateTimeFormatter
@@ -51,7 +50,7 @@ class MergedTaskRepositoryImpl(
 
         outputTask?.let { outputTask ->
             val convertedOutput: Task = outputTaskToTaskDomain(outputTask)
-            if (inputTask != null) {
+            inputTask?.let {
                 val convertedInput: Task = inputTaskToTaskDomain(inputTask)
                 /**
                  * return if tasks are same. It's unbelievable, but still...
@@ -65,18 +64,18 @@ class MergedTaskRepositoryImpl(
                      */
                     return convertedOutput
                 }
-            } else {
+            } ?: kotlin.run {
                 /**
                  * return if input task is null
                  */
                 return convertedOutput
             }
-        } ?: return if (inputTask != null) {
+        } ?: inputTask?.let {
             /**
              * return if output task is null
              */
-            return inputTaskToTaskDomain(inputTask)
-        } else {
+            return inputTaskToTaskDomain(it)
+        } ?: kotlin.run {
             return null
         }
     }

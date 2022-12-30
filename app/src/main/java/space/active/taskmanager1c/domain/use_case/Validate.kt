@@ -30,9 +30,7 @@ class Validate @Inject constructor() {
     fun endDate(date: LocalDateTime?): Validation {
         val maxDateRange = 3 * 365 // 3 years
         val minDateRange = 0
-        if (date == null) {
-            return Validation(true)
-        } else {
+        date?.let {
             if (date.nowDiffInDays() >= minDateRange && date.nowDiffInDays() <= maxDateRange) {
                 return Validation(true)
             }
@@ -44,15 +42,16 @@ class Validate @Inject constructor() {
                     false,
                     UiText.Resource(R.string.end_date_valid_max_error, maxDateRange)
                 )
-
             }
+        } ?: kotlin.run {
+            return Validation(true)
         }
         return Validation(false, UiText.Resource(R.string.end_date_valid_error, maxDateRange))
     }
 
     fun author(author: User?): Validation {
-        if (author != null) {
-            if (author.name.isNotBlank() && author.id.isNotBlank()) {
+        author?.let {
+            if (it.name.isNotBlank() && it.id.isNotBlank()) {
                 return Validation(true)
             }
         }
@@ -61,8 +60,8 @@ class Validate @Inject constructor() {
 
     fun performer(performer: User?): Validation {
         Log.d("Validate", "performer $performer")
-        if (performer != null) {
-            if (performer.name.isNotBlank() && performer.id.isNotBlank()) {
+        performer?.let {
+            if (it.name.isNotBlank() && it.id.isNotBlank()) {
                 return Validation(true)
             }
         }

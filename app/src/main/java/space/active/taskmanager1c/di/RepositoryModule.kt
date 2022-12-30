@@ -26,10 +26,7 @@ import space.active.taskmanager1c.domain.repository.MessagesRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import javax.inject.Singleton
 
-private val Context.dataStore by dataStore(
-    "user-settings.json",
-    serializer = UserSettingsSerializer(CryptoManager())
-)
+
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -67,11 +64,7 @@ class RepositoryModule {
         taskApi: TaskApi
     ): MessagesRepository = MessagesRepositoryImpl(taskApi)
 
-    @Provides
-    @Singleton
-    fun providesDataStoreRepository(
-        application: Application,
-    ): DataStore<UserSettings> = application.dataStore
+
 
 
 }

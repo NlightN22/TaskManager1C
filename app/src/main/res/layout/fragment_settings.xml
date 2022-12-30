@@ -7,6 +7,93 @@
     android:layout_height="match_parent"
     tools:context=".presentation.screens.settings.SettingsFragment">
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/settingsUsername"
+        style="@style/CardViewGlobal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="70"
+        >
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/settingsUsernameTIL"
+            style="@style/NotEditableTextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/settings_username">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/settingsUsernameET"
+                style="@style/EditTextNotEditable"
+                android:layout_width="match_parent"
+                android:inputType="textPersonName"
+                tools:text="Великий Платон Самуилович" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/settingsUserId"
+        style="@style/CardViewGlobal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settingsUsername"
+        app:layout_constraintHorizontal_weight="70"
+        >
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/settingsUserIdTIL"
+            style="@style/NotEditableTextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/settings_userId">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/settingsUserIdET"
+                style="@style/EditTextNotEditable"
+                android:layout_width="match_parent"
+                android:inputType="textPersonName"
+                tools:text="fdglksdjfgl.kjw3455l6;kjw;lrktj" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/settingsServerAddress"
+        style="@style/EditableCardView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="75"
+        app:layout_constraintTop_toBottomOf="@+id/settingsUserId"
+>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/settingsServerAddressTIL"
+            style="@style/EditableTextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/settings_server_address"
+
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/settingsServerAddressET"
+                style="@style/EditTextEditable"
+                android:layout_width="match_parent"
+                android:inputType="textUri"
+                tools:text="http://172.16.17.242/torg_develop/hs/taskmgr/" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomMenu"
         app:menu="@menu/menu_save_cancel"

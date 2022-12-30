@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.login
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -7,16 +8,15 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
-import space.active.taskmanager1c.domain.models.UserSettings
 import space.active.taskmanager1c.domain.repository.Authorization
-import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.domain.use_case.GetUserSettingsFromDataStore
+import space.active.taskmanager1c.domain.use_case.LoadFromAsset
 import space.active.taskmanager1c.domain.use_case.SaveUserSettingsToDataStore
 import javax.inject.Inject
 
@@ -26,39 +26,106 @@ private const val TAG = "LoginViewModel"
 class LoginViewModel @Inject constructor(
     private val userSettings: GetUserSettingsFromDataStore,
     private val saveUserSettings: SaveUserSettingsToDataStore,
-    private val tasksRepository: TasksRepository,
+    private val loadFromAsset: LoadFromAsset,
     private val authorization: Authorization,
     private val exceptionHandler: ExceptionHandler,
     private val logger: Logger,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val _authState = MutableStateFlow<StateProgress<String>>(OnWait())
+    private val _viewState = MutableStateFlow(LoginViewState())
+    val viewState = _viewState.asStateFlow()
+
+    private val _authState = MutableStateFlow<StateProgress<Boolean>>(OnWait())
     val authState = _authState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            userSettings().collectLatest { settings ->
-                val name = settings.username
-                val pass = settings.password
-                if (name == null || pass == null) {
-                    _authState.value = OnWait()
-                } else {
-                    _authState.value = Loading()
-                    auth(name, pass)
+            //TODO delete mock
+            updateUI("Администратор", "123a")
+//            val serverAddress = "http://172.16.17.242/torg_develop/hs/taskmgr/"
+
+            // read from settings
+            val settings = userSettings().first()
+            val name = settings.username
+            val pass = settings.password
+
+//            if (serverAddress == null) {
+//                tryToLoadServerAddress()
+//            }
+
+            if (name == null || pass == null) {
+                // if null load base URL from asset
+                _authState.value = OnWait()
+            } else {
+                updateUI(name, pass)
+                _authState.value = Loading()
+                auth(name!!, pass!!)
+            }
+        }
+    }
+
+    private fun updateUI(username: String, password: String) {
+        viewModelScope.launch {
+            _viewState.value = _viewState.value.copy(username = username, password = password)
+        }
+    }
+
+    private fun validateServerAddress(address: String): Boolean =
+        Patterns.WEB_URL.matcher(address).matches()
+
+    private suspend fun tryToLoadServerAddress() {
+        val addressAsset: String? = loadFromAsset.invoke()
+        addressAsset?.let {
+            if (validateServerAddress(addressAsset)) {
+                val current = userSettings().first()
+                val changed = current.copy(serverAddress = addressAsset)
+                saveUserSettings(changed).collect {
+                    when (it) {
+                        is ErrorRequest -> {
+                            exceptionHandler(it.exception)
+                        }
+                        else -> {}
+                    }
                 }
             }
         }
     }
 
-    fun auth(name: String, pass: String) {
+    // todo delete mock
+    fun auth(
+        name: String,
+        pass: String,
+        server: String = "http://172.16.17.242/torg_develop/hs/taskmgr/"
+    ) {
         viewModelScope.launch {
-            authorization.auth(name, pass)
-                .catch {
-                    exceptionHandler(it)
+            updateUI(name, pass)
+            var serverAddress = server
+            if (server.isBlank()) {
+                serverAddress = userSettings().first().serverAddress ?: ""
+            }
+            serverAddress?.let {
+                if (validateServerAddress(it)) {
+                    tryToAuth(name, pass, it)
+                } else {
                     _authState.value = OnWait()
+                    exceptionHandler(NotCorrectServerAddress)
                 }
-                .collect { request ->
+            } ?: kotlin.run {
+                _authState.value = OnWait()
+                exceptionHandler(NotCorrectServerAddress)
+            }
+        }
+    }
+
+    private suspend fun tryToAuth(name: String, pass: String, serverAddress: String) {
+        // todo send address to module
+        authorization.auth(name, pass)
+            .catch {
+                exceptionHandler(it)
+                _authState.value = OnWait()
+            }
+            .collect { request ->
                 when (request) {
                     is PendingRequest -> {
                         _authState.value = Loading()
@@ -68,31 +135,34 @@ class LoginViewModel @Inject constructor(
                         exceptionHandler(request.exception)
                     }
                     is SuccessRequest -> {
-                        saveUserToStore(
-                            userName = request.data.userName,
-                            userId = request.data.userId, // todo get userid from server response
-                            userPass = pass
-                        )
-                        _authState.value = Success("")
+                        tryToSaveSettings(name, request.data.userId, pass, serverAddress)
                     }
                 }
             }
-        }
     }
 
-    private fun saveUserToStore(userName: String, userId: String, userPass: String) {
-        viewModelScope.launch(ioDispatcher) {
-            try {
-                logger.log(TAG, "saveUserToStore $userName $userId $userPass")
-                saveUserSettings(
-                    UserSettings(
-                        userName,
-                        userId,
-                        userPass
-                    )
-                )
-            } catch (e: Exception) {
-                exceptionHandler(e)
+    private suspend fun tryToSaveSettings(
+        name: String,
+        userId: String,
+        pass: String,
+        serverAddress: String
+    ) {
+        val changed = userSettings().first().copy(
+            username = name,
+            userId = userId,
+            password = pass,
+            serverAddress = serverAddress
+        )
+        saveUserSettings(changed).collect { saveRequest ->
+            when (saveRequest) {
+                is ErrorRequest -> {
+                    _authState.value = OnWait()
+                    exceptionHandler(saveRequest.exception)
+                }
+                is SuccessRequest -> {
+                    _authState.value = Success(true)
+                }
+                is PendingRequest -> {}
             }
         }
     }

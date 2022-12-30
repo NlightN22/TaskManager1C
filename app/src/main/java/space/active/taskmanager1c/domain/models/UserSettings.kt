@@ -8,7 +8,9 @@ import space.active.taskmanager1c.data.remote.model.AuthBasicDto
 data class UserSettings(
     val username: String? = null,
     val userId: String? = null,
-    val password: String? = null
+    val password: String? = null,
+    val serverAddress: String? = null
+    // TODO add base URL to settings and transfer it to class in parameters
 ) {
     fun toAuthBasicDto() = AuthBasicDto(
         name = this.username ?: throw EmptyObject("username"),

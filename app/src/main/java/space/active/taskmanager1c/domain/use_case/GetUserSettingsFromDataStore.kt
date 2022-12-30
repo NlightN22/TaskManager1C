@@ -23,7 +23,7 @@ class GetUserSettingsFromDataStore @Inject constructor(
             throw EmptyObject("UserFromSettings")
         } else {
             User(
-                id = it.userId, name = it.username
+                id = it.userId!!, name = it.username!!
             )
         }
     }.catch {
@@ -35,7 +35,7 @@ class GetUserSettingsFromDataStore @Inject constructor(
             throw EmptyObject("UserFromSettings")
         } else {
             User(
-                id = it.userId, name = it.username
+                id = it.userId!!, name = it.username!!
             )
         }
     }.catch {

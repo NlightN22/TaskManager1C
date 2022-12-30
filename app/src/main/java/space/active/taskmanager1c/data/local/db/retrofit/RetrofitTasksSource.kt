@@ -1,7 +1,5 @@
 package space.active.taskmanager1c.data.local.db.retrofit
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import okhttp3.Credentials
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
@@ -12,7 +10,10 @@ import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.remote.model.UserDto
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
+import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
+import space.active.taskmanager1c.data.remote.model.messages_dto.TasksReadingTimeDTO
 import java.nio.charset.StandardCharsets
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 private const val TAG = "RetrofitTasksSource"
@@ -79,8 +80,22 @@ class RetrofitTasksSource @Inject constructor
     override suspend fun getMessagesTimes(
         auth: AuthBasicDto,
         taskIds: List<String>
-    ): List<TaskMessagesDTO> = wrapRetrofitExceptions {
-        TODO("Not yet implemented")
+    ): List<TasksReadingTimeDTO> = wrapRetrofitExceptions {
+        retrofitApi.getReadingTimes(auth.toBasic(), taskIds)
+    }
+
+    override suspend fun setReadingTime(
+        auth: AuthBasicDto,
+        taskId: String,
+        readingTime: LocalDateTime
+    ): TasksReadingTimeDTO = wrapRetrofitExceptions {
+        val toSendMap = mapOf<String,String>("id" to taskId, "readTime" to readingTime.toString())
+        retrofitApi.setReadingTime(auth.toBasic(),toSendMap)
+    }
+
+    override suspend fun setReadingFlag(auth: AuthBasicDto, taskId: String, flag: Boolean): TaskUserReadingFlagDTO = wrapRetrofitExceptions {
+        val toSendMap = mapOf<String,String>("id" to taskId, "flag" to flag.toString())
+        retrofitApi.setReadingFlag(auth.toBasic(), toSendMap)
     }
 
     private fun AuthBasicDto.toBasic(): String =

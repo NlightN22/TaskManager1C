@@ -1,15 +1,21 @@
 package space.active.taskmanager1c.presentation.screens.mainactivity
 
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.datastore.dataStore
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.CryptoManager
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.ActivityMainBinding
+import space.active.taskmanager1c.domain.models.UserSettingsSerializer
 import javax.inject.Inject
 
 private const val TAG = "MainActivity"
@@ -36,6 +42,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observers() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.exitEvent.collectLatest {
+                if (it) {finishAffinity()}
+            }
+        }
 
     }
 

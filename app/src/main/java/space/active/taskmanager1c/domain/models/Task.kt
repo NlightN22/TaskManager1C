@@ -9,11 +9,8 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.Tas
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.domain.models.User.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedTaskState
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import kotlin.reflect.full.memberProperties
 
 data class Task(
     val date: LocalDateTime,
@@ -29,7 +26,8 @@ data class Task(
     val status: Status,
     val users: UsersInTaskDomain,
     val isSending: Boolean = false,
-    val outputId: Int = 0
+    val outputId: Int = 0,
+    val unread: Boolean = false
 ) {
 
     enum class Status {
@@ -117,16 +115,17 @@ data class Task(
      * Return days deadline in string
      */
     private fun getDeadline(): String {
-        if (this.endDate != null) {
-            val difference = this.endDate.nowDiffInDays()
+        this.endDate?.let {
+            val difference = it.nowDiffInDays()
             return "$difference дней"
-        } else {
+        } ?: kotlin.run {
             return ""
         }
-
     }
 
     companion object {
+
+
 
         fun newTask(author: User) = Task(
             date = LocalDateTime.now(),

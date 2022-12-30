@@ -7,6 +7,14 @@ data class User(
     val id: String,
     val name: String
 ) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {return true}
+        if (other != null && other is User) {
+            return this.id == other!!.id
+        }
+        return false
+    }
+
     fun toDialogItem(checked: Boolean): DialogItem {
         return DialogItem(id = this.id, text = name, checked = checked)
     }

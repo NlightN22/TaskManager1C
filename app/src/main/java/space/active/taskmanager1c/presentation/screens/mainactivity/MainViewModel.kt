@@ -23,6 +23,7 @@ private const val TAG = "MainViewModel"
 class MainViewModel @Inject constructor(
     private val updateJobInterface: UpdateJobInterface,
     private val userSettings: GetUserSettingsFromDataStore,
+    private val saveUserSettings: SaveUserSettingsToDataStore,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
     private val saveBreakable: SaveBreakable,
     private val saveDelayed: SaveDelayed,
@@ -39,12 +40,25 @@ class MainViewModel @Inject constructor(
 
     val coroutineContext: CoroutineContext = SupervisorJob() + ioDispatcher
 
+    private val _exitEvent = MutableSharedFlow<Boolean>()
+    val exitEvent = _exitEvent.asSharedFlow()
+
     /**
      *
      * Variable for stoppable job witch regular update data after user login
      */
     private var updateJob: Job? = null
     private val runningJob: AtomicBoolean = AtomicBoolean(false)
+
+    fun clearAndExit() {
+        viewModelScope.launch {
+            val current = userSettings().first()
+            saveUserSettings(
+                current.copy(username = null, userId = null, password = null)
+            ).collect()
+            _exitEvent.emit(true)
+        }
+    }
 
     fun saveTask(saveEvents: SaveEvents) {
         // new or edit

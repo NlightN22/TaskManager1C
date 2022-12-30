@@ -5,6 +5,7 @@ import android.security.keystore.KeyProperties
 import java.io.InputStream
 import java.io.OutputStream
 import java.security.KeyStore
+import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -16,7 +17,7 @@ class CryptoManager {
         load(null)
     }
 
-    private val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
+    private val encryptCipher get() = Cipher.getInstance(TRANSFORMATION).apply {
         init(Cipher.ENCRYPT_MODE, getKey())
     }
 
@@ -27,7 +28,7 @@ class CryptoManager {
     }
 
     private fun getKey(): SecretKey {
-        val existingKey = keyStore.getEntry(KEY_STORE_ALIAS, null) as? KeyStore.SecretKeyEntry
+        val existingKey = keyStore.getEntry("secret", null) as? KeyStore.SecretKeyEntry
         return existingKey?.secretKey ?: createKey()
     }
 
@@ -35,7 +36,7 @@ class CryptoManager {
         return KeyGenerator.getInstance(ALGORITHM).apply {
             init(
                 KeyGenParameterSpec.Builder(
-                    KEY_STORE_ALIAS,
+                    "secret",
                     KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
                 )
                     .setBlockModes(BLOCK_MODE)
@@ -47,8 +48,8 @@ class CryptoManager {
         }.generateKey()
     }
 
-    fun encrypt(byteArray: ByteArray, outputStream: OutputStream): ByteArray {
-        val encryptedBytes = encryptCipher.doFinal(byteArray)
+    fun encrypt(bytes: ByteArray, outputStream: OutputStream): ByteArray {
+        val encryptedBytes = encryptCipher.doFinal(bytes)
         outputStream.use {
             it.write(encryptCipher.iv.size)
             it.write(encryptCipher.iv)
@@ -64,8 +65,8 @@ class CryptoManager {
             val iv = ByteArray(ivSize)
             it.read(iv)
 
-            val encryptedByteSize = it.read()
-            val encryptedBytes = ByteArray(encryptedByteSize)
+            val encryptedBytesSize = it.read()
+            val encryptedBytes = ByteArray(encryptedBytesSize)
             it.read(encryptedBytes)
 
             getDecryptCipherForIv(iv).doFinal(encryptedBytes)
@@ -73,10 +74,10 @@ class CryptoManager {
     }
 
     companion object {
-        private const val KEY_STORE_ALIAS = "secret"
         private const val ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
     }
+
 }

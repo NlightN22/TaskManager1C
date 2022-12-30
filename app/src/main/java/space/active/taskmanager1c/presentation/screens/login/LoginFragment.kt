@@ -29,8 +29,14 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         listeners()
     }
 
+    // TODO check settings error at open
 
     private fun observers() {
+        viewModel.viewState.collectOnStart {
+            binding.editTextUsername.setText(it.username)
+            binding.editTextPassword.setText(it.password)
+        }
+
         viewModel.authState.collectOnStart { state ->
             when (state) {
                 is OnWait -> {
@@ -73,10 +79,10 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
                 setOnOptionsMenuClickListener(optionsMenu) {
                     when (it.itemId) {
                         R.id.options_settings -> {
-                            launchSettings(R.id.action_loginFragment2_to_settingsFragment2)
+                            navigate(LoginFragmentDirections.actionLoginFragment2ToSettingsFragment2())
                         }
                         R.id.options_logout -> {
-                            onBackClick()
+                            clearUserCredentialsAndExit()
                         }
                     }
                 }
@@ -84,10 +90,9 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         }
     }
 
-
     private fun launchMainScreen(isSignedIn: Boolean) {
         if (isSignedIn) {
-            findNavController().navigate(R.id.action_loginFragment2_to_main_nav_graph2)
+            navigate(LoginFragmentDirections.actionLoginFragment2ToMainNavGraph())
         }
     }
 

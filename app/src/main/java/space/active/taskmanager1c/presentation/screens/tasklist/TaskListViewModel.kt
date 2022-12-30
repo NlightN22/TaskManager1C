@@ -138,11 +138,11 @@ class TaskListViewModel @Inject constructor(
 
     fun changeTaskStatus(taskIn: Task) {
         viewModelScope.launch(ioDispatcher) {
-            var task = repository.getTask(taskIn.id).first()
-            if (task != null) {
+            val curTask: Task? = repository.getTask(taskIn.id).first()
+            curTask?.let {
                 val cancelDuration = 5
                 val ok = TaskChangesEvents.Status(true)
-                val userIs = whoUserInTask(task, whoAmI.first())
+                val userIs = whoUserInTask(it, whoAmI.first())
                 // smart set status
                 val taskStatus = GetTaskStatus()(userIs, ok.status)
                 val validateResult = validate.okCancelChoose(
@@ -151,12 +151,12 @@ class TaskListViewModel @Inject constructor(
                     taskStatus
                 )
                 if (validateResult.success) {
-                    task = task.copy(status = taskStatus)
-                    _saveTaskEvent.emit(SaveEvents.Breakable(task, cancelDuration))
+                    val changedTask = it.copy(status = taskStatus)
+                    _saveTaskEvent.emit(SaveEvents.Breakable(changedTask, cancelDuration))
                 } else {
-                    validateResult.errorMessage?.let { _showSnackBar.emit(it) }
+                    validateResult.errorMessage?.let { error-> _showSnackBar.emit(error) }
                 }
-            } else {
+            } ?: kotlin.run {
                 exceptionHandler(EmptyObject("task"))
             }
         }
