@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
 
 <!--    TODO add night theme-->
-    <style name="Theme.TaskManager1C" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.TaskManager1C" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/edit_text_stroke</item>
         <item name="colorPrimaryVariant">@color/hint_text</item>

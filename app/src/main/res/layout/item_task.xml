@@ -4,27 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
     android:layout_marginStart="4dp"
+    android:layout_marginTop="4dp"
     android:layout_marginEnd="4dp"
-    app:cardCornerRadius="14dp"
     android:background="@color/editable_text_background"
-    >
+    app:cardCornerRadius="14dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="2dp"
-        android:background="?android:selectableItemBackground"
-        >
+        android:background="?android:selectableItemBackground">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_baseline_expand_enter_arrow"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:src="@drawable/ic_baseline_expand_enter_arrow" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/startPart"
@@ -35,8 +33,7 @@
             app:layout_constraintEnd_toStartOf="@+id/endPart"
             app:layout_constraintHorizontal_weight="8"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            >
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/taskTitle"
@@ -107,8 +104,8 @@
                 android:id="@+id/userTasks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginStart="4dp"
+                android:orientation="vertical"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/taskNumber">
 
@@ -134,10 +131,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                app:layout_constraintStart_toEndOf="@+id/userTasks"
-                app:layout_constraintTop_toBottomOf="@+id/taskNumber"
+                android:src="@drawable/ic_sending"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/ic_sending"/>
+                app:layout_constraintStart_toEndOf="@+id/userTasks"
+                app:layout_constraintTop_toBottomOf="@+id/taskNumber" />
 
             <ImageView
                 android:id="@+id/taskStatus"
@@ -145,14 +142,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="12dp"
+                android:src="@drawable/ic_task_status"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/taskNumber"
-                android:src="@drawable/ic_task_status"/>
+                app:layout_constraintTop_toBottomOf="@+id/taskNumber" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
