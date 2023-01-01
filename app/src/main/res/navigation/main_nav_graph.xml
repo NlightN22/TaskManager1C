@@ -17,6 +17,9 @@
         <action
             android:id="@+id/action_taskListFragment_to_taskDetailedFragment"
             app:destination="@id/taskDetailedFragment" />
+        <action
+            android:id="@+id/action_taskListFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -31,5 +34,17 @@
         <argument
             android:name="taskId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_taskDetailedFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="space.active.taskmanager1c.presentation.screens.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 </navigation>

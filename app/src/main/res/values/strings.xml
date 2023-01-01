@@ -19,7 +19,7 @@
     <string name="task_hint_author">автор</string>
     <string name="settings_username">имя пользователя</string>
     <string name="settings_userId">ID пользователя</string>
-    <string name="settings_server_address">Адресс сервера</string>
+    <string name="settings_server_address">Адрес сервера</string>
     <string name="task_deadline_hint">срок выполнения</string>
     <string name="task_days_end_hint">осталось</string>
     <string name="task_performer_hint">исполнитель</string>

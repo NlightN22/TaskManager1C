@@ -8,7 +8,9 @@ import android.widget.PopupMenu
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.facebook.shimmer.ShimmerFrameLayout
@@ -29,8 +31,10 @@ import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.Toasts
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 private const val TAG = "BaseFragment"
+const val LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL"
 
 abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
@@ -43,8 +47,9 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     @Inject
     lateinit var exceptionHandler: ExceptionHandler
 
-    private val baseMainVM by viewModels<MainViewModel>()
+    private lateinit var currentDestination: NavDestination
 
+    val baseMainVM by viewModels<MainViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -54,7 +59,82 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
                 baseMainVM.saveTask(SaveEvents.BreakSave)
             }
         }
+
+        baseMainVM.exitEvent.collectOnStart {
+            logger.log(TAG, "Logout from application $it")
+            if (it) {
+                requireActivity().finish()
+                exitProcess(0)
+            }
+        }
+
+        currentDestination = findNavController().currentDestination!!
+
+        val isLoginFragment: Boolean = currentDestination?.id == R.id.loginFragment
+        if (!isLoginFragment) {
+            val login = getLoginState()
+            checkLoginState(login)
+        }
+        showNavigationLog()
     }
+
+    private fun getLoginState(): Boolean {
+        val currentStateHandle = findNavController().currentBackStackEntry!!.savedStateHandle
+
+        val previousLogin =
+            findNavController().previousBackStackEntry?.savedStateHandle?.get<Boolean>(
+                LOGIN_SUCCESSFUL
+            )
+        previousLogin?.let {
+            currentStateHandle.set(LOGIN_SUCCESSFUL, it)
+        }
+        val currentLogin = currentStateHandle?.get<Boolean>(LOGIN_SUCCESSFUL)
+        return currentLogin ?: false
+    }
+
+    private fun checkLoginState(login: Boolean) {
+        val currentFragment: Int = findNavController().currentDestination!!.id
+        val loginFragment: Int = R.id.loginFragment
+        if (!login) {
+            logger.log(TAG, "Not login")
+            if (currentFragment != loginFragment) {
+                logger.log(TAG, "Navigate to login")
+                navigateToLogin()
+            }
+        } else {
+            logger.log(TAG, "Success login")
+            successLogin()
+        }
+    }
+
+    private fun showNavigationLog() {
+        val backdest = findNavController().previousBackStackEntry
+        logger.log(TAG, "backdest: ${backdest?.destination}")
+        val currentDestination = findNavController().currentDestination
+        logger.log(TAG, "currentFragment: ${currentDestination?.displayName}")
+        val currentBackStackEntry = findNavController().currentBackStackEntry
+        logger.log(TAG, "currentBackStackEntry: ${currentBackStackEntry?.destination}")
+    }
+
+    abstract fun successLogin()
+
+    abstract fun navigateToLogin()
+
+    // todo delete
+//    fun observerLogin() {
+//        val currentStateHandle = findNavController().currentBackStackEntry!!.savedStateHandle
+//
+//        val loginState = currentStateHandle.getLiveData<Boolean>(LOGIN_SUCCESSFUL)
+//        logger.log(TAG, "loginState ${loginState.value}")
+//
+//        if (loginState.value == null) {
+//            authState = false
+//        }
+//
+//        loginState.observe(viewLifecycleOwner) {
+//            authState = true
+//        }
+//    }
 
     var textChangeJob: Job? = null
     fun TextInputEditText.changeListener(block: (String) -> Unit) {
@@ -72,7 +152,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     }
 
     fun showOptionsMenu(context: Context?, anchorView: View): PopupMenu? {
-        context?.let { context ->
+        context?.let {
             val optionsMenu = PopupMenu(this.context, anchorView)
             optionsMenu.inflate(R.menu.options_menu)
             optionsMenu.show()
@@ -98,8 +178,10 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     fun navigate(directions: NavDirections) {
         try {
             val backDest = findNavController().previousBackStackEntry?.destination
-            val current = findNavController().currentDestination
-            logger.log(TAG, "Nav: $directions  cur: ${current?.displayName} backdest: ${backDest?.displayName}")
+            logger.log(
+                TAG,
+                "Nav: $directions  cur: ${currentDestination?.displayName} backdest: ${backDest?.displayName}"
+            )
             findNavController().navigate(directions)
         } catch (e: Throwable) {
             e.printStackTrace()
@@ -110,17 +192,19 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         try {
             val destination = findNavController().currentBackStackEntry?.destination
             val backDest = findNavController().previousBackStackEntry?.destination
-            val current = findNavController().currentDestination
-            logger.log(TAG, "Nav back: ${backDest?.displayName} cur: ${current?.displayName} ")
+            logger.log(
+                TAG,
+                "Nav back: ${backDest?.displayName} cur: ${currentDestination?.displayName} "
+            )
             destination?.let {
-                if (it.id == current?.id) {
+                if (it.id == currentDestination?.id) {
                     requireActivity().onBackPressed()
                 } else {
                     logger.log("onBackClick", "")
                     findNavController().popBackStack()
                 }
             }
-        } catch (e:Throwable) {
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
@@ -189,7 +273,12 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         var duration = timer
         val snack = Snackbar.make(requireView(), text, Snackbar.LENGTH_INDEFINITE)
         coroutineScope.launch(SupervisorJob()) {
-            snack.setActionTextColor(resources.getColor(R.color.button_not_pressed))
+            snack.setActionTextColor(
+                resources.getColor(
+                    R.color.button_not_pressed,
+                    resources.newTheme()
+                )
+            )
             snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
             snack.show()
             while (duration > 0) {

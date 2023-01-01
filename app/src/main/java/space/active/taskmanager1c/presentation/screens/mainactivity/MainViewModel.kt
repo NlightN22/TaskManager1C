@@ -43,6 +43,7 @@ class MainViewModel @Inject constructor(
     private val _exitEvent = MutableSharedFlow<Boolean>()
     val exitEvent = _exitEvent.asSharedFlow()
 
+
     /**
      *
      * Variable for stoppable job witch regular update data after user login

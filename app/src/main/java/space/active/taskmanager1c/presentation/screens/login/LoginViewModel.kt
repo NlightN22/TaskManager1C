@@ -18,20 +18,21 @@ import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.domain.use_case.GetUserSettingsFromDataStore
 import space.active.taskmanager1c.domain.use_case.LoadFromAsset
 import space.active.taskmanager1c.domain.use_case.SaveUserSettingsToDataStore
+import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import javax.inject.Inject
 
 private const val TAG = "LoginViewModel"
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val userSettings: GetUserSettingsFromDataStore,
+    userSettings: GetUserSettingsFromDataStore,
     private val saveUserSettings: SaveUserSettingsToDataStore,
     private val loadFromAsset: LoadFromAsset,
     private val authorization: Authorization,
     private val exceptionHandler: ExceptionHandler,
-    private val logger: Logger,
+    logger: Logger,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : ViewModel() {
+) : BaseViewModel(userSettings, logger) {
 
     private val _viewState = MutableStateFlow(LoginViewState())
     val viewState = _viewState.asStateFlow()

@@ -10,6 +10,7 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.DefaultDispatcher
 import space.active.taskmanager1c.di.IoDispatcher
+import space.active.taskmanager1c.di.MainDispatcher
 import space.active.taskmanager1c.domain.models.*
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDelegate
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDidNtCheck
@@ -17,22 +18,26 @@ import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.fi
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIObserve
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
+import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import javax.inject.Inject
 
 private const val TAG = "TaskListViewModel"
 
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
+    userSettings: GetUserSettingsFromDataStore,
     private val repository: TasksRepository,
-    private val userSettings: GetUserSettingsFromDataStore,
     private val handleEmptyTaskList: HandleEmptyTaskList,
     private val exceptionHandler: ExceptionHandler,
     private val whoUserInTask: DefineUserInTask,
     private val validate: Validate,
-    private val logger: Logger,
+    logger: Logger,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @DefaultDispatcher private val defDispatcher: CoroutineDispatcher,
-) : ViewModel() {
+) : BaseViewModel(userSettings, logger) {
+
+    private val _startLoginEvent = MutableSharedFlow<Boolean>()
+    val startLoginEvent = _startLoginEvent.asSharedFlow()
 
     private val _startUpdateJob = MutableStateFlow<Boolean>(false)
     val startUpdateJob = _startUpdateJob.asStateFlow()
@@ -81,20 +86,21 @@ class TaskListViewModel @Inject constructor(
         orderByBottom(searchList, bottomOrder)
     }
 
-    init {
-        collectListTasks()
-    }
+//    fun checkCredentialsAndStart() {
+//        startAtValidateResult(
+//            ok = {collectListTasks()},
+//            login = {_startLoginEvent.emit(true)}
+//        )
+//    }
 
-    private fun collectListTasks() {
-        viewModelScope.launch {
-            inputListTask.collect { inputList ->
-//                logger.log(TAG, "inputListTask.collect")
-                tryToGetTasksAtFirstStart(inputList)
-            }
+    fun collectListTasks() {
+        logger.log(TAG, "collectListTasks")
+        inputListTask.collectInScope { inputList ->
+            checkForInputListAndTryFetch(inputList)
         }
     }
 
-    private suspend fun tryToGetTasksAtFirstStart(inputList: List<Task>) {
+    private suspend fun checkForInputListAndTryFetch(inputList: List<Task>) {
         if (inputList.isEmpty()) {
             handleEmptyTaskList(userSettings().first()).collect { request ->
                 when (request) {
@@ -106,7 +112,7 @@ class TaskListViewModel @Inject constructor(
                         _listTask.value = PendingRequest()
                     }
                     is ErrorRequest -> {
-                        _listTask.value = ErrorRequest(request.exception)
+                        exceptionHandler(request.exception)
                     }
                 }
             }
@@ -154,7 +160,7 @@ class TaskListViewModel @Inject constructor(
                     val changedTask = it.copy(status = taskStatus)
                     _saveTaskEvent.emit(SaveEvents.Breakable(changedTask, cancelDuration))
                 } else {
-                    validateResult.errorMessage?.let { error-> _showSnackBar.emit(error) }
+                    validateResult.errorMessage?.let { error -> _showSnackBar.emit(error) }
                 }
             } ?: kotlin.run {
                 exceptionHandler(EmptyObject("task"))
@@ -287,7 +293,7 @@ class TaskListViewModel @Inject constructor(
         searchJob?.cancel()
 //        logger.log(TAG, "searchJob onStart ${searchJob?.isActive} expr: $expression")
         searchJob = viewModelScope.launch {
-            delay(700)
+            delay(200)
             _searchFilter.value = expression?.toString() ?: ""
             logger.log(TAG, "searchJob End ${searchJob?.isActive} ${_searchFilter.value}")
         }

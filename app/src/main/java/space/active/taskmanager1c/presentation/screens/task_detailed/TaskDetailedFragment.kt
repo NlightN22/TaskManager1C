@@ -15,7 +15,6 @@ import space.active.taskmanager1c.domain.models.TaskChangesEvents
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
-import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.*
 import java.util.*
 
@@ -28,7 +27,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     lateinit var binding: FragmentTaskDetailedBinding
     lateinit var messagesAdapter: MessagesAdapter
     private val viewModel by viewModels<TaskDetailedViewModel>()
-    private val mainVM by viewModels<MainViewModel>()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,12 +42,21 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         listeners()
     }
 
-    private fun income() {
+    override fun navigateToLogin() {
+        navigate(TaskDetailedFragmentDirections.actionTaskDetailedFragmentToLoginFragment())
+    }
+
+    override fun successLogin() {
         //todo delete
 //        logger.log(TAG, "create")
         val taskId = TaskDetailedFragmentArgs.fromBundle(requireArguments()).taskId
 //        logger.log(TAG, "send $taskId")
         viewModel.setTaskFlow(taskId ?: "")
+    }
+
+    //todo delete
+    private fun income() {
+
     }
 
     private fun observers() {
@@ -105,7 +112,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
         // Save observer
         viewModel.saveTaskEvent.collectOnStart {
-            mainVM.saveTask(it)
+            baseMainVM.saveTask(it)
             if (it is SaveEvents.Breakable) {
                 onBackClick()
             }

@@ -19,7 +19,13 @@ sealed class UiText {
 
     fun getString(context: Context): String {
         return when (this) {
-            is Dynamic -> value
+            is Dynamic ->
+                try {
+                    value
+                } catch  ( e: Throwable) {
+                    e.printStackTrace()
+                    "Error in getString Dynamic. See Log."
+                }
             is Resource -> {
                 try {
                     context.getString(resourceId, *args)

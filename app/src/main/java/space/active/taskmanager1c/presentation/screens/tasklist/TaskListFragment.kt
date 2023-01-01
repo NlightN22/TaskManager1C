@@ -7,7 +7,6 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
@@ -20,7 +19,6 @@ import space.active.taskmanager1c.domain.models.Task
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
 import space.active.taskmanager1c.domain.models.TaskListOrderTypes
 import space.active.taskmanager1c.presentation.screens.BaseFragment
-import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.setIcon09State
 import space.active.taskmanager1c.presentation.utils.setIconAZState
 
@@ -32,7 +30,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     private lateinit var binding: FragmentTaskListBinding
 
     private val viewModel by viewModels<TaskListViewModel>()
-    private val mainVM by viewModels<MainViewModel>()
 
     private lateinit var recyclerTasks: TaskListAdapter
     private lateinit var orderMenu: PopupMenu
@@ -41,14 +38,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskListBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
-        val backdest = findNavController().previousBackStackEntry
-        val res = backdest?.let { findNavController().clearBackStack(R.id.action_taskListFragment_to_taskDetailedFragment) }
-        logger.log(TAG, "clearBackStack: ${res}")
-        logger.log(TAG, "backdest: ${backdest?.destination}")
-        val current = findNavController().currentDestination
-        logger.log(TAG, "currentDestination: ${current?.displayName}")
-
-
 
         recyclerTasks = TaskListAdapter(object : TaskActionListener {
             override fun onTaskStatusClick(task: Task) {
@@ -71,15 +60,26 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         listeners()
     }
 
+    override fun navigateToLogin() {
+        navigate(TaskListFragmentDirections.actionTaskListFragmentToLoginFragment())
+    }
+
+    override fun successLogin() {
+        viewModel.collectListTasks()
+    }
+
     private fun observers() {
+
 
         // start updateJob in MainVM
         viewModel.startUpdateJob.collectOnStart {
-            if (it) {mainVM.updateJob()}
+            if (it) {
+                baseMainVM.updateJob()
+            }
         }
 
         // collect saveId events to change isSaved status
-        mainVM.savedIdEvent.collectOnStart {
+        baseMainVM.savedIdEvent.collectOnStart {
             viewModel.changeIsSending(it)
         }
 
@@ -88,7 +88,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
         // Save observer
         viewModel.saveTaskEvent.collectOnStart {
-            mainVM.saveTask(it)
+            baseMainVM.saveTask(it)
         }
 
         // order sate for order menu
@@ -156,8 +156,8 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         // options menu
         binding.optionsMenu.setOnClickListener {
             val optionsMenu = showOptionsMenu(this.context, binding.optionsMenu)
-            optionsMenu?.let { optionsMenu ->
-                setOnOptionsMenuClickListener(optionsMenu) {
+            optionsMenu?.let {
+                setOnOptionsMenuClickListener(it) {
                     when (it.itemId) {
                         R.id.options_settings -> {
                             navigate(TaskListFragmentDirections.actionTaskListFragmentToSettingsFragment())

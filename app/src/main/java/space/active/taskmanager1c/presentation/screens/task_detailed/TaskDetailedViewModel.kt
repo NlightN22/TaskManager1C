@@ -15,6 +15,7 @@ import space.active.taskmanager1c.domain.models.Messages.Companion.toMessages
 import space.active.taskmanager1c.domain.models.User.Companion.toDialogItems
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
+import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import javax.inject.Inject
 
 private const val TAG = "TaskDetailedViewModel"
@@ -22,8 +23,8 @@ private const val TAG = "TaskDetailedViewModel"
 @HiltViewModel
 class TaskDetailedViewModel @Inject constructor(
     private val repository: TasksRepository,
-    private val logger: Logger,
-    private val userSettings: GetUserSettingsFromDataStore,
+    logger: Logger,
+    userSettings: GetUserSettingsFromDataStore,
     private val saveNewTaskToDb: SaveNewTaskToDb,
     private val validate: Validate,
     private val exceptionHandler: ExceptionHandler,
@@ -32,7 +33,7 @@ class TaskDetailedViewModel @Inject constructor(
     private val sendTaskMessages: SendTaskMessages,
     private val whoUserInTask: DefineUserInTask,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : ViewModel() {
+) : BaseViewModel(userSettings, logger) {
 
     private val _taskState = MutableStateFlow<TaskDetailedViewState>(TaskDetailedViewState.New())
     val taskState = _taskState.asStateFlow()

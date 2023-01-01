@@ -7,6 +7,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.FragmentSettingsBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
@@ -27,6 +28,14 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
         observers()
         listeners()
+    }
+
+    override fun navigateToLogin() {
+        //nothing
+    }
+
+    override fun successLogin() {
+        //nothing
     }
 
     private fun observers() {

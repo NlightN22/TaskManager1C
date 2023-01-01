@@ -3,6 +3,7 @@ package space.active.taskmanager1c.presentation.screens.login
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
@@ -11,6 +12,8 @@ import space.active.taskmanager1c.coreutils.OnWait
 import space.active.taskmanager1c.coreutils.Success
 import space.active.taskmanager1c.databinding.FragmentLoginBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import space.active.taskmanager1c.presentation.screens.BaseViewModel
+import space.active.taskmanager1c.presentation.screens.LOGIN_SUCCESSFUL
 
 private const val TAG = "LoginFragment"
 
@@ -18,6 +21,7 @@ private const val TAG = "LoginFragment"
 class LoginFragment : BaseFragment(R.layout.fragment_login) {
 
     lateinit var binding: FragmentLoginBinding
+    lateinit var previousStateHandle: SavedStateHandle
     private val viewModel: LoginViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -25,11 +29,23 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         binding = FragmentLoginBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
+        initLoginState()
         observers()
         listeners()
     }
 
-    // TODO check settings error at open
+    private  fun initLoginState() {
+        previousStateHandle = findNavController().previousBackStackEntry!!.savedStateHandle
+        previousStateHandle[LOGIN_SUCCESSFUL] = false
+    }
+
+    override fun navigateToLogin() {
+        // nothing
+    }
+
+    override fun successLogin() {
+        onBackClick()
+    }
 
     private fun observers() {
         viewModel.viewState.collectOnStart {
@@ -46,7 +62,10 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
                     renderLoading(true)
                 }
                 is Success -> {
-                    launchMainScreen(true)
+                    previousStateHandle[LOGIN_SUCCESSFUL] = true
+                    successLogin()
+                    // todo delete
+//                    launchMainScreen(true)
                 }
             }
         }
@@ -75,11 +94,11 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
 
         binding.optionsMenu.setOnClickListener {
             val optionsMenu = showOptionsMenu(this.context, binding.optionsMenu)
-            optionsMenu?.let { optionsMenu ->
-                setOnOptionsMenuClickListener(optionsMenu) {
+            optionsMenu?.let { options ->
+                setOnOptionsMenuClickListener(options) {
                     when (it.itemId) {
                         R.id.options_settings -> {
-                            navigate(LoginFragmentDirections.actionLoginFragment2ToSettingsFragment2())
+                            navigate(LoginFragmentDirections.actionLoginFragmentToSettingsFragment())
                         }
                         R.id.options_logout -> {
                             clearUserCredentialsAndExit()
@@ -90,9 +109,11 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         }
     }
 
+    // todo delete
     private fun launchMainScreen(isSignedIn: Boolean) {
         if (isSignedIn) {
-            navigate(LoginFragmentDirections.actionLoginFragment2ToMainNavGraph())
+
+//            previousStateHandle.set(LOGIN_SUCCESSFUL, true)
         }
     }
 

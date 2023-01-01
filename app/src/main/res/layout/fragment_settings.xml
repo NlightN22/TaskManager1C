@@ -58,6 +58,7 @@
                 android:id="@+id/settingsUserIdET"
                 style="@style/EditTextNotEditable"
                 android:layout_width="match_parent"
+                android:clickable="true"
                 android:inputType="textPersonName"
                 tools:text="fdglksdjfgl.kjw3455l6;kjw;lrktj" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -89,7 +90,7 @@
                 style="@style/EditTextEditable"
                 android:layout_width="match_parent"
                 android:inputType="textUri"
-                tools:text="http://172.16.17.242/torg_develop/hs/taskmgr/" />
+                tools:text="https://super_platform.com/develop/taskmanager" />
         </com.google.android.material.textfield.TextInputLayout>
     </com.google.android.material.card.MaterialCardView>
 

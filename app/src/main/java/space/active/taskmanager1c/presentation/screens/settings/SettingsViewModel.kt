@@ -10,6 +10,7 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.domain.use_case.GetUserSettingsFromDataStore
 import space.active.taskmanager1c.domain.use_case.SaveUserSettingsToDataStore
+import space.active.taskmanager1c.domain.use_case.ValidateCredentials
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,6 +21,8 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _viewState = MutableStateFlow(SettingsViewState())
     val viewState = _viewState.asStateFlow()
+
+    val validateCredentials = ValidateCredentials()
 
 
     private val _saveEvent = MutableSharedFlow<Boolean>()
@@ -41,15 +44,15 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
 
             val curSettings = userSettings().first()
+            val changeAddress = curSettings.copy(serverAddress = serverAddress)
+
             // validation
-            val res = Patterns.WEB_URL.matcher(serverAddress).matches()
-            if (!res) {
-                _viewState.value =
-                    _viewState.value.copy(addressError = NotCorrectServerAddress.text)
+            val validateRes = validateCredentials(changeAddress)
+
+            if (!validateRes) {
+                exceptionHandler(NotCorrectServerAddress)
                 return@launch
             }
-            // save address
-            val changeAddress = curSettings.copy(serverAddress = serverAddress)
             // save to DataStore
             saveSettings(changeAddress).collect { saveRequest ->
                 when (saveRequest) {
