@@ -53,6 +53,7 @@ class MainViewModel @Inject constructor(
 
     fun clearAndExit() {
         viewModelScope.launch {
+            // todo stop update job add clear BD
             val current = userSettings().first()
             saveUserSettings(
                 current.copy(username = null, userId = null, password = null)
@@ -108,7 +109,8 @@ class MainViewModel @Inject constructor(
                         updateJobInterface.updateJob(userSettings().first(), 1000L)
                             .catch { e ->
                                 exceptionHandler(e)
-                                delay(2000)
+                                //TODO add error counter and pause
+                                delay(5000)
                             }
                             .collectLatest {
                                 if (it is ErrorRequest) {
@@ -126,16 +128,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    //
-//    /** TODO update job
-//     * - update only for authenticated user
-//     * - take data only from DB
-//     * - write to DB from api
-//     * - update must be only in data layer with threshold handler
-//     * - get and collect update result to threshold handler
-//     * - catch update timeouts and tries and when the threshold is exceeded show information to user
-//     */
-//
     fun stopUpdateJob() {
         try {
             updateJob?.cancel()

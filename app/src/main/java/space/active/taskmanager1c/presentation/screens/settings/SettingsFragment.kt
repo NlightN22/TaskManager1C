@@ -15,11 +15,6 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     private val viewModel by viewModels<SettingsViewModel>()
 
     lateinit var binding: FragmentSettingsBinding
-    // todo
-    // Server address
-    // Username
-    // Logging
-    // не отображать если нет прав в списке
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

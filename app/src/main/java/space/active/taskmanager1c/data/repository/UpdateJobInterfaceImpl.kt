@@ -31,6 +31,7 @@ class UpdateJobInterfaceImpl
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger,
 ) : UpdateJobInterface {
+
     override fun updateJob(userSettings: UserSettings, updateDelay: Long): Flow<Request<Any>> =
         channelFlow<Request<Any>> {
             // Проверяем таблицу исходящих задач. С определенной переодичностью

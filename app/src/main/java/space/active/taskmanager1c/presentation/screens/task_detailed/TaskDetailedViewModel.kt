@@ -336,7 +336,6 @@ class TaskDetailedViewModel @Inject constructor(
     private fun setDependentTasks(task: Task) {
         viewModelScope.launch {
             val mainTaskId = task.mainTaskId
-            // todo val innerTasksId =
             if (mainTaskId.isNotBlank()) {
                 val mainTask = repository.getTask(mainTaskId).first()
                 mainTask?.let {

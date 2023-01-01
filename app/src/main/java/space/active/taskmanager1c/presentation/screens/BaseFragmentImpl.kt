@@ -120,22 +120,6 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     abstract fun navigateToLogin()
 
-    // todo delete
-//    fun observerLogin() {
-//        val currentStateHandle = findNavController().currentBackStackEntry!!.savedStateHandle
-//
-//        val loginState = currentStateHandle.getLiveData<Boolean>(LOGIN_SUCCESSFUL)
-//        logger.log(TAG, "loginState ${loginState.value}")
-//
-//        if (loginState.value == null) {
-//            authState = false
-//        }
-//
-//        loginState.observe(viewLifecycleOwner) {
-//            authState = true
-//        }
-//    }
-
     var textChangeJob: Job? = null
     fun TextInputEditText.changeListener(block: (String) -> Unit) {
         addTextChangedListener {

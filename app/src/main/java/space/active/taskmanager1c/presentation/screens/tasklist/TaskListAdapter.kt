@@ -3,6 +3,7 @@ package space.active.taskmanager1c.presentation.screens.tasklist
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.active.taskmanager1c.R
@@ -15,11 +16,23 @@ interface TaskActionListener {
     fun onTaskClick(task: Task)
     fun onTaskLongClick(task: Task)
 }
+data class TasKForAdapter(
+    val task: Task,
+    val status: Status
+){
+    enum class Status {
+        Reviewed,
+        NotReviewed,
+        Invisible
+    }
+}
 
+
+// TODO implement diff utils
 class TaskListAdapter(
     private val actionListener: TaskActionListener
 ) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener {
-    var tasks: List<Task> = emptyList()
+    var tasks: List<TasKForAdapter> = emptyList()
         set(newValue) {
             field = newValue
             notifyDataSetChanged()
@@ -48,18 +61,34 @@ class TaskListAdapter(
     }
 
     override fun onBindViewHolder(holder: TasksViewHolder, position: Int) {
-        val task: Task = tasks[position]
+        val taskAdapter: TasKForAdapter = tasks[position]
         with(holder.binding) {
-            holder.itemView.tag = task             // send to onClick
-            taskStatus.tag = task             // send to onClick
-            taskTitle.text = task.name
-            taskDate.text = task.date.toShortDate()
-            taskNumber.text = task.number
-            taskAuthor.text = abbreviationName(task.users.author.name)
-            isObserved.isVisible = task.users.observers.isNotEmpty()
-            isCoPerformed.isVisible = task.users.coPerformers.isNotEmpty()
-            isSending.isVisible = task.isSending
-            taskStatus.isSelected = task.status == Task.Status.Reviewed
+            holder.itemView.tag = taskAdapter.task           // send to onClick
+            taskStatus.tag = taskAdapter.task             // send to onClick
+            taskTitle.text = taskAdapter.task.name
+            taskDate.text = taskAdapter.task.date.toShortDate()
+            taskNumber.text = taskAdapter.task.number
+            taskAuthor.text = abbreviationName(taskAdapter.task.users.author.name)
+            isObserved.isVisible = taskAdapter.task.users.observers.isNotEmpty()
+            isCoPerformed.isVisible = taskAdapter.task.users.coPerformers.isNotEmpty()
+            isSending.isVisible = taskAdapter.task.isSending
+            taskStatus.setTaskStatus(taskAdapter.status)
+        }
+    }
+
+    private fun ImageView.setTaskStatus(status: TasKForAdapter.Status) {
+        when (status) {
+            TasKForAdapter.Status.Reviewed ->  {
+                this.isSelected = true
+                this.isVisible = true
+            }
+            TasKForAdapter.Status.NotReviewed ->  {
+                this.isSelected = false
+                this.isVisible = true
+            }
+            TasKForAdapter.Status.Invisible ->  {
+                this.isVisible = false
+            }
         }
     }
 

@@ -1,7 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.login
 
 import android.util.Patterns
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -42,18 +41,14 @@ class LoginViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            //TODO delete mock
-            updateUI("Администратор", "123a")
-//            val serverAddress = "http://172.16.17.242/torg_develop/hs/taskmgr/"
+            val serverAddress = userSettings().first().serverAddress
 
             // read from settings
-            val settings = userSettings().first()
-            val name = settings.username
-            val pass = settings.password
+            val (name, pass) = readFromSettings()
 
-//            if (serverAddress == null) {
-//                tryToLoadServerAddress()
-//            }
+            if (serverAddress == null) {
+                tryToLoadServerAddress()
+            }
 
             if (name == null || pass == null) {
                 // if null load base URL from asset
@@ -64,6 +59,13 @@ class LoginViewModel @Inject constructor(
                 auth(name!!, pass!!)
             }
         }
+    }
+
+    private suspend fun readFromSettings(): Pair<String?, String?> {
+        val settings = userSettings().first()
+        val name = settings.username
+        val pass = settings.password
+        return Pair(name, pass)
     }
 
     private fun updateUI(username: String, password: String) {
@@ -93,18 +95,13 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    // todo delete mock
     fun auth(
         name: String,
         pass: String,
-        server: String = "http://172.16.17.242/torg_develop/hs/taskmgr/"
     ) {
         viewModelScope.launch {
             updateUI(name, pass)
-            var serverAddress = server
-            if (server.isBlank()) {
-                serverAddress = userSettings().first().serverAddress ?: ""
-            }
+            val serverAddress = userSettings().first().serverAddress
             serverAddress?.let {
                 if (validateServerAddress(it)) {
                     tryToAuth(name, pass, it)
@@ -120,7 +117,7 @@ class LoginViewModel @Inject constructor(
     }
 
     private suspend fun tryToAuth(name: String, pass: String, serverAddress: String) {
-        // todo send address to module
+        // todo send address to retrofit module
         authorization.auth(name, pass)
             .catch {
                 exceptionHandler(it)

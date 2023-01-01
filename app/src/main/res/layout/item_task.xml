@@ -31,7 +31,7 @@
             android:layout_marginStart="6dp"
             android:layout_marginTop="3dp"
             app:layout_constraintEnd_toStartOf="@+id/endPart"
-            app:layout_constraintHorizontal_weight="8"
+            app:layout_constraintHorizontal_weight="80"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -80,7 +80,7 @@
             android:layout_marginTop="3dp"
             android:layout_marginBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_weight="3"
+            app:layout_constraintHorizontal_weight="35"
             app:layout_constraintStart_toEndOf="@+id/startPart"
             app:layout_constraintTop_toTopOf="parent"
 

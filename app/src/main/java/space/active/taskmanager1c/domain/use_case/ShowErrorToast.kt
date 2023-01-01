@@ -13,15 +13,23 @@ class ShowErrorToast @Inject constructor(
     private val context: Application
 ) {
     operator fun invoke(e: AppExceptions) {
-        android.os.Handler(Looper.getMainLooper()).post {
-            val message = e.text.getString(context)
-            toast(message)
+        try {
+            android.os.Handler(Looper.getMainLooper()).post {
+                val message = e.text.getString(context)
+                toast(message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     operator fun invoke(e: Throwable) {
-        android.os.Handler(Looper.getMainLooper()).post {
-            toast(e.message.toString())
+        try {
+            android.os.Handler(Looper.getMainLooper()).post {
+                toast(e.message.toString())
+            }
+        } catch (e: Throwable) {
+            e.printStackTrace()
         }
     }
 }

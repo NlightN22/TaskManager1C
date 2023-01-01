@@ -9,6 +9,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.Tas
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.domain.models.User.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedTaskState
+import space.active.taskmanager1c.presentation.screens.tasklist.TasKForAdapter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -29,6 +30,13 @@ data class Task(
     val outputId: Int = 0,
     val unread: Boolean = false
 ) {
+
+    fun toTaskAdapter(status: TasKForAdapter.Status) = TasKForAdapter(
+        task = this,
+        status = status
+    )
+
+    fun List<Task>.toListForTaskAdapter(status: TasKForAdapter.Status) = this.map { it.toTaskAdapter(status) }
 
     enum class Status {
         New, // не используется Можно использовать при отправке на сервер

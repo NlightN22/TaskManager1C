@@ -67,7 +67,7 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
     }
 
     interface DialogListener {
-        fun onClickItem(item: DialogItem) // todo replace to typealias
+        fun onClickItem(item: DialogItem)
     }
 
     class DialogAdapter(val listener: DialogListener) :

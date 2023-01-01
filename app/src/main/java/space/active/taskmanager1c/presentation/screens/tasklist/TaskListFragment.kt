@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.PendingRequest
@@ -49,6 +50,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             }
 
             override fun onTaskLongClick(task: Task) {
+                // add popup menu set priority and unread status
                 TODO("Not yet implemented")
             }
         }

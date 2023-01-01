@@ -1,7 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.text.Editable
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -10,7 +9,6 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.DefaultDispatcher
 import space.active.taskmanager1c.di.IoDispatcher
-import space.active.taskmanager1c.di.MainDispatcher
 import space.active.taskmanager1c.domain.models.*
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDelegate
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDidNtCheck
@@ -36,9 +34,6 @@ class TaskListViewModel @Inject constructor(
     @DefaultDispatcher private val defDispatcher: CoroutineDispatcher,
 ) : BaseViewModel(userSettings, logger) {
 
-    private val _startLoginEvent = MutableSharedFlow<Boolean>()
-    val startLoginEvent = _startLoginEvent.asSharedFlow()
-
     private val _startUpdateJob = MutableStateFlow<Boolean>(false)
     val startUpdateJob = _startUpdateJob.asStateFlow()
 
@@ -50,7 +45,7 @@ class TaskListViewModel @Inject constructor(
     private val _showSnackBar = MutableSharedFlow<UiText>()
     val showSnackBar = _showSnackBar.asSharedFlow()
 
-    private val _listTask = MutableStateFlow<Request<List<Task>>>(PendingRequest())
+    private val _listTask = MutableStateFlow<Request<List<TasKForAdapter>>>(PendingRequest())
     val listTask = _listTask.asStateFlow()
 
     private val _searchFilter = MutableStateFlow<String>("")
@@ -61,13 +56,13 @@ class TaskListViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    private val whoAmI: Flow<User> = userSettings.getUserFlow()
+    val whoAmI: Flow<User> = userSettings.getUserFlow()
 
     private val inputUserList = repository.listUsersFlow
     val userList: StateFlow<List<User>> =
         inputUserList.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
-    private val inputListTask = combine(
+    private val inputListTask: Flow<List<TasKForAdapter>> = combine(
         repository.listTasksFlow,
         _bottomFilter,
         _searchFilter,
@@ -82,16 +77,33 @@ class TaskListViewModel @Inject constructor(
         } else {
             filterBySearch(bottomList, searchFilter)
         }
+        val orederedList = orderByBottom(searchList, bottomOrder)
         // final result
-        orderByBottom(searchList, bottomOrder)
+        val whoAmI = whoAmI.first()
+        orederedList.map {
+            val adaptedTask = it.toTaskAdapter(defineStatusForList(it, whoAmI))
+            changeAuthorToPerformer(adaptedTask, whoAmI)
+        }
     }
 
-//    fun checkCredentialsAndStart() {
-//        startAtValidateResult(
-//            ok = {collectListTasks()},
-//            login = {_startLoginEvent.emit(true)}
-//        )
-//    }
+    private fun changeAuthorToPerformer(taskAdapter: TasKForAdapter, whoAmI: User): TasKForAdapter {
+        if (taskAdapter.task.users.author == whoAmI) {
+            return taskAdapter.copy(taskAdapter.task.copy(
+                users = taskAdapter.task.users.copy(
+                    author = taskAdapter.task.users.performer)))
+        }
+        return taskAdapter
+    }
+
+    // todo add precalculate in updatejob and check for null parameter
+    private fun defineStatusForList(task: Task, whoAmI: User): TasKForAdapter.Status {
+        val userIs = whoUserInTask(task, whoAmI)
+        return when (userIs) {
+            is TaskUserIs.AuthorInReviewed -> TasKForAdapter.Status.Reviewed
+            is TaskUserIs.NotAuthorOrPerformer -> TasKForAdapter.Status.Invisible
+            else -> TasKForAdapter.Status.NotReviewed
+        }
+    }
 
     fun collectListTasks() {
         logger.log(TAG, "collectListTasks")
@@ -100,8 +112,9 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    private suspend fun checkForInputListAndTryFetch(inputList: List<Task>) {
-        if (inputList.isEmpty()) {
+    private suspend fun checkForInputListAndTryFetch(inputList: List<TasKForAdapter>) {
+        val curListIsEmpty = repository.listTasksFlow.first().isEmpty()
+        if (inputList.isEmpty() && curListIsEmpty) {
             handleEmptyTaskList(userSettings().first()).collect { request ->
                 when (request) {
                     is SuccessRequest -> {

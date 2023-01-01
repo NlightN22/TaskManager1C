@@ -64,8 +64,7 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
                 is Success -> {
                     previousStateHandle[LOGIN_SUCCESSFUL] = true
                     successLogin()
-                    // todo delete
-//                    launchMainScreen(true)
+
                 }
             }
         }
@@ -108,13 +107,4 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
             }
         }
     }
-
-    // todo delete
-    private fun launchMainScreen(isSignedIn: Boolean) {
-        if (isSignedIn) {
-
-//            previousStateHandle.set(LOGIN_SUCCESSFUL, true)
-        }
-    }
-
 }

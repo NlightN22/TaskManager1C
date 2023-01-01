@@ -37,7 +37,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         messagesAdapter = MessagesAdapter()
         binding.messagesRV.adapter = messagesAdapter
 
-        income()
         observers()
         listeners()
     }
@@ -47,16 +46,8 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     override fun successLogin() {
-        //todo delete
-//        logger.log(TAG, "create")
         val taskId = TaskDetailedFragmentArgs.fromBundle(requireArguments()).taskId
-//        logger.log(TAG, "send $taskId")
         viewModel.setTaskFlow(taskId ?: "")
-    }
-
-    //todo delete
-    private fun income() {
-
     }
 
     private fun observers() {
@@ -125,7 +116,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                     event.listUsers?.let {
                         SingleChooseDialog.show(
                             parentFragmentManager,
-                            it, // todo replace to dialog item in class
+                            it,
                             ok = false,
                             cancel = true
                         )
