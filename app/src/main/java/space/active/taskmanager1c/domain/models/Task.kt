@@ -6,10 +6,10 @@ import space.active.taskmanager1c.coreutils.nowDiffInDays
 import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.coreutils.toShortDateTime
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.WhoIsInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.domain.models.User.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedTaskState
-import space.active.taskmanager1c.presentation.screens.tasklist.TasKForAdapter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -28,18 +28,22 @@ data class Task(
     val users: UsersInTaskDomain,
     val isSending: Boolean = false,
     val outputId: Int = 0,
-    val unread: Boolean = false
+    val unread: Boolean = false,
+    val whoIsInTask: WhoIsInTask,
+    val ok: Boolean,
+    val cancel: Boolean
 ) {
 
-    fun toTaskAdapter(status: TasKForAdapter.Status, whoAmI: User) = TasKForAdapter(
-        task = this,
-        status = status,
-        showUser = if (whoAmI == this.users.author) {
-            this.users.performer
-        } else {
-            this.users.author
-        }
-    )
+    //todo delete
+//    fun toTaskAdapter(status: TasKForAdapter.Status, whoAmI: User) = TasKForAdapter(
+//        task = this,
+//        status = status,
+//        showUser = if (whoAmI == this.users.author) {
+//            this.users.performer
+//        } else {
+//            this.users.author
+//        }
+//    )
 
 
 
@@ -155,14 +159,13 @@ data class Task(
             objName = "",
             priority = "",
             status = Task.Status.New,
+            whoIsInTask = WhoIsInTask(author = true, performer = false),
+            unread = false,
+            ok = true,
+            cancel = false
         )
 
-        fun List<Task>.mapAndReplaceById(inputList: List<Task>): List<Task> {
-            val replacedList = this.map { list1Item ->
-                inputList.find { list2Item -> (list1Item.id == list2Item.id) } ?: list1Item
-            }
-            return replacedList
-        }
+
 
         fun toTaskStatus(status: String): Status {
             return when (status) {

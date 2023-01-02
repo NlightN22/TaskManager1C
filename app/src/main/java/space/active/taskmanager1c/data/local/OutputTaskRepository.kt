@@ -6,8 +6,6 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
 
 interface OutputTaskRepository {
     val outputTaskList: Flow<List<OutputTask>>
-//    val outputTask: Flow<Request<List<OutputTask>>>
-//    fun saveChangesAndTrySend(task: OutputTask): Flow<Request<Any>>
     suspend fun insertTask(outputTask: OutputTask)
     suspend fun getTasks(): List<OutputTask>
 

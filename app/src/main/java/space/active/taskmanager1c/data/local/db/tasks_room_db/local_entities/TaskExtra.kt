@@ -11,5 +11,7 @@ data class TaskExtra(
     val taskId: String,
     @Embedded
     val whoIsInTask: WhoIsInTask,
-    val isRead: Boolean = false,
+    val unread: Boolean = false,
+    val ok: Boolean = false,
+    val cancel: Boolean = false
     )

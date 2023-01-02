@@ -8,6 +8,8 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.Tas
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.Label
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.TaskExtra
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskExtraLabelCrossRef
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 
@@ -17,7 +19,8 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
         UserInput::class,
         OutputTask::class,
         TaskExtra::class,
-        Label::class
+        Label::class,
+        TaskExtraLabelCrossRef::class
     ],
     version = 1,
 

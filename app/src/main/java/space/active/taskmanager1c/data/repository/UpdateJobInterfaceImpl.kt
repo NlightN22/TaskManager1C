@@ -15,6 +15,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
 import space.active.taskmanager1c.data.remote.model.TaskDto
+import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.UserSettings
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
@@ -57,7 +58,7 @@ class UpdateJobInterfaceImpl
 
     private fun outputSendJob(userSettings: UserSettings) = flow<Request<Any>> {
         val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
-        val inputTasks: List<TaskInput> = inputTaskRepository.getTasks()
+        val inputTasks: List<TaskInput> = inputTaskRepository.getTasks().map { it.taskIn }
         if (outputTasks.isNotEmpty()) {
             // find an delete the same tasks in output and input table
             val deleteOutputTaskList: List<OutputTask> =
@@ -73,13 +74,13 @@ class UpdateJobInterfaceImpl
                 val outToDTO = TaskDto.fromOutputTask(outputTask)
                 // find diffs with TaskInput if id in input table or send as is
                 existingInputTask?.let {
-                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(it.name))
+                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(it.taskIn.name))
                     // if task is not edited and existing in input table
                     if (!outputTask.newTask) {
                         // get taskDTO with id and only diffs params
                         val outDTOWithoutId = outToDTO.copy(id = "")
                         // get diff map key value
-                        val inputDTO = TaskDto.fromInputTask(it)
+                        val inputDTO = TaskDto.fromInputTask(it.taskIn)
                         val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
                         // send in Map
                         val res = taskApi.sendEditedTaskMappedChanges(
@@ -104,12 +105,15 @@ class UpdateJobInterfaceImpl
                         result = SuccessRequest(withoutId)
                     }
                 }
-                result?.let { res->
+                result?.let { res ->
                     when (res) {
                         is SuccessRequest -> {
                             // TODO if task send with delete label
 //                        logger.log(TAG, result.data.toString())
-                            inputTaskRepository.insertTask(res.data.toTaskInput())
+                            inputTaskRepository.insertTask(
+                                res.data.toTaskInput(),
+                                userSettings.toUserInput()
+                            )
                             outputTaskRepository.deleteTasks(listOf(outputTask))
                             emit(SuccessRequest(Any()))
                         }
@@ -127,11 +131,23 @@ class UpdateJobInterfaceImpl
     }
 
     override fun inputFetchJobFlow(userSettings: UserSettings) = flow<Request<Any>> {
-        val request = taskApi.getTaskList(userSettings.toAuthBasicDto())
+        val request: Request<TaskListDto> = taskApi.getTaskList(userSettings.toAuthBasicDto())
         when (request) {
             is SuccessRequest -> {
-                inputTaskRepository.insertTasks(request.data.toTaskInputList())
-                inputTaskRepository.insertUsers(request.data.toUserInputList())
+//                logger.log(TAG, "get tasks from server")
+                val listUsers = request.data.toUserInputList()
+                val listTasks = request.data.toTaskInputList()
+                val whoAmi = userSettings.toUserInput()
+                //save input Users
+                inputTaskRepository.insertUsers(listUsers)
+
+                //save input Tasks
+                //todo delete
+//                inputTaskRepository.insertTasks(listTasks) todo delete
+//                logger.log(TAG, "Tasks: ${listTasks.map { it.name }.joinToString("\n")  }")
+//                logger.log(TAG, "WhoAmI: $whoAmi")
+                inputTaskRepository.insertTasks(listTasks, whoAmi)
+//                logger.log(TAG, "save all to DB")
                 emit(SuccessRequest(Any()))
             }
             is ErrorRequest -> {

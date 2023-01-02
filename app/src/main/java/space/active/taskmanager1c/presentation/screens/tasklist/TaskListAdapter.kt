@@ -12,31 +12,18 @@ import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.databinding.ItemTaskBinding
 import space.active.taskmanager1c.domain.models.Task
-import space.active.taskmanager1c.domain.models.User
 
 interface TaskActionListener {
     fun onTaskStatusClick(task: Task)
     fun onTaskClick(task: Task)
     fun onTaskLongClick(task: Task)
 }
-data class TasKForAdapter(
-    val task: Task,
-    val status: Status,
-    var showUser: User
-){
-    enum class Status {
-        Reviewed,
-        NotReviewed,
-        Invisible
-    }
-}
-
 
 // TODO implement diff utils
 class TaskListAdapter(
     private val actionListener: TaskActionListener
 ) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener {
-    var tasks: List<TasKForAdapter> = emptyList()
+    var tasks: List<Task> = emptyList()
         set(newValue) {
             val diffCallback = TasksDiffCallback(field, newValue)
             val diffResult = DiffUtil.calculateDiff(diffCallback)
@@ -67,20 +54,27 @@ class TaskListAdapter(
     }
 
     override fun onBindViewHolder(holder: TasksViewHolder, position: Int) {
-        val taskAdapter: TasKForAdapter = tasks[position]
+        val task: Task = tasks[position]
         with(holder.binding) {
-            holder.itemView.tag = taskAdapter.task           // send to onClick
-            taskStatus.tag = taskAdapter.task             // send to onClick
-            taskStatus.isClickable = !taskAdapter.task.isSending // not clickable if is sending
-            taskTitle.text = taskAdapter.task.name
-            taskDate.text = taskAdapter.task.date.toShortDate()
-            taskNumber.text = taskAdapter.task.number
-            taskAuthor.text = abbreviationName(taskAdapter.showUser.name)
-            isObserved.isVisible = taskAdapter.task.users.observers.isNotEmpty()
-            isCoPerformed.isVisible = taskAdapter.task.users.coPerformers.isNotEmpty()
-            isSending.isVisible = taskAdapter.task.isSending
-            listItemShimmer.setSendingState(taskAdapter.task.isSending)
-            taskStatus.setTaskStatus(taskAdapter.status)
+            holder.itemView.tag = task           // send to onClick
+            taskStatus.tag = task             // send to onClick
+            taskStatus.isClickable = !task.isSending // not clickable if is sending
+            taskTitle.text = task.name
+            taskDate.text = task.date.toShortDate()
+            taskNumber.text = task.number
+            taskAuthor.text = abbreviationName(
+                if (task.whoIsInTask.author) {
+                    task.users.performer.name
+                } else {
+                    task.users.author.name
+                }
+            )
+            isObserved.isVisible = task.users.observers.isNotEmpty()
+            isCoPerformed.isVisible = task.users.coPerformers.isNotEmpty()
+            isSending.isVisible = task.isSending
+            listItemShimmer.setSendingState(task.isSending)
+            taskStatus.isVisible = task.ok
+            taskStatus.isSelected = task.status == Task.Status.Reviewed
         }
     }
 
@@ -94,21 +88,20 @@ class TaskListAdapter(
         }
     }
 
-    private fun ImageView.setTaskStatus(status: TasKForAdapter.Status) {
-        when (status) {
-            TasKForAdapter.Status.Reviewed ->  {
-                this.isSelected = true
-                this.isVisible = true
-            }
-            TasKForAdapter.Status.NotReviewed ->  {
-                this.isSelected = false
-                this.isVisible = true
-            }
-            TasKForAdapter.Status.Invisible ->  {
-                this.isVisible = false
-            }
-        }
-    }
+    //todo delete
+//    private fun ImageView.setTaskStatus(status: TasKForAdapter.Status) {
+//        when (status) {
+//            TasKForAdapter.Status.Reviewed -> {
+//                this.isSelected = true
+//            }
+//            TasKForAdapter.Status.NotReviewed -> {
+//                this.isSelected = false
+//            }
+//            TasKForAdapter.Status.Invisible -> {
+//                this.isVisible = false
+//            }
+//        }
+//    }
 
     override fun getItemCount(): Int = tasks.size
 

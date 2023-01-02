@@ -22,6 +22,10 @@ class RoomModule {
 
     @Provides
     @Singleton
+    fun provideTaskExtraDao(db: TaskWithUsersDatabase) = db.extraDao
+
+    @Provides
+    @Singleton
     fun provideTaskInputDao(db: TaskWithUsersDatabase) = db.inputDao
 
     @Provides

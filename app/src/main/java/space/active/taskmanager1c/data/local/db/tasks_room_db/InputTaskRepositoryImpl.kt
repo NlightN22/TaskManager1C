@@ -1,56 +1,69 @@
 package space.active.taskmanager1c.data.local.db.tasks_room_db
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import space.active.taskmanager1c.coreutils.EmptyObject
-import space.active.taskmanager1c.coreutils.ErrorRequest
-import space.active.taskmanager1c.coreutils.Request
-import space.active.taskmanager1c.coreutils.SuccessRequest
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.InputTaskRepository
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.Label
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.LabelWithTasks
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskExtraLabelCrossRef
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskWithLabels
+
+private const val TAG = "InputTaskRepositoryImpl"
 
 class InputTaskRepositoryImpl(
-    private val inputDao: TaskInputDao
+    private val inputDao: TaskInputDao,
+    private val extraDao: TaskExtraInputDao,
+    private val logger: Logger
 ) : InputTaskRepository {
 
 
-    override val listTaskFlow: Flow<List<TaskInput>> get() = inputDao.getTasksFlow()
+    override val listTaskFlow: Flow<List<TaskInAndExtra>> get() = extraDao.taskInAndExtraListFlow()
 
-    override val listTasksRequest: Flow<Request<List<TaskInput>>> =
-        inputDao.getTasksFlow().map { listTask ->
-            if (listTask.isNotEmpty()) {
-                SuccessRequest(listTask)
-            } else {
-                ErrorRequest(EmptyObject("List<TaskInput>"))
+    override fun getTaskFlow(taskId: String): Flow<TaskInAndExtra?> = extraDao.getTaskFlow(taskId)
+
+    override suspend fun getTask(taskId: String): TaskInAndExtra? = extraDao.getTaskExtra(taskId)
+
+    override suspend fun getTasks(): List<TaskInAndExtra> = extraDao.taskInAndExtraList()
+
+    override suspend fun insertTask(taskInput: TaskInput, whoAmI: UserInput) {
+//        logger.log(TAG, "insertTask: ${taskInput.name}")
+        val taskExtra: TaskInAndExtra = taskInput.toTaskExtra(whoAmI)
+//        logger.log(TAG, "try to get in DB")
+        val currentVersionTask: TaskInAndExtra? = getTask(taskInput.id)
+        try {
+
+            currentVersionTask?.let {
+                if (taskExtra != it) {
+                    extraDao.insertTaskInAndExtra(taskExtra)
+//                    logger.log(TAG, "try to save: ${taskExtra.taskIn.id}")
+//                    extraDao.insertTaskInput(taskExtra.taskIn)
+//                    logger.log(TAG, "try to save: ${taskExtra.extra.taskId}")
+//                    extraDao.insertTaskExtra(taskExtra.extra)
+                }
+            } ?: kotlin.run {
+                extraDao.insertTaskInAndExtra(taskExtra)
+//                logger.log(TAG, "try to save: ${taskExtra.taskIn.id}")
+//                extraDao.insertTaskInput(taskExtra.taskIn)
+//                logger.log(TAG, "try to save: ${taskExtra.extra.taskId}")
+//                extraDao.insertTaskExtra(taskExtra.extra)
             }
-        }
-
-    override fun getTaskFlow(taskId: String): Flow<TaskInput?> = inputDao.getTaskFlow(taskId)
-
-    override suspend fun getTask(taskId: String): TaskInput? = inputDao.getTask(taskId)
-
-    override suspend fun getTasks(): List<TaskInput> = inputDao.getTasks()
-
-    override suspend fun insertTask(taskInput: TaskInput) {
-        val currentVersionTask = getTask(taskInput.id)
-        if (taskInput != currentVersionTask) {
-            inputDao.insertTask(taskInput)
+        } catch (e: Throwable) {
+            logger.log(TAG, "$taskExtra")
         }
     }
 
-    override suspend fun insertTasks(taskInputList: List<TaskInput>) {
+    override suspend fun insertTasks(taskInputList: List<TaskInput>, whoAmI: UserInput) {
         taskInputList.forEach {
-            insertTask(it)
+            insertTask(it, whoAmI)
         }
     }
 
-    override val listUsersFlow: Flow<List<UserInput>> = inputDao.getUsersFlow()
+    override val listUsersFlow: Flow<List<UserInput>> get() = inputDao.getUsersFlow()
 
     override suspend fun getUser(userId: String): UserInput? = inputDao.getUser(userId)
-
-    override suspend fun getUserByName(username: String): UserInput? =
-        inputDao.getUserByName(username)
 
     override suspend fun insertUser(userInput: UserInput) {
         val currentVersionUser = getUser(userInput.id)
@@ -65,7 +78,11 @@ class InputTaskRepositoryImpl(
         }
     }
 
-    override suspend fun clearTable() {
-        inputDao.clearInputTable()
+    override fun taskWithLabels(taskId: String): Flow<TaskWithLabels?> = extraDao.getTaskWithLabels(taskId)
+
+    override fun labelWithTasks(label: Label): Flow<LabelWithTasks?> = extraDao.getLabelWithTasks(label.labelName)
+
+    override suspend fun insertLabel(taskId: String, label: Label) {
+        extraDao.insertLabel(TaskExtraLabelCrossRef(taskId, label.labelName))
     }
 }

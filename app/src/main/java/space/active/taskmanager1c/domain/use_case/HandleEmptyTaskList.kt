@@ -64,7 +64,7 @@ class HandleEmptyTaskList @Inject constructor(
         emit(SuccessRequest(Any()))
     }.flowOn(ioDispatcher)
 }
-
+    // todo delete
 //        var listTasks: List<Task> = repository.listTasksFlow.first()
 //        if (listTasks.isEmpty()) {
 //            var iterator = 0

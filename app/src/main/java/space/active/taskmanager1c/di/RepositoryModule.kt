@@ -13,10 +13,7 @@ import space.active.taskmanager1c.coreutils.CryptoManager
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
-import space.active.taskmanager1c.data.local.db.tasks_room_db.InputTaskRepositoryImpl
-import space.active.taskmanager1c.data.local.db.tasks_room_db.OutputTaskRepositoryImpl
-import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskInputDao
-import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskOutputDao
+import space.active.taskmanager1c.data.local.db.tasks_room_db.*
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.repository.MessagesRepositoryImpl
 import space.active.taskmanager1c.data.repository.*
@@ -34,8 +31,12 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun providesInputTaskRepository(inputDao: TaskInputDao): InputTaskRepository {
-        return InputTaskRepositoryImpl(inputDao)
+    fun providesInputTaskRepository(
+        inputDao: TaskInputDao,
+        extraDao: TaskExtraInputDao,
+        logger: Logger
+    ): InputTaskRepository {
+        return InputTaskRepositoryImpl(inputDao, extraDao, logger)
     }
 
     @Provides

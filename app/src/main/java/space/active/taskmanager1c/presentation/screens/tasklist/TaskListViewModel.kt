@@ -45,7 +45,7 @@ class TaskListViewModel @Inject constructor(
     private val _showSnackBar = MutableSharedFlow<UiText>()
     val showSnackBar = _showSnackBar.asSharedFlow()
 
-    private val _listTask = MutableStateFlow<Request<List<TasKForAdapter>>>(PendingRequest())
+    private val _listTask = MutableStateFlow<Request<List<Task>>>(PendingRequest())
     val listTask = _listTask.asStateFlow()
 
     private val _searchFilter = MutableStateFlow<String>("")
@@ -62,39 +62,46 @@ class TaskListViewModel @Inject constructor(
     val userList: StateFlow<List<User>> =
         inputUserList.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
-    private val inputListTask: Flow<List<TasKForAdapter>> = combine(
+    private val inputListTask: Flow<List<Task>> = combine(
         repository.listTasksFlow,
         _bottomFilter,
         _searchFilter,
         _bottomOrder
     ) { input, bottomFilter, searchFilter, bottomOrder ->
-
+        // todo delete
 //        logger.log(TAG, "_bottomFilter.combine $bottomFilter")
-        val bottomList = filterByBottom(input, bottomFilter)
+//        val bottomList = filterByBottom(input, bottomFilter)
 //        logger.log(TAG, "_searchFilter.combine $searchFilter")
-        val searchList = if (searchFilter.isNullOrBlank()) {
-            bottomList
-        } else {
-            filterBySearch(bottomList, searchFilter)
-        }
-        val orederedList = orderByBottom(searchList, bottomOrder)
+//        val searchList = if (searchFilter.isNullOrBlank()) {
+//            filterByBottom(input, bottomFilter)
+//        } else {
+//            filterBySearch(filterByBottom(input, bottomFilter), searchFilter)
+//        }
+        orderByBottom(search(filterByBottom(input, bottomFilter), searchFilter), bottomOrder)
         // final result
-        val whoAmI = whoAmI.first()
-        val adapterList = orederedList.map {
-            it.toTaskAdapter(defineStatusForList(it, whoAmI), whoAmI)
-            }
-        return@combine adapterList
+//        val whoAmI = whoAmI.first()
+//        val adapterList = orederedList.map {
+//            it.toTaskAdapter(defineStatusForList(it, whoAmI), whoAmI)
+//            }
+
     }
 
     // todo add precalculate in updatejob and check for null parameter
-    private fun defineStatusForList(task: Task, whoAmI: User): TasKForAdapter.Status {
-        val userIs = whoUserInTask(task, whoAmI)
-        return when (userIs) {
-            is TaskUserIs.AuthorInReviewed -> TasKForAdapter.Status.Reviewed
-            is TaskUserIs.NotAuthorOrPerformer -> TasKForAdapter.Status.Invisible
-            else -> TasKForAdapter.Status.NotReviewed
+//    private fun defineStatusForList(task: Task, whoAmI: User): TasKForAdapter.Status {
+//        val userIs = whoUserInTask(task, whoAmI)
+//        return when (userIs) {
+//            is TaskUserIs.AuthorInReviewed -> TasKForAdapter.Status.Reviewed
+//            is TaskUserIs.NotAuthorOrPerformer -> TasKForAdapter.Status.Invisible
+//            else -> TasKForAdapter.Status.NotReviewed
+//        }
+//    }
+
+    private suspend fun search(filterByBottom: List<Task>, searchFilter: String): List<Task> =
+        if (searchFilter.isNullOrBlank()) {
+            filterByBottom
+        } else {
+            filterBySearch(filterByBottom, searchFilter)
         }
-    }
 
     fun collectListTasks() {
         logger.log(TAG, "collectListTasks")
@@ -103,7 +110,7 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    private suspend fun checkForInputListAndTryFetch(inputList: List<TasKForAdapter>) {
+    private suspend fun checkForInputListAndTryFetch(inputList: List<Task>) {
         val curListIsEmpty = repository.listTasksFlow.first().isEmpty()
         if (inputList.isEmpty() && curListIsEmpty) {
             handleEmptyTaskList(userSettings().first()).collect { request ->
