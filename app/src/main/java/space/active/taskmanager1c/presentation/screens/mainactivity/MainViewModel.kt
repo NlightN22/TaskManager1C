@@ -28,6 +28,7 @@ class MainViewModel @Inject constructor(
     private val saveBreakable: SaveBreakable,
     private val saveDelayed: SaveDelayed,
     private val exceptionHandler: ExceptionHandler,
+    private val clearAllTables: ClearAllTables,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val logger: Logger
 ) : ViewModel() {
@@ -43,7 +44,6 @@ class MainViewModel @Inject constructor(
     private val _exitEvent = MutableSharedFlow<Boolean>()
     val exitEvent = _exitEvent.asSharedFlow()
 
-
     /**
      *
      * Variable for stoppable job witch regular update data after user login
@@ -53,12 +53,19 @@ class MainViewModel @Inject constructor(
 
     fun clearAndExit() {
         viewModelScope.launch {
-            // todo stop update job add clear BD
+
             val current = userSettings().first()
             saveUserSettings(
                 current.copy(username = null, userId = null, password = null)
             ).collect()
-            _exitEvent.emit(true)
+
+            stopUpdateJob()
+
+            clearAllTables().collectLatest {
+                if (it) {
+                    _exitEvent.emit(true)
+                }
+            }
         }
     }
 
@@ -132,7 +139,7 @@ class MainViewModel @Inject constructor(
         try {
             updateJob?.cancel()
             runningJob.compareAndSet(true, false)
-            logger.log(TAG, "updateJob cancelled ${updateJob?.isActive}")
+            logger.log(TAG, "updateJob is Active: ${updateJob?.isActive}")
             updateJob = null
         } catch (e: UninitializedPropertyAccessException) {
             Log.w(TAG, "Warning updateJob already cancelled")

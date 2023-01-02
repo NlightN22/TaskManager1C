@@ -98,9 +98,10 @@ class UpdateJobInterfaceImpl
                     if (outputTask.newTask) {
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
-                        result = taskApi.sendNewTask(userSettings.toAuthBasicDto(),withoutId)
+//                        result = taskApi.sendNewTask(userSettings.toAuthBasicDto(),withoutId)
                         //mock todo delete
-//                        result = SuccessRequest(withoutId)
+                        delay(6000)
+                        result = SuccessRequest(withoutId)
                     }
                 }
                 result?.let { res->

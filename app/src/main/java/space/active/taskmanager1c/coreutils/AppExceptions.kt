@@ -35,7 +35,7 @@ class ParseBackendException(val inEx: Throwable) :
 
 class BackendException(val errorBody: String, val errorCode: String) : AppExceptions(
     UiText.Resource(
-        R.string.exception_server_answer, errorCode
+        R.string.exception_server_answer, errorCode, errorBody
     )
 )
 

@@ -19,4 +19,5 @@ interface InputTaskRepository {
     suspend fun getUserByName(username: String): UserInput?
     suspend fun insertUser(userInput: UserInput)
     suspend fun insertUsers(userInputList: List<UserInput>)
+    suspend fun clearTable()
 }

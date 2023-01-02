@@ -38,4 +38,7 @@ interface TaskInputDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUser(userInput: UserInput)
 
+    @Query("DELETE FROM TaskInput")
+    fun clearInputTable()
+
 }

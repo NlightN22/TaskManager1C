@@ -31,12 +31,17 @@ data class Task(
     val unread: Boolean = false
 ) {
 
-    fun toTaskAdapter(status: TasKForAdapter.Status) = TasKForAdapter(
+    fun toTaskAdapter(status: TasKForAdapter.Status, whoAmI: User) = TasKForAdapter(
         task = this,
-        status = status
+        status = status,
+        showUser = if (whoAmI == this.users.author) {
+            this.users.performer
+        } else {
+            this.users.author
+        }
     )
 
-    fun List<Task>.toListForTaskAdapter(status: TasKForAdapter.Status) = this.map { it.toTaskAdapter(status) }
+
 
     enum class Status {
         New, // не используется Можно использовать при отправке на сервер
@@ -132,8 +137,6 @@ data class Task(
     }
 
     companion object {
-
-
 
         fun newTask(author: User) = Task(
             date = LocalDateTime.now(),

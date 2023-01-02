@@ -80,19 +80,10 @@ class TaskListViewModel @Inject constructor(
         val orederedList = orderByBottom(searchList, bottomOrder)
         // final result
         val whoAmI = whoAmI.first()
-        orederedList.map {
-            val adaptedTask = it.toTaskAdapter(defineStatusForList(it, whoAmI))
-            changeAuthorToPerformer(adaptedTask, whoAmI)
-        }
-    }
-
-    private fun changeAuthorToPerformer(taskAdapter: TasKForAdapter, whoAmI: User): TasKForAdapter {
-        if (taskAdapter.task.users.author == whoAmI) {
-            return taskAdapter.copy(taskAdapter.task.copy(
-                users = taskAdapter.task.users.copy(
-                    author = taskAdapter.task.users.performer)))
-        }
-        return taskAdapter
+        val adapterList = orederedList.map {
+            it.toTaskAdapter(defineStatusForList(it, whoAmI), whoAmI)
+            }
+        return@combine adapterList
     }
 
     // todo add precalculate in updatejob and check for null parameter

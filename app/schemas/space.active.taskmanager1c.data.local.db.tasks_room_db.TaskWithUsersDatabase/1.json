@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e1030137d7c49b7724d0f1dcdc397c61",
+    "identityHash": "9b6f604acbe3699addbc29c88ef05e0f",
     "entities": [
       {
         "tableName": "TaskInput",
@@ -237,12 +237,70 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "TaskExtra",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`taskId` TEXT NOT NULL, `isRead` INTEGER NOT NULL, `author` INTEGER NOT NULL, `performer` INTEGER NOT NULL, PRIMARY KEY(`taskId`))",
+        "fields": [
+          {
+            "fieldPath": "taskId",
+            "columnName": "taskId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRead",
+            "columnName": "isRead",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "whoIsInTask.author",
+            "columnName": "author",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "whoIsInTask.performer",
+            "columnName": "performer",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "taskId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Label",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`labelName` TEXT NOT NULL, PRIMARY KEY(`labelName`))",
+        "fields": [
+          {
+            "fieldPath": "labelName",
+            "columnName": "labelName",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "labelName"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e1030137d7c49b7724d0f1dcdc397c61')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9b6f604acbe3699addbc29c88ef05e0f')"
     ]
   }
 }

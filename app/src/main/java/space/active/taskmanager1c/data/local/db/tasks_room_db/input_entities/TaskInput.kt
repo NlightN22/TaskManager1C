@@ -19,5 +19,6 @@ data class TaskInput(
     val objName: String,
     val priority: String,
     val status: String,
-    @Embedded val usersInTask: UsersInTask
+    @Embedded
+    val usersInTask: UsersInTask
 )

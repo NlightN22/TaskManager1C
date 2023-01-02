@@ -79,7 +79,7 @@
     <string name="exception_show_snackbar">Ошибка при отображении сообщения в snackbar: %s</string>
     <string name="exception_parse_server_answer">Неожиданный ответ от сервера. Подробнее в логе</string>
     <string name="exception_connection">Ошибка подключения. Проверьте ваше соединение с сервером</string>
-    <string name="exception_server_answer">Ошибка ответа от сервера %s. Подробнее в логе</string>
+    <string name="exception_server_answer">Ошибка от сервера %s. %s</string>
     <string name="error_new_task_send_message">Ошибка отправки сообщения. Сохраните новую задачу</string>
     <string name="exception_not_correct_URL">Некорректный адрес сервера</string>
 </resources>

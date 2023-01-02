@@ -63,8 +63,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         baseMainVM.exitEvent.collectOnStart {
             logger.log(TAG, "Logout from application $it")
             if (it) {
-                requireActivity().finish()
-                exitProcess(0)
+                requireActivity().finishAffinity()
             }
         }
 

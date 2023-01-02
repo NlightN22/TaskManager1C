@@ -88,9 +88,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.exit_toast), delay.toInt()).show()
             lastPress = System.currentTimeMillis()
         } else {
-            super.onDestroy()
-            this.finish()
-            exitProcess(0)
+            this.finishAffinity()
         }
     }
 }

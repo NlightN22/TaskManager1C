@@ -64,4 +64,8 @@ class InputTaskRepositoryImpl(
             insertUser(it)
         }
     }
+
+    override suspend fun clearTable() {
+        inputDao.clearInputTable()
+    }
 }

@@ -5,11 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.facebook.shimmer.ShimmerFrameLayout
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.databinding.ItemTaskBinding
 import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.User
 
 interface TaskActionListener {
     fun onTaskStatusClick(task: Task)
@@ -18,7 +21,8 @@ interface TaskActionListener {
 }
 data class TasKForAdapter(
     val task: Task,
-    val status: Status
+    val status: Status,
+    var showUser: User
 ){
     enum class Status {
         Reviewed,
@@ -34,8 +38,10 @@ class TaskListAdapter(
 ) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener {
     var tasks: List<TasKForAdapter> = emptyList()
         set(newValue) {
+            val diffCallback = TasksDiffCallback(field, newValue)
+            val diffResult = DiffUtil.calculateDiff(diffCallback)
             field = newValue
-            notifyDataSetChanged()
+            diffResult.dispatchUpdatesTo(this)
         }
 
     override fun onClick(v: View) {
@@ -65,14 +71,26 @@ class TaskListAdapter(
         with(holder.binding) {
             holder.itemView.tag = taskAdapter.task           // send to onClick
             taskStatus.tag = taskAdapter.task             // send to onClick
+            taskStatus.isClickable = !taskAdapter.task.isSending // not clickable if is sending
             taskTitle.text = taskAdapter.task.name
             taskDate.text = taskAdapter.task.date.toShortDate()
             taskNumber.text = taskAdapter.task.number
-            taskAuthor.text = abbreviationName(taskAdapter.task.users.author.name)
+            taskAuthor.text = abbreviationName(taskAdapter.showUser.name)
             isObserved.isVisible = taskAdapter.task.users.observers.isNotEmpty()
             isCoPerformed.isVisible = taskAdapter.task.users.coPerformers.isNotEmpty()
             isSending.isVisible = taskAdapter.task.isSending
+            listItemShimmer.setSendingState(taskAdapter.task.isSending)
             taskStatus.setTaskStatus(taskAdapter.status)
+        }
+    }
+
+    private fun ShimmerFrameLayout.setSendingState(state: Boolean) {
+        if (state) {
+            this.rootView.isClickable = false
+            this.startShimmer()
+        } else {
+            this.rootView.isClickable = true
+            this.stopShimmer()
         }
     }
 
