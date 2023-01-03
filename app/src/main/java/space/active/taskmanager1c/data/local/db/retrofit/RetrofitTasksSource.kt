@@ -12,6 +12,8 @@ import space.active.taskmanager1c.data.remote.model.UserDto
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TasksReadingTimeDTO
+import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
 import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -31,15 +33,16 @@ class RetrofitTasksSource @Inject constructor
         retrofitApi.authUser(auth.toBasic())
     }
 
-    override suspend fun getTaskList(auth: AuthBasicDto): Request<TaskListDto> =
+    override suspend fun getTaskList(auth: AuthBasicDto): TaskListDto =
         wrapRetrofitExceptions {
-            val taskDto = retrofitApi.getTasks(auth.toBasic())
+            retrofitApi.getTasks(auth.toBasic())
+            // todo delete
 //            logger.log(TAG, "getTaskList ${taskDto.tasks.joinToString("\n") { it.name }}")
-            if (taskDto.tasks.isEmpty() or taskDto.users.isEmpty()) {
-                return@wrapRetrofitExceptions ErrorRequest(EmptyObject("TaskListDto"))
-            } else {
-                return@wrapRetrofitExceptions SuccessRequest(taskDto)
-            }
+//            if (taskDto.tasks.isEmpty() or taskDto.users.isEmpty()) {
+//                return@wrapRetrofitExceptions ErrorRequest(EmptyObject("TaskListDto"))
+//            } else {
+//                return@wrapRetrofitExceptions SuccessRequest(taskDto)
+//            }
         }
 
     override suspend fun sendNewTask(auth: AuthBasicDto, task: TaskDto): Request<TaskDto> =
@@ -80,8 +83,8 @@ class RetrofitTasksSource @Inject constructor
     override suspend fun getMessagesTimes(
         auth: AuthBasicDto,
         taskIds: List<String>
-    ): List<TasksReadingTimeDTO> = wrapRetrofitExceptions {
-        retrofitApi.getReadingTimes(auth.toBasic(), taskIds)
+    ): List<ReadingTimesTask> = wrapRetrofitExceptions {
+        retrofitApi.getReadingTimes(auth.toBasic(), FetchReadingTimes(taskIds)).Tasks
     }
 
     override suspend fun setReadingTime(

@@ -26,26 +26,26 @@ data class TaskInput(
     @Embedded
     val usersInTask: UsersInTask
 ) {
-    fun toTaskExtra(user: UserInput): TaskInAndExtra {
+    fun toTaskInAndExtra(user: UserInput): TaskInAndExtra =
+        TaskInAndExtra(this,this.toTaskExtra(user))
+
+    fun toTaskExtra(user: UserInput): TaskExtra {
         val author = this.usersInTask.authorId == user.id
         val performer = definePerformer(user)
         val status = this.status.toTaskStatus()
-        return TaskInAndExtra(
-            this,
-            extra = TaskExtra(
-                taskId = this.id,
-                whoIsInTask = WhoIsInTask(
-                    author = author,
-                    performer = performer
-                ),
-                ok = defineOk(author, performer, status),
-                cancel = defineCancel(author, status),
-            )
+        return TaskExtra(
+            taskId = this.id,
+            whoIsInTask = WhoIsInTask(
+                author = author,
+                performer = performer
+            ),
+            ok = defineOk(author, performer, status),
+            cancel = defineCancel(author, status),
         )
     }
 
     private fun definePerformer(user: UserInput): Boolean {
-        var inList = if (this.usersInTask.coPerformers.isNullOrEmpty()){
+        var inList = if (this.usersInTask.coPerformers.isNullOrEmpty()) {
             false
         } else {
             this.usersInTask.coPerformers.any { it == user.id }

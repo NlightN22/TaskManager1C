@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,6 +61,7 @@ class TaskListAdapter(
             taskStatus.tag = task             // send to onClick
             taskStatus.isClickable = !task.isSending // not clickable if is sending
             taskTitle.text = task.name
+            taskTitle.typeface = if (task.unread) { Typeface.DEFAULT_BOLD } else { Typeface.DEFAULT}
             taskDate.text = task.date.toShortDate()
             taskNumber.text = task.number
             taskAuthor.text = abbreviationName(

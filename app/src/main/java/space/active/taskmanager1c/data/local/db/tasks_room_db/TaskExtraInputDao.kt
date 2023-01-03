@@ -22,11 +22,20 @@ interface TaskExtraInputDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertTaskExtra(taskExtra: TaskExtra)
 
+    @Query("SELECT * FROM TaskInput WHERE id = :taskId")
+    suspend fun getInput(taskId: String): TaskInput?
+
+    @Query("SELECT * FROM TaskExtra WHERE taskId = :taskId")
+    suspend fun getExtra(taskId: String): TaskExtra?
+
     @Transaction
-    suspend fun insertTaskInAndExtra(taskInAndExtra: TaskInAndExtra) {
-        insertTaskInput(taskInAndExtra.taskIn)
-        insertTaskExtra(taskInAndExtra.extra)
+    suspend fun insertTaskInAndExtra(taskExtra: TaskExtra, taskInput: TaskInput) {
+        insertTaskInput(taskInput)
+        insertTaskExtra(taskExtra)
     }
+
+    @Query("UPDATE TaskExtra SET unread = :unread WHERE taskId = :taskId ")
+    suspend fun updateIsReading(taskId: String, unread: Boolean)
 
     @Transaction
     @Query("SELECT * FROM TaskInput")
@@ -42,7 +51,10 @@ interface TaskExtraInputDao {
 
     @Transaction
     @Query("SELECT * FROM TaskInput WHERE id = :taskId")
-    suspend fun getTaskExtra(taskId: String): TaskInAndExtra?
+    suspend fun getTaskInAndExtra(taskId: String): TaskInAndExtra?
+
+    @Query("SELECT * FROM TaskExtra WHERE taskId = :taskId")
+    suspend fun getTaskExtra(taskId: String): TaskExtra?
 
     // Labels
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -16,9 +16,11 @@ import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
 import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.data.remote.model.TaskListDto
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.UserSettings
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 private const val TAG = "UpdateJobInterfaceImpl"
@@ -45,16 +47,45 @@ class UpdateJobInterfaceImpl
             // Далее запрашиваем с сервера входящие задачи.
             // Обновляем список входящих задач в таблице.
             // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
-//            logger.log(TAG, "Job start")
+            var curTime = System.currentTimeMillis()
+            logger.log(TAG, "outputSendJob start")
             outputSendJob(userSettings).collect {
                 send(it)
             }
+            logger.log(TAG, "outputSendJob stop ${System.currentTimeMillis() - curTime}ms")
+
+            curTime = System.currentTimeMillis()
+            logger.log(TAG, "inputFetchJobFlow start")
             inputFetchJobFlow(userSettings).collect {
                 send(it)
             }
+            logger.log(TAG, "inputFetchJobFlow stop ${System.currentTimeMillis() - curTime}ms")
+
+            curTime = System.currentTimeMillis()
+            logger.log(TAG, "updateReadingState start")
+            updateReadingState(userSettings).collect{
+                send(it)
+            }
+            logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
+
             delay(updateDelay)
 //            logger.log(TAG, "Job end")
         }.flowOn(ioDispatcher)
+
+    private fun updateReadingState(userSettings: UserSettings) = flow<Request<Any>> {
+        emit(PendingRequest())
+        val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(userSettings.toAuthBasicDto(), inputTaskRepository.getTasks().map { it.extra.taskId})
+        result.forEach {
+            inputTaskRepository.updateReading(it.id, it.getUnreadStatus())
+        }
+        emit(SuccessRequest(Any()))
+    }
+
+    private fun ReadingTimesTask.getUnreadStatus(): Boolean {
+        val messageTime = lastMessageTime.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val lastRead = readingTime.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        return (messageTime > lastRead)
+    }
 
     private fun outputSendJob(userSettings: UserSettings) = flow<Request<Any>> {
         val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
@@ -78,17 +109,24 @@ class UpdateJobInterfaceImpl
                     // if task is not edited and existing in input table
                     if (!outputTask.newTask) {
                         // get taskDTO with id and only diffs params
-                        val outDTOWithoutId = outToDTO.copy(id = "")
+//                        val outDTOWithoutId = outToDTO.copy(id = "")
                         // get diff map key value
                         val inputDTO = TaskDto.fromInputTask(it.taskIn)
-                        val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
+//                        val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
                         // send in Map
-                        val res = taskApi.sendEditedTaskMappedChanges(
-                            userSettings.toAuthBasicDto(),
-                            inputDTO.id,
-                            mappedDiffs
+//                        val res = taskApi.sendEditedTaskMappedChanges(
+//                            userSettings.toAuthBasicDto(),
+//                            inputDTO.id,
+//                            mappedDiffs
+//                        )
+//                        result = SuccessRequest(res)
+                        result = SuccessRequest(
+                            taskApi.sendEditedTaskMappedChanges(
+                                userSettings.toAuthBasicDto(),
+                                inputDTO.id,
+                                inputDTO.compareWithAndGetDiffs(outToDTO.copy(id = ""))
+                            )
                         )
-                        result = SuccessRequest(res)
 //                        mock todo delete
 //                        result = SuccessRequest(inputDTO)
                     }
@@ -131,32 +169,39 @@ class UpdateJobInterfaceImpl
     }
 
     override fun inputFetchJobFlow(userSettings: UserSettings) = flow<Request<Any>> {
-        val request: Request<TaskListDto> = taskApi.getTaskList(userSettings.toAuthBasicDto())
-        when (request) {
-            is SuccessRequest -> {
+        emit(PendingRequest())
+        val result: TaskListDto = taskApi.getTaskList(userSettings.toAuthBasicDto())
+//        when (request) {
+//            is SuccessRequest -> {
 //                logger.log(TAG, "get tasks from server")
-                val listUsers = request.data.toUserInputList()
-                val listTasks = request.data.toTaskInputList()
+//                val listUsers = request.data.toUserInputList()
+//                val listTasks = request.data.toTaskInputList()
                 val whoAmi = userSettings.toUserInput()
                 //save input Users
-                inputTaskRepository.insertUsers(listUsers)
+        var curTime = System.currentTimeMillis()
+        logger.log(TAG, "insertUsers")
+        inputTaskRepository.insertUsers(result.toUserInputList())
+        logger.log(TAG, "insertUsers ${System.currentTimeMillis() - curTime}ms")
 
-                //save input Tasks
+        //save input Tasks
                 //todo delete
 //                inputTaskRepository.insertTasks(listTasks) todo delete
 //                logger.log(TAG, "Tasks: ${listTasks.map { it.name }.joinToString("\n")  }")
 //                logger.log(TAG, "WhoAmI: $whoAmi")
-                inputTaskRepository.insertTasks(listTasks, whoAmi)
+        curTime = System.currentTimeMillis()
+        logger.log(TAG, "insertTasks")
+        inputTaskRepository.insertTasks(result.toTaskInputList(), whoAmi)
+        logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
 //                logger.log(TAG, "save all to DB")
                 emit(SuccessRequest(Any()))
-            }
-            is ErrorRequest -> {
-                emit(ErrorRequest(request.exception))
-            }
-            is PendingRequest -> {
-                emit(PendingRequest())
-            }
-        }
+//            }
+//            is ErrorRequest -> {
+//                emit(ErrorRequest(request.exception))
+//            }
+//            is PendingRequest -> {
+//                emit(PendingRequest())
+//            }
+//        }
     }.flowOn(ioDispatcher)
 
     private fun getEqualOutputTasksInInputTasks(

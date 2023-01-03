@@ -24,40 +24,44 @@ class InputTaskRepositoryImpl(
 
     override fun getTaskFlow(taskId: String): Flow<TaskInAndExtra?> = extraDao.getTaskFlow(taskId)
 
-    override suspend fun getTask(taskId: String): TaskInAndExtra? = extraDao.getTaskExtra(taskId)
+    override suspend fun getTask(taskId: String): TaskInAndExtra? = extraDao.getTaskInAndExtra(taskId)
 
     override suspend fun getTasks(): List<TaskInAndExtra> = extraDao.taskInAndExtraList()
 
-    override suspend fun insertTask(taskInput: TaskInput, whoAmI: UserInput) {
-//        logger.log(TAG, "insertTask: ${taskInput.name}")
-        val taskExtra: TaskInAndExtra = taskInput.toTaskExtra(whoAmI)
-//        logger.log(TAG, "try to get in DB")
-        val currentVersionTask: TaskInAndExtra? = getTask(taskInput.id)
-        try {
+    override suspend fun insertTask(taskInput: TaskInput, whoAmI: UserInput): Int {
+        // prepare taskIn
+        val taskIn = extraDao.getInput(taskInput.id)
+        // compare with current and save if diff
+        val saveIn: Boolean = taskIn?.let {
+            taskInput != it
+        } ?: true
+        // prepare taskExtra
+        val taskEx = extraDao.getExtra(taskInput.id)
+        // compare with current and save if diff
+        val saveEx: Boolean = taskEx?.let {
+            it.insertFromInput(taskInput, whoAmI) != it
+        } ?: true
 
-            currentVersionTask?.let {
-                if (taskExtra != it) {
-                    extraDao.insertTaskInAndExtra(taskExtra)
-//                    logger.log(TAG, "try to save: ${taskExtra.taskIn.id}")
-//                    extraDao.insertTaskInput(taskExtra.taskIn)
-//                    logger.log(TAG, "try to save: ${taskExtra.extra.taskId}")
-//                    extraDao.insertTaskExtra(taskExtra.extra)
-                }
-            } ?: kotlin.run {
-                extraDao.insertTaskInAndExtra(taskExtra)
-//                logger.log(TAG, "try to save: ${taskExtra.taskIn.id}")
-//                extraDao.insertTaskInput(taskExtra.taskIn)
-//                logger.log(TAG, "try to save: ${taskExtra.extra.taskId}")
-//                extraDao.insertTaskExtra(taskExtra.extra)
-            }
-        } catch (e: Throwable) {
-            logger.log(TAG, "$taskExtra")
+        if (saveIn || saveEx) {
+            extraDao.insertTaskInAndExtra(taskInput.toTaskExtra(whoAmI), taskInput)
+            return 1
         }
+        return 0
     }
 
     override suspend fun insertTasks(taskInputList: List<TaskInput>, whoAmI: UserInput) {
+        var saveCounter = 0
         taskInputList.forEach {
-            insertTask(it, whoAmI)
+            saveCounter += insertTask(it, whoAmI)
+        }
+        logger.log(TAG, "Count saved tasks: $saveCounter")
+    }
+
+    override suspend fun updateReading(taskId: String, unread: Boolean) {
+        extraDao.getTaskExtra(taskId)?.let {
+            if (it.unread != unread) {
+                extraDao.updateIsReading(taskId, unread)
+            }
         }
     }
 

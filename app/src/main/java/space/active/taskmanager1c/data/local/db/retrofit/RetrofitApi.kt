@@ -7,6 +7,8 @@ import space.active.taskmanager1c.data.remote.model.UserDto
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TasksReadingTimeDTO
+import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesDTO
 
 interface RetrofitApi {
 //    tasks: get - получение списка задач
@@ -85,8 +87,8 @@ interface RetrofitApi {
     @POST("tasks/status")
     suspend fun getReadingTimes(
         @Header("Authorization") auth: String,
-        @Body taskListIds: List<String>
-    ): List<TasksReadingTimeDTO>
+        @Body taskListIds: FetchReadingTimes
+    ): ReadingTimesDTO
 
     /**
      * POST
@@ -111,7 +113,7 @@ interface RetrofitApi {
     suspend fun setReadingFlag(
         @Header("Authorization") auth: String,
         @Body map: Map<String, String>
-    ): TaskUserReadingFlagDTO // TODO change to Map
+    ): TaskUserReadingFlagDTO
 
     @GET("auth")
     suspend fun authUser(@Header("Authorization") auth: String): UserDto

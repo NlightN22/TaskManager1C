@@ -14,6 +14,7 @@ import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.fi
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDidNtCheck
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDo
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIObserve
+import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterUnread
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
@@ -267,7 +268,7 @@ class TaskListViewModel @Inject constructor(
                     result = list.filterIObserve(whoAmI)
                 }
                 is TaskListFilterTypes.IDidNtRead -> {
-                    result = list // todo add not readed status
+                    result = list.filterUnread()
                 }
                 is TaskListFilterTypes.All -> {
                     result = list

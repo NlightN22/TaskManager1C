@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.Label
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.TaskExtra
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.LabelWithTasks
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskWithLabels
@@ -14,8 +15,9 @@ interface InputTaskRepository {
     suspend fun getTasks(): List<TaskInAndExtra>
     fun getTaskFlow(taskId: String): Flow<TaskInAndExtra?>
     suspend fun getTask(taskId: String): TaskInAndExtra?
-    suspend fun insertTask(taskInput: TaskInput, whoAmI: UserInput)
+    suspend fun insertTask(taskInput: TaskInput, whoAmI: UserInput): Int
     suspend fun insertTasks(taskInputList: List<TaskInput>, whoAmI: UserInput)
+    suspend fun updateReading(taskId: String, unread: Boolean)
     // users
     val listUsersFlow: Flow<List<UserInput>>
     suspend fun getUser(userId: String): UserInput?
