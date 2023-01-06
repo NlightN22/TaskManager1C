@@ -1,6 +1,5 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -13,6 +12,7 @@ import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.*
 import space.active.taskmanager1c.domain.models.Messages.Companion.toMessages
 import space.active.taskmanager1c.domain.models.User.Companion.toDialogItems
+import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
@@ -24,7 +24,7 @@ private const val TAG = "TaskDetailedViewModel"
 class TaskDetailedViewModel @Inject constructor(
     private val repository: TasksRepository,
     logger: Logger,
-    userSettings: GetUserSettingsFromDataStore,
+    settings: SettingsRepository,
     private val saveNewTaskToDb: SaveNewTaskToDb,
     private val validate: Validate,
     private val exceptionHandler: ExceptionHandler,
@@ -33,7 +33,7 @@ class TaskDetailedViewModel @Inject constructor(
     private val sendTaskMessages: SendTaskMessages,
     private val whoUserInTask: DefineUserInTask,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : BaseViewModel(userSettings, logger) {
+) : BaseViewModel(settings, logger) {
 
     private val _taskState = MutableStateFlow<TaskDetailedViewState>(TaskDetailedViewState.New())
     val taskState = _taskState.asStateFlow()
@@ -66,7 +66,7 @@ class TaskDetailedViewModel @Inject constructor(
     private val _sendMessageEvent = MutableSharedFlow<StateProgress<Any>>()
     val sendMessageEvent = _sendMessageEvent.asSharedFlow()
 
-    private val whoAmI: Flow<User> = userSettings.getUserFlow()
+    private val whoAmI: Flow<User> = settings.getUserFlow()
 
     private val _inputTaskId = MutableStateFlow<String>("")
 
@@ -141,7 +141,7 @@ class TaskDetailedViewModel @Inject constructor(
 
     private fun showMessages(taskId: String) {
         viewModelScope.launch {
-            getTaskMessages(userSettings().first(), taskId).collect { request ->
+            getTaskMessages(settings.getCredentials().first(), taskId).collect { request ->
                 when (request) {
                     is PendingRequest -> {}
                     is ErrorRequest -> {
@@ -171,7 +171,7 @@ class TaskDetailedViewModel @Inject constructor(
             val curTask = currentTask.first()
             curTask?.let { task ->
                 if (task.id.isNotBlank()) {
-                    sendTaskMessages(userSettings().first(), task.id, text).collect { res ->
+                    sendTaskMessages(settings.getCredentials().first(), task.id, text).collect { res ->
                         when (res) {
                             is PendingRequest -> {
                                 _sendMessageEvent.emit(Loading())

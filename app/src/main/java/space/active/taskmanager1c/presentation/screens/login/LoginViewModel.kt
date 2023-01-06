@@ -1,6 +1,5 @@
 package space.active.taskmanager1c.presentation.screens.login
 
-import android.util.Patterns
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -9,14 +8,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
+import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.repository.Authorization
+import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.domain.use_case.GetUserSettingsFromDataStore
 import space.active.taskmanager1c.domain.use_case.LoadFromAsset
-import space.active.taskmanager1c.domain.use_case.SaveUserSettingsToDataStore
+import space.active.taskmanager1c.domain.use_case.ValidateCredentials
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import javax.inject.Inject
 
@@ -24,14 +26,13 @@ private const val TAG = "LoginViewModel"
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    userSettings: GetUserSettingsFromDataStore,
-    private val saveUserSettings: SaveUserSettingsToDataStore,
+    settings: SettingsRepository,
     private val loadFromAsset: LoadFromAsset,
     private val authorization: Authorization,
     private val exceptionHandler: ExceptionHandler,
     logger: Logger,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : BaseViewModel(userSettings, logger) {
+) : BaseViewModel(settings, logger) {
 
     private val _viewState = MutableStateFlow(LoginViewState())
     val viewState = _viewState.asStateFlow()
@@ -39,9 +40,11 @@ class LoginViewModel @Inject constructor(
     private val _authState = MutableStateFlow<StateProgress<Boolean>>(OnWait())
     val authState = _authState.asStateFlow()
 
+    private val validate = ValidateCredentials()
+
     init {
         viewModelScope.launch {
-            val serverAddress = userSettings().first().serverAddress
+            val serverAddress = settings.getServerAddress()
 
             // read from settings
             val (name, pass) = readFromSettings()
@@ -62,10 +65,12 @@ class LoginViewModel @Inject constructor(
     }
 
     private suspend fun readFromSettings(): Pair<String?, String?> {
-        val settings = userSettings().first()
-        val name = settings.username
-        val pass = settings.password
-        return Pair(name, pass)
+        return withContext(viewModelScope.coroutineContext) {
+            val cred = settings.getCredentials().first()
+            val name = cred.username.getString()
+            val pass = cred.password.getString()
+            Pair(name, pass)
+        }
     }
 
     private fun updateUI(username: String, password: String) {
@@ -74,23 +79,11 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun validateServerAddress(address: String): Boolean =
-        Patterns.WEB_URL.matcher(address).matches()
-
     private suspend fun tryToLoadServerAddress() {
         val addressAsset: String? = loadFromAsset.invoke()
         addressAsset?.let {
-            if (validateServerAddress(addressAsset)) {
-                val current = userSettings().first()
-                val changed = current.copy(serverAddress = addressAsset)
-                saveUserSettings(changed).collect {
-                    when (it) {
-                        is ErrorRequest -> {
-                            exceptionHandler(it.exception)
-                        }
-                        else -> {}
-                    }
-                }
+            if (validate.server(it)) {
+                settings.saveServerAddress(it)
             }
         }
     }
@@ -99,11 +92,25 @@ class LoginViewModel @Inject constructor(
         name: String,
         pass: String,
     ) {
+        //validation
+        if (!validate.userName(name)) {
+            _viewState.value =
+                _viewState.value.copy(userError = UiText.Resource(R.string.username_valid_error))
+            return
+        }
+
+        if (!validate.userName(name)) {
+            _viewState.value =
+                _viewState.value.copy(passError = UiText.Resource(R.string.password_valid_error))
+            return
+        }
+        _viewState.value = _viewState.value.copy(userError = null, passError = null)
+
+        // authorization
         viewModelScope.launch {
             updateUI(name, pass)
-            val serverAddress = userSettings().first().serverAddress
-            serverAddress?.let {
-                if (validateServerAddress(it)) {
+            settings.getServerAddress()?.let {
+                if (validate.server(it)) {
                     tryToAuth(name, pass, it)
                 } else {
                     _authState.value = OnWait()
@@ -139,29 +146,16 @@ class LoginViewModel @Inject constructor(
             }
     }
 
-    private suspend fun tryToSaveSettings(
+    private fun tryToSaveSettings(
         name: String,
         userId: String,
         pass: String,
         serverAddress: String
     ) {
-        val changed = userSettings().first().copy(
-            username = name,
-            userId = userId,
-            password = pass,
-            serverAddress = serverAddress
-        )
-        saveUserSettings(changed).collect { saveRequest ->
-            when (saveRequest) {
-                is ErrorRequest -> {
-                    _authState.value = OnWait()
-                    exceptionHandler(saveRequest.exception)
-                }
-                is SuccessRequest -> {
-                    _authState.value = Success(true)
-                }
-                is PendingRequest -> {}
-            }
-        }
+        settings.saveUser(User(name, userId))
+        settings.saveServerAddress(serverAddress)
+        settings.savePassword(pass)
+        _authState.value = Success(true)
+
     }
 }

@@ -15,6 +15,7 @@ import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.fi
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDo
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIObserve
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterUnread
+import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
@@ -24,7 +25,7 @@ private const val TAG = "TaskListViewModel"
 
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
-    userSettings: GetUserSettingsFromDataStore,
+    settings: SettingsRepository,
     private val repository: TasksRepository,
     private val handleEmptyTaskList: HandleEmptyTaskList,
     private val exceptionHandler: ExceptionHandler,
@@ -33,7 +34,7 @@ class TaskListViewModel @Inject constructor(
     logger: Logger,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @DefaultDispatcher private val defDispatcher: CoroutineDispatcher,
-) : BaseViewModel(userSettings, logger) {
+) : BaseViewModel(settings, logger) {
 
     private val _startUpdateJob = MutableStateFlow<Boolean>(false)
     val startUpdateJob = _startUpdateJob.asStateFlow()
@@ -57,7 +58,7 @@ class TaskListViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    val whoAmI: Flow<User> = userSettings.getUserFlow()
+    val whoAmI: Flow<User> = settings.getUserFlow()
 
     private val inputUserList = repository.listUsersFlow
     val userList: StateFlow<List<User>> =
@@ -78,7 +79,9 @@ class TaskListViewModel @Inject constructor(
 //        } else {
 //            filterBySearch(filterByBottom(input, bottomFilter), searchFilter)
 //        }
-        orderByBottom(search(filterByBottom(input, bottomFilter), searchFilter), bottomOrder)
+        orderByBottom(
+            search(
+                filterByBottom(input, bottomFilter), searchFilter), bottomOrder)
         // final result
 //        val whoAmI = whoAmI.first()
 //        val adapterList = orederedList.map {
@@ -87,15 +90,6 @@ class TaskListViewModel @Inject constructor(
 
     }
 
-    // todo add precalculate in updatejob and check for null parameter
-//    private fun defineStatusForList(task: Task, whoAmI: User): TasKForAdapter.Status {
-//        val userIs = whoUserInTask(task, whoAmI)
-//        return when (userIs) {
-//            is TaskUserIs.AuthorInReviewed -> TasKForAdapter.Status.Reviewed
-//            is TaskUserIs.NotAuthorOrPerformer -> TasKForAdapter.Status.Invisible
-//            else -> TasKForAdapter.Status.NotReviewed
-//        }
-//    }
 
     private suspend fun search(filterByBottom: List<Task>, searchFilter: String): List<Task> =
         if (searchFilter.isNullOrBlank()) {
@@ -114,7 +108,7 @@ class TaskListViewModel @Inject constructor(
     private suspend fun checkForInputListAndTryFetch(inputList: List<Task>) {
         val curListIsEmpty = repository.listTasksFlow.first().isEmpty()
         if (inputList.isEmpty() && curListIsEmpty) {
-            handleEmptyTaskList(userSettings().first()).collect { request ->
+            handleEmptyTaskList(settings.getCredentials().first(), settings.getUser().toUserInput()).collect { request ->
                 when (request) {
                     is SuccessRequest -> {
                         _listTask.value = SuccessRequest(inputList)
@@ -212,94 +206,95 @@ class TaskListViewModel @Inject constructor(
     }
 
     private suspend fun orderByBottom(list: List<Task>, order: TaskListOrderTypes): List<Task> {
-        val finalRes = viewModelScope.async(defDispatcher) {
-            var result: List<Task> = emptyList()
-            when (order) {
+        return viewModelScope.async(defDispatcher) {
+            return@async when (order) {
                 is TaskListOrderTypes.StartDate -> {
-                    result = if (order.desc) {
+                    if (order.desc) {
                         list.sortedByDescending { it.date }
                     } else {
                         list.sortedBy { it.date }
                     }
                 }
                 is TaskListOrderTypes.EndDate -> {
-                    result = if (order.desc) {
+                    if (order.desc) {
                         list.sortedByDescending { it.endDate }
                     } else {
                         list.sortedBy { it.endDate }
                     }
                 }
                 is TaskListOrderTypes.Name -> {
-                    result = if (order.desc) {
+                    if (order.desc) {
                         list.sortedByDescending { it.name }
                     } else {
                         list.sortedBy { it.name }
                     }
                 }
                 is TaskListOrderTypes.Performer -> {
-                    result = if (order.desc) {
+                    if (order.desc) {
                         list.sortedByDescending { it.users.performer.name }
                     } else {
                         list.sortedBy { it.users.performer.name }
                     }
                 }
             }
-            result
-        }
-        return finalRes.await()
+        }.await()
     }
 
 
     private suspend fun filterByBottom(list: List<Task>, filter: TaskListFilterTypes): List<Task> {
-        val finalRes = viewModelScope.async(defDispatcher) {
+        return viewModelScope.async(defDispatcher) {
             val whoAmI = whoAmI.first()
-            var result: List<Task> = emptyList()
-            when (filter) {
+            return@async when (filter) {
                 is TaskListFilterTypes.IDo -> {
-                    result = list.filterIDo(whoAmI)
+                    list.filterIDo(whoAmI)
                 }
                 is TaskListFilterTypes.IDelegate -> {
-                    result = list.filterIDelegate(whoAmI)
+                    list.filterIDelegate(whoAmI)
                 }
                 is TaskListFilterTypes.IDidNtCheck -> {
-                    result = list.filterIDidNtCheck(whoAmI)
+                    list.filterIDidNtCheck(whoAmI)
                 }
                 is TaskListFilterTypes.IObserve -> {
-                    result = list.filterIObserve(whoAmI)
+                    list.filterIObserve(whoAmI)
                 }
                 is TaskListFilterTypes.IDidNtRead -> {
-                    result = list.filterUnread()
+                    list.filterUnread()
                 }
                 is TaskListFilterTypes.All -> {
-                    result = list
+                    list
                 }
             }
-            result
-        }
-        return finalRes.await()
+        }.await()
     }
 
     private suspend fun filterBySearch(list: List<Task>, filter: String): List<Task> {
-        val finalRes = viewModelScope.async(defDispatcher) {
-            val filteredName = list.filter { it.name.contains(filter, true) }
-            val filteredAuthor = list.filter { it.users.author.name.contains(filter, true) }
-            val filteredPerformer = list.filter { it.users.performer.name.contains(filter, true) }
-            val filteredCoPerformers = list.filter { task ->
-                task.users.coPerformers.any { user -> user.name.contains(filter, true) }
+        return withContext(viewModelScope.coroutineContext + defDispatcher) {
+            list.filter {
+                it.filterByName(filter) ||
+                        it.filterByAuthor(filter) ||
+                        it.filterByPerformer(filter) ||
+                        it.filterByCoPerformer(filter) ||
+                        it.filterByObservers(filter) ||
+                        it.filterByNumber(filter)
             }
-            val filteredObservers = list.filter { task ->
-                task.users.observers.any { user -> user.name.contains(filter, true) }
-            }
-            val filteredNumber = list.filter { it.number.contains(filter, true) }
-            val combineList1 = filteredName.addNotContainedFromList(filteredAuthor)
-            val combineList2 = combineList1.addNotContainedFromList(filteredPerformer)
-            val combineList3 = combineList2.addNotContainedFromList(filteredCoPerformers)
-            val combineList4 = combineList3.addNotContainedFromList(filteredObservers)
-            val combineList5 = combineList4.addNotContainedFromList(filteredNumber)
-            combineList5
         }
-        return finalRes.await()
     }
+
+    private fun Task.filterByName(name: String): Boolean = this.name.contains(name, true)
+    private fun Task.filterByAuthor(name: String): Boolean =
+        this.users.author.name.contains(name, true)
+
+    private fun Task.filterByPerformer(name: String): Boolean =
+        this.users.performer.name.contains(name, true)
+
+    private fun Task.filterByCoPerformer(name: String): Boolean =
+        this.users.coPerformers.any { user -> user.name.contains(name, true) }
+
+    private fun Task.filterByObservers(name: String): Boolean =
+        this.users.observers.any { user -> user.name.contains(name, true) }
+
+    private fun Task.filterByNumber(number: String): Boolean = this.number.contains(number, true)
+
 
     fun find(expression: Editable?) {
         searchJob?.cancel()

@@ -1,24 +1,32 @@
 package space.active.taskmanager1c.presentation.screens.settings
 
-import android.util.Patterns
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import space.active.taskmanager1c.coreutils.*
+import kotlinx.serialization.json.Json
+import space.active.taskmanager1c.coreutils.EncryptedData
+import space.active.taskmanager1c.coreutils.EncryptedData.Companion.toEncryptedData
+import space.active.taskmanager1c.coreutils.NotCorrectServerAddress
+import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.domain.use_case.GetUserSettingsFromDataStore
-import space.active.taskmanager1c.domain.use_case.SaveUserSettingsToDataStore
 import space.active.taskmanager1c.domain.use_case.ValidateCredentials
+import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import javax.inject.Inject
+
+private const val TAG = "SettingsViewModel"
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val userSettings: GetUserSettingsFromDataStore,
-    private val saveSettings: SaveUserSettingsToDataStore,
+    settings: SettingsRepository,
+    logger: Logger,
     private val exceptionHandler: ExceptionHandler
-) : ViewModel() {
+) : BaseViewModel(settings, logger) {
+
     private val _viewState = MutableStateFlow(SettingsViewState())
     val viewState = _viewState.asStateFlow()
 
@@ -31,40 +39,47 @@ class SettingsViewModel @Inject constructor(
     init {
         // set user
         viewModelScope.launch {
-            val settings = userSettings().first()
             _viewState.value = SettingsViewState(
-                userId = settings.userId ?: "",
-                userName = settings.username ?: "",
-                serverAddress = settings.serverAddress ?: ""
+                userId = settings.getUser()?.id ?: "",
+                userName = settings.getUser()?.name ?: "",
+                serverAddress = settings.getServerAddress() ?: ""
             )
         }
     }
 
     fun saveSettings(serverAddress: String) {
-        viewModelScope.launch {
+        // validation
+        val validateRes = validateCredentials.server(serverAddress)
 
-            val curSettings = userSettings().first()
-            val changeAddress = curSettings.copy(serverAddress = serverAddress)
+        if (!validateRes) {
+            exceptionHandler(NotCorrectServerAddress)
+            return
+        }
+        // save to Settings
+        settings.saveServerAddress(serverAddress)
+    }
 
-            // validation
-            val validateRes = validateCredentials(changeAddress)
+    // todo delete
+//    fun saveMock(serverAddress: String) {
+//        val curSettings = UserSettings(
+//            username = _viewState.value.userName,
+//            userId = _viewState.value.userId,
+//            serverAddress = serverAddress
+//        )
+//        encrTmp(serverAddress)
+//    }
 
-            if (!validateRes) {
-                exceptionHandler(NotCorrectServerAddress)
-                return@launch
-            }
-            // save to DataStore
-            saveSettings(changeAddress).collect { saveRequest ->
-                when (saveRequest) {
-                    is ErrorRequest -> {
-                        exceptionHandler(saveRequest.exception)
-                    }
-                    is SuccessRequest -> {
-                        _saveEvent.emit(true)
-                    }
-                    is PendingRequest -> {}
-                }
-            }
+    private fun encrTmp(serverAddress: String) {
+        val encrypted: EncryptedData? = serverAddress.toEncryptedData()
+        logger.log(TAG, "encrypted: ${encrypted}")
+        encrypted?.let {
+            val json = Json.encodeToString(EncryptedData.serializer(), it)
+            logger.log(TAG, "serialized: $json")
+            val deSerial = Json.decodeFromString(EncryptedData.serializer(), json)
+            logger.log(TAG, "deserialized: $deSerial")
+            val decrypted: String? = deSerial.getString()
+            logger.log(TAG, "decrypted: $decrypted")
         }
     }
+
 }

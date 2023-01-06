@@ -58,12 +58,13 @@ class RetrofitTasksSource @Inject constructor
         taskId: String,
         changeMap: Map<String, Any>
     ) = wrapRetrofitExceptions<TaskDto> {
-        val mapWId = mutableMapOf<String, Any>()
-        mapWId["id"] = taskId
-        mapWId.putAll(changeMap)
-        val changes = converters.mapToJson(mapWId)
-        logger.log(TAG, "Send changes: $changes")
-        val res = retrofitApi.saveChanges(auth.toBasic(), changes)
+        //todo delete
+//        val mapWId = mutableMapOf<String, Any>()
+//        mapWId["id"] = taskId
+//        mapWId.putAll(changeMap)
+        val changes = converters.mapToJson(changeMap)
+        logger.log(TAG, "Send changes: $changeMap")
+        val res = retrofitApi.saveChanges(taskId, auth.toBasic(), changes)
         res.tasks.first()
     }
 

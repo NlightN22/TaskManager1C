@@ -19,6 +19,10 @@ data class User(
         return DialogItem(id = this.id, text = name, checked = checked)
     }
 
+    fun toUserInput(): UserInput = UserInput(
+        id, name
+    )
+
     companion object {
 
         fun UserInput.fromUserInput(): User = User (

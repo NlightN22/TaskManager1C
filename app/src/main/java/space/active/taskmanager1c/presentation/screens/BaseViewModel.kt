@@ -2,20 +2,19 @@ package space.active.taskmanager1c.presentation.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.logger.Logger
-import space.active.taskmanager1c.domain.use_case.GetUserSettingsFromDataStore
-import space.active.taskmanager1c.domain.use_case.ValidateCredentials
-import javax.inject.Inject
+import space.active.taskmanager1c.domain.repository.SettingsRepository
 
 private const val TAG = "BaseViewModel"
 
-abstract class BaseViewModel (
-    val userSettings: GetUserSettingsFromDataStore,
+abstract class BaseViewModel(
+    val settings: SettingsRepository,
     val logger: Logger
-): ViewModel() {
+) : ViewModel() {
 
 
     override fun onCleared() {

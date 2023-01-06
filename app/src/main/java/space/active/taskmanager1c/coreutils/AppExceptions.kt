@@ -43,3 +43,5 @@ object NotCorrectServerAddress : AppExceptions(text = UiText.Resource(R.string.e
 
 class ConnectionException(val inEx: Throwable) :
     AppExceptions(UiText.Resource(R.string.exception_connection))
+
+object EncryptionException: AppExceptions(text = UiText.Resource(R.string.exception_encryption))

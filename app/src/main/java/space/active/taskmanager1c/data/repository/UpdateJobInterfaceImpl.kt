@@ -11,6 +11,7 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
@@ -18,7 +19,7 @@ import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
 import space.active.taskmanager1c.di.IoDispatcher
-import space.active.taskmanager1c.domain.models.UserSettings
+import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -35,7 +36,7 @@ class UpdateJobInterfaceImpl
     private val logger: Logger,
 ) : UpdateJobInterface {
 
-    override fun updateJob(userSettings: UserSettings, updateDelay: Long): Flow<Request<Any>> =
+    override fun updateJob(credentials: Credentials, updateDelay: Long, whoAmI: UserInput): Flow<Request<Any>> =
         channelFlow<Request<Any>> {
             // Проверяем таблицу исходящих задач. С определенной переодичностью
             // Если в таблице исходящих есть задачи, то сравниваем их с таблицей входящих задач.
@@ -49,21 +50,21 @@ class UpdateJobInterfaceImpl
             // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
             var curTime = System.currentTimeMillis()
             logger.log(TAG, "outputSendJob start")
-            outputSendJob(userSettings).collect {
+            outputSendJob(credentials, whoAmI).collect {
                 send(it)
             }
             logger.log(TAG, "outputSendJob stop ${System.currentTimeMillis() - curTime}ms")
 
             curTime = System.currentTimeMillis()
             logger.log(TAG, "inputFetchJobFlow start")
-            inputFetchJobFlow(userSettings).collect {
+            inputFetchJobFlow(credentials, whoAmI).collect {
                 send(it)
             }
             logger.log(TAG, "inputFetchJobFlow stop ${System.currentTimeMillis() - curTime}ms")
 
             curTime = System.currentTimeMillis()
             logger.log(TAG, "updateReadingState start")
-            updateReadingState(userSettings).collect{
+            updateReadingState(credentials).collect{
                 send(it)
             }
             logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
@@ -72,9 +73,9 @@ class UpdateJobInterfaceImpl
 //            logger.log(TAG, "Job end")
         }.flowOn(ioDispatcher)
 
-    private fun updateReadingState(userSettings: UserSettings) = flow<Request<Any>> {
+    private fun updateReadingState(credentials: Credentials) = flow<Request<Any>> {
         emit(PendingRequest())
-        val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(userSettings.toAuthBasicDto(), inputTaskRepository.getTasks().map { it.extra.taskId})
+        val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(credentials.toAuthBasicDto(), inputTaskRepository.getTasks().map { it.extra.taskId})
         result.forEach {
             inputTaskRepository.updateReading(it.id, it.getUnreadStatus())
         }
@@ -87,7 +88,7 @@ class UpdateJobInterfaceImpl
         return (messageTime > lastRead)
     }
 
-    private fun outputSendJob(userSettings: UserSettings) = flow<Request<Any>> {
+    private fun outputSendJob(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
         val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
         val inputTasks: List<TaskInput> = inputTaskRepository.getTasks().map { it.taskIn }
         if (outputTasks.isNotEmpty()) {
@@ -122,7 +123,7 @@ class UpdateJobInterfaceImpl
 //                        result = SuccessRequest(res)
                         result = SuccessRequest(
                             taskApi.sendEditedTaskMappedChanges(
-                                userSettings.toAuthBasicDto(),
+                                credentials.toAuthBasicDto(),
                                 inputDTO.id,
                                 inputDTO.compareWithAndGetDiffs(outToDTO.copy(id = ""))
                             )
@@ -150,7 +151,7 @@ class UpdateJobInterfaceImpl
 //                        logger.log(TAG, result.data.toString())
                             inputTaskRepository.insertTask(
                                 res.data.toTaskInput(),
-                                userSettings.toUserInput()
+                                whoAmI
                             )
                             outputTaskRepository.deleteTasks(listOf(outputTask))
                             emit(SuccessRequest(Any()))
@@ -168,15 +169,14 @@ class UpdateJobInterfaceImpl
         emit(SuccessRequest(Any()))
     }
 
-    override fun inputFetchJobFlow(userSettings: UserSettings) = flow<Request<Any>> {
+    override fun inputFetchJobFlow(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
         emit(PendingRequest())
-        val result: TaskListDto = taskApi.getTaskList(userSettings.toAuthBasicDto())
+        val result: TaskListDto = taskApi.getTaskList(credentials.toAuthBasicDto())
 //        when (request) {
 //            is SuccessRequest -> {
 //                logger.log(TAG, "get tasks from server")
 //                val listUsers = request.data.toUserInputList()
 //                val listTasks = request.data.toTaskInputList()
-                val whoAmi = userSettings.toUserInput()
                 //save input Users
         var curTime = System.currentTimeMillis()
         logger.log(TAG, "insertUsers")
@@ -190,7 +190,7 @@ class UpdateJobInterfaceImpl
 //                logger.log(TAG, "WhoAmI: $whoAmi")
         curTime = System.currentTimeMillis()
         logger.log(TAG, "insertTasks")
-        inputTaskRepository.insertTasks(result.toTaskInputList(), whoAmi)
+        inputTaskRepository.insertTasks(result.toTaskInputList(), whoAmI)
         logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
 //                logger.log(TAG, "save all to DB")
                 emit(SuccessRequest(Any()))

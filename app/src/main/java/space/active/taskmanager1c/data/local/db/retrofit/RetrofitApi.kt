@@ -18,7 +18,6 @@ interface RetrofitApi {
 //    tasks\status\unread: post - установка\снятие флага
 //    tasks\messages: get - получение сообщения по task id
 
-
     /**
      * GET
      * http://172.16.17.242/torg_develop/hs/taskmgr/tasks
@@ -46,9 +45,10 @@ interface RetrofitApi {
     "name": "11111Фразы покупателей в магазинах"
     }
      */
-    @POST("tasks")
+    @POST("tasks/{taskId}")
     @Headers("Content-Type: application/json")
     suspend fun saveChanges(
+        @Path("taskId") taskId: String,
         @Header("Authorization") auth: String,
         @Body changes: String
     ): TaskListDto

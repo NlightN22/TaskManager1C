@@ -51,6 +51,8 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             when (menuItem.itemId) {
                 R.id.menu_save -> {
                     viewModel.saveSettings(binding.settingsServerAddressET.text.toString())
+                    //todo delete
+//                    viewModel.saveMock(binding.settingsServerAddressET.text.toString())
                 }
                 R.id.menu_cancel -> {
                     onBackClick()

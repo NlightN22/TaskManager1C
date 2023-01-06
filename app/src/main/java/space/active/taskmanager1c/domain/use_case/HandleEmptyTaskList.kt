@@ -9,9 +9,9 @@ import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.di.IoDispatcher
-import space.active.taskmanager1c.domain.models.UserSettings
-import space.active.taskmanager1c.domain.repository.TasksRepository
+import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
 import javax.inject.Inject
 
@@ -28,7 +28,7 @@ class HandleEmptyTaskList @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
     var tries = 0
-    operator fun invoke(userSettings: UserSettings) = flow<Request<Any>> {
+    operator fun invoke(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
         // Если список пустой, то мы пытаемся получить его с сервера
         //Если ответ с сервера успешный, то выводим информацию об отсутствии задач
         //Если нет, то обрабатываем исключения
@@ -38,7 +38,7 @@ class HandleEmptyTaskList @Inject constructor(
         while (tries <= TRIES_TO_FETCH && !successResult) {
             logger.log(TAG, "HandleEmptyTaskList try $tries ")
             try {
-                updateJob.inputFetchJobFlow(userSettings).collect { request ->
+                updateJob.inputFetchJobFlow(credentials, whoAmI).collect { request ->
                     emit(PendingRequest())
                     when (request) {
                         is SuccessRequest -> {

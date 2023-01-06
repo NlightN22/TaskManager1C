@@ -8,6 +8,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.Tas
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.Label
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.TaskExtra
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.UserSettings
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskExtraLabelCrossRef
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
@@ -20,7 +21,8 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
         OutputTask::class,
         TaskExtra::class,
         Label::class,
-        TaskExtraLabelCrossRef::class
+        TaskExtraLabelCrossRef::class,
+        UserSettings::class
     ],
     version = 1,
 
@@ -30,4 +32,5 @@ abstract class TaskWithUsersDatabase : RoomDatabase() {
     abstract val inputDao: TaskInputDao
     abstract val outputDao: TaskOutputDao
     abstract val extraDao: TaskExtraInputDao
+    abstract val settingsDao: SettingsDao
 }

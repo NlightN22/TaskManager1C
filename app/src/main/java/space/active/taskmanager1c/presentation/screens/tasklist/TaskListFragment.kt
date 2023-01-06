@@ -132,6 +132,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                     shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, true)
                 }
                 is SuccessRequest -> {
+
                     recyclerTasks.tasks = request.data
                     shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
                 }

@@ -1,26 +1,30 @@
 package space.active.taskmanager1c.domain.use_case
 
 import android.util.Patterns
-import space.active.taskmanager1c.domain.models.UserSettings
+import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.UserSettings
+import space.active.taskmanager1c.domain.models.User
 
 class ValidateCredentials  {
-    operator fun invoke(userSettings: UserSettings): Boolean {
-        val nameResult: Boolean = validateString(userSettings.username)
-        val idResult: Boolean = validateString(userSettings.userId)
-        val passResult: Boolean = validateString(userSettings.password)
-        val serverResult: Boolean = validateServer(userSettings.serverAddress)
+    fun user(user: User): Boolean {
+        val nameResult: Boolean = validateString(user.name)
+        val idResult: Boolean = validateString(user.id)
 
-        val finalResultList = listOf(nameResult,idResult,passResult,serverResult)
+        val finalResultList = listOf(nameResult,idResult)
         val finalRes = !finalResultList.contains(false)
 
         return finalRes
     }
 
+    fun userName(user: String): Boolean = validateString(user)
+
+    fun password(pass: String) = validateString(pass)
+
+
     private fun validateString(name: String?):Boolean {
         return name?.isNotBlank() ?: false
     }
 
-    private fun validateServer(server: String?): Boolean {
+    fun server(server: String?): Boolean {
         return server?.let { Patterns.WEB_URL.matcher(it).matches() } ?: false
     }
 

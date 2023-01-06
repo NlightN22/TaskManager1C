@@ -3,6 +3,8 @@ package space.active.taskmanager1c.data.local.db
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
+import space.active.taskmanager1c.coreutils.EncryptedData
 import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.utils.JsonParser
 
@@ -26,6 +28,14 @@ class Converters(
             object : TypeToken<ArrayList<String>>(){}.type
         ) ?: emptyList<String>()
     }
+
+    @TypeConverter
+    fun encryptedToString(encryptedData: EncryptedData): String =
+        Json.encodeToString(EncryptedData.serializer(), encryptedData)
+
+    @TypeConverter
+    fun stringToEncrypted(json: String): EncryptedData =
+        Json.decodeFromString(EncryptedData.serializer(), json)
 
     fun <T,R>mapToJson(map: Map<T,R>): String {
         return jsonParser.toJsonSimple(map) ?: ""

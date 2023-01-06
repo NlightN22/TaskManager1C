@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import space.active.taskmanager1c.coreutils.EmptyObject
 import space.active.taskmanager1c.coreutils.ErrorRequest
+import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.SaveEvents
-import space.active.taskmanager1c.domain.models.UserSettings
+import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
 import space.active.taskmanager1c.domain.use_case.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -22,8 +24,7 @@ private const val TAG = "MainViewModel"
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val updateJobInterface: UpdateJobInterface,
-    private val userSettings: GetUserSettingsFromDataStore,
-    private val saveUserSettings: SaveUserSettingsToDataStore,
+    private val settings: SettingsRepository,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
     private val saveBreakable: SaveBreakable,
     private val saveDelayed: SaveDelayed,
@@ -53,17 +54,17 @@ class MainViewModel @Inject constructor(
 
     fun clearAndExit() {
         viewModelScope.launch {
-
-            val current = userSettings().first()
-            saveUserSettings(
-                current.copy(username = null, userId = null, password = null)
-            ).collect()
-
-            stopUpdateJob()
-
-            clearAllTables().collectLatest {
-                if (it) {
-                    _exitEvent.emit(true)
+            settings.clearSettings().collect { clearSettings->
+                when (clearSettings) {
+                    is SuccessRequest -> {
+                        stopUpdateJob()
+                        clearAllTables().collectLatest {
+                            if (it) {
+                                _exitEvent.emit(true)
+                            }
+                        }
+                    }
+                    else -> {}
                 }
             }
         }
@@ -113,7 +114,8 @@ class MainViewModel @Inject constructor(
                         /**
                         set update work here
                          */
-                        updateJobInterface.updateJob(userSettings().first(), 1000L)
+                        updateJobInterface.updateJob(settings.getCredentials().first(), 1000L,
+                        settings.getUser()?.toUserInput()?: throw EmptyObject("user"))
                             .catch { e ->
                                 exceptionHandler(e)
                                 //TODO add error counter and pause
