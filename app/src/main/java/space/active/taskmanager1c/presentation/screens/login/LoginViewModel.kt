@@ -44,7 +44,11 @@ class LoginViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val serverAddress = settings.getServerAddress()
+            val serverAddress = try {
+                settings.getServerAddress()
+            } catch (e: EmptyObject) {
+                null
+            }
 
             // read from settings
             val (name, pass) = readFromSettings()
@@ -66,10 +70,14 @@ class LoginViewModel @Inject constructor(
 
     private suspend fun readFromSettings(): Pair<String?, String?> {
         return withContext(viewModelScope.coroutineContext) {
-            val cred = settings.getCredentials().first()
-            val name = cred.username.getString()
-            val pass = cred.password.getString()
-            Pair(name, pass)
+            try {
+                val cred = settings.getCredentials().first()
+                val name = cred.username.getString()
+                val pass = cred.password.getString()
+                Pair(name, pass)
+            } catch (e: EmptyObject) {
+                Pair(null, null)
+            }
         }
     }
 
@@ -81,9 +89,11 @@ class LoginViewModel @Inject constructor(
 
     private suspend fun tryToLoadServerAddress() {
         val addressAsset: String? = loadFromAsset.invoke()
+        logger.log(TAG, "addressAsset: $addressAsset")
         addressAsset?.let {
             if (validate.server(it)) {
-                settings.saveServerAddress(it)
+                logger.log(TAG, "addressAsset: $addressAsset")
+                settings.saveServerAddress(it).collect {}
             }
         }
     }
@@ -109,23 +119,24 @@ class LoginViewModel @Inject constructor(
         // authorization
         viewModelScope.launch {
             updateUI(name, pass)
-            settings.getServerAddress()?.let {
-                if (validate.server(it)) {
-                    tryToAuth(name, pass, it)
-                } else {
-                    _authState.value = OnWait()
-                    exceptionHandler(NotCorrectServerAddress)
+            try {
+                settings.getServerAddress()?.let {
+                    if (validate.server(it)) {
+                        tryToAuth(name, pass, it)
+                    } else {
+                        _authState.value = OnWait()
+                        exceptionHandler(NotCorrectServerAddress)
+                    }
                 }
-            } ?: kotlin.run {
-                _authState.value = OnWait()
-                exceptionHandler(NotCorrectServerAddress)
+            } catch (e: EmptyObject) {
+                exceptionHandler(e)
             }
         }
     }
 
     private suspend fun tryToAuth(name: String, pass: String, serverAddress: String) {
         // todo send address to retrofit module
-        authorization.auth(name, pass)
+        authorization.auth(name, pass, serverAddress)
             .catch {
                 exceptionHandler(it)
                 _authState.value = OnWait()
@@ -140,7 +151,12 @@ class LoginViewModel @Inject constructor(
                         exceptionHandler(request.exception)
                     }
                     is SuccessRequest -> {
-                        tryToSaveSettings(name, request.data.userId, pass, serverAddress)
+                        tryToSaveSettings(
+                            name = name,
+                            userId = request.data.userId,
+                            pass = pass,
+                            serverAddress = serverAddress
+                        )
                     }
                 }
             }
@@ -152,10 +168,32 @@ class LoginViewModel @Inject constructor(
         pass: String,
         serverAddress: String
     ) {
-        settings.saveUser(User(name, userId))
-        settings.saveServerAddress(serverAddress)
-        settings.savePassword(pass)
-        _authState.value = Success(true)
-
+        viewModelScope.launch {
+            var exceptions = false
+            settings.saveUser(User(id = userId, name = name))
+                .catch {
+                    exceptionHandler(it)
+                    exceptions = true
+                }
+                .collect { }
+            settings.saveServerAddress(serverAddress)
+                .catch {
+                    exceptionHandler(it)
+                    exceptions = true
+                }
+                .collect {}
+            settings.savePassword(pass)
+                .catch {
+                    exceptionHandler(it)
+                    exceptions = true
+                }
+                .collect {}
+            if (exceptions) {
+                _authState.value = OnWait()
+                return@launch
+            }
+            logger.log(TAG, "tryToSaveSettings exceptions: $exceptions")
+            _authState.value = Success(true)
+        }
     }
 }

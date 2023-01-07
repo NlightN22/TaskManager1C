@@ -3,6 +3,7 @@ package space.active.taskmanager1c.data.local.db.retrofit
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonEncodingException
 import retrofit2.HttpException
+import space.active.taskmanager1c.coreutils.AuthException
 import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.ConnectionException
 import space.active.taskmanager1c.coreutils.ParseBackendException
@@ -39,8 +40,12 @@ open class BaseRetrofitSource (
     private fun transformBackendException(e: HttpException): Throwable {
         return try {
             val errorBody = e.response()!!.errorBody()!!.string()
+            if (e.code() == 401) { throw AuthException}
             BackendException(errorBody = errorBody, errorCode = e.code().toString())
-        } catch (e: Exception) {
+        } catch ( e: AuthException) {
+            throw AuthException
+        }
+        catch (e: Exception) {
             throw ParseBackendException(inEx = e)
         }
     }

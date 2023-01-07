@@ -34,19 +34,6 @@ data class Task(
     val cancel: Boolean
 ) {
 
-    //todo delete
-//    fun toTaskAdapter(status: TasKForAdapter.Status, whoAmI: User) = TasKForAdapter(
-//        task = this,
-//        status = status,
-//        showUser = if (whoAmI == this.users.author) {
-//            this.users.performer
-//        } else {
-//            this.users.author
-//        }
-//    )
-
-
-
     enum class Status {
         New, // не используется Можно использовать при отправке на сервер
         Accepted, // в работе - по умолчанию создаётся автором. может меняться исполнителем

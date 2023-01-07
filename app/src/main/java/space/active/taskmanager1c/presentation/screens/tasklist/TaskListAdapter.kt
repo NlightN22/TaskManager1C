@@ -20,7 +20,7 @@ interface TaskActionListener {
     fun onTaskLongClick(task: Task)
 }
 
-// TODO implement diff utils
+// TODO implement ListAdapter
 class TaskListAdapter(
     private val actionListener: TaskActionListener
 ) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener {
@@ -89,21 +89,6 @@ class TaskListAdapter(
             this.stopShimmer()
         }
     }
-
-    //todo delete
-//    private fun ImageView.setTaskStatus(status: TasKForAdapter.Status) {
-//        when (status) {
-//            TasKForAdapter.Status.Reviewed -> {
-//                this.isSelected = true
-//            }
-//            TasKForAdapter.Status.NotReviewed -> {
-//                this.isSelected = false
-//            }
-//            TasKForAdapter.Status.Invisible -> {
-//                this.isVisible = false
-//            }
-//        }
-//    }
 
     override fun getItemCount(): Int = tasks.size
 

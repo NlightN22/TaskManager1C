@@ -7,6 +7,7 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.data.remote.model.AuthUserDto
 import space.active.taskmanager1c.domain.repository.Authorization
 
+// todo delete
 class AuthMockImpl : Authorization {
 
     // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович
@@ -18,7 +19,7 @@ class AuthMockImpl : Authorization {
         pass = "test"
     )
 
-    override fun auth(username: String, password: String): Flow<Request<AuthUserDto>> = flow {
+    override fun auth(username: String, password: String, serverAddress: String): Flow<Request<AuthUserDto>> = flow {
         emit(PendingRequest())
         delay(1000)
         emit(

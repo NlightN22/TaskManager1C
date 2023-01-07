@@ -9,37 +9,24 @@ sealed class TaskListFilterTypes {
 
     object IDidNtCheck : TaskListFilterTypes() // i am author and status is Reviewed
     object IObserve : TaskListFilterTypes() // i am observer and status is New, Accepted, Deferred
-    object IDidNtRead : TaskListFilterTypes() // todo not read status
+    object IDidNtRead : TaskListFilterTypes() // unread status
     object All : TaskListFilterTypes() // none
 
     companion object {
-        // todo delete user param
-        fun List<Task>.filterIDo(user: User): List<Task> {
+        fun List<Task>.filterIDo(): List<Task> {
             return this.filter { it.whoIsInTask.performer }
-//            val statusList =
-//                this.filter {  it.status != Task.Status.Reviewed && it.status != Task.Status.Finished && it.status != Task.Status.Cancelled }
-//            val performerList = statusList.filter { it.users.performer == user }
-//            val coPerformerList = statusList.filter { it.users.coPerformers.contains(user) }
-//            return performerList.addNotContainedFromList(coPerformerList)
         }
 
-        fun List<Task>.filterIDelegate(user: User): List<Task> {
+        fun List<Task>.filterIDelegate(): List<Task> {
             return this.filter { it.whoIsInTask.author && !it.whoIsInTask.performer && !it.cancel }
-//            val statusList =
-//                this.filter { it.status != Task.Status.Reviewed && it.status != Task.Status.Finished && it.status != Task.Status.Cancelled }
-//            return statusList.filter { it.users.author == user && it.users.performer != user && !it.users.coPerformers.contains(user) }
-        }
+       }
 
-        fun List<Task>.filterIDidNtCheck(user: User): List<Task> {
+        fun List<Task>.filterIDidNtCheck(): List<Task> {
             return this.filter { it.whoIsInTask.author && it.cancel }
-//            return this.filter { it.status == Task.Status.Reviewed && it.users.author == user }
-        }
+       }
 
-        fun List<Task>.filterIObserve(user: User): List<Task> {
-//            val statusList =
-//                this.filter { it.status != Task.Status.Reviewed && it.status != Task.Status.Finished && it.status != Task.Status.Cancelled }
-//            return statusList.filter { it.users.observers.contains(user) }
-            return this.filter { !it.whoIsInTask.author && !it.whoIsInTask.performer }
+        fun List<Task>.filterIObserve(): List<Task> {
+           return this.filter { !it.whoIsInTask.author && !it.whoIsInTask.performer }
         }
 
         fun List<Task>.filterUnread() = this.filter { it.unread }

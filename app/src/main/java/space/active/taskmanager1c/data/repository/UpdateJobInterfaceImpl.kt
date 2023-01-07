@@ -36,7 +36,11 @@ class UpdateJobInterfaceImpl
     private val logger: Logger,
 ) : UpdateJobInterface {
 
-    override fun updateJob(credentials: Credentials, updateDelay: Long, whoAmI: UserInput): Flow<Request<Any>> =
+    override fun updateJob(
+        credentials: Credentials,
+        updateDelay: Long,
+        whoAmI: UserInput
+    ): Flow<Request<Any>> =
         channelFlow<Request<Any>> {
             // Проверяем таблицу исходящих задач. С определенной переодичностью
             // Если в таблице исходящих есть задачи, то сравниваем их с таблицей входящих задач.
@@ -64,7 +68,7 @@ class UpdateJobInterfaceImpl
 
             curTime = System.currentTimeMillis()
             logger.log(TAG, "updateReadingState start")
-            updateReadingState(credentials).collect{
+            updateReadingState(credentials).collect {
                 send(it)
             }
             logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
@@ -75,7 +79,9 @@ class UpdateJobInterfaceImpl
 
     private fun updateReadingState(credentials: Credentials) = flow<Request<Any>> {
         emit(PendingRequest())
-        val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(credentials.toAuthBasicDto(), inputTaskRepository.getTasks().map { it.extra.taskId})
+        val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(
+            credentials.toAuthBasicDto(),
+            inputTaskRepository.getTasks().map { it.extra.taskId })
         result.forEach {
             inputTaskRepository.updateReading(it.id, it.getUnreadStatus())
         }
@@ -109,18 +115,8 @@ class UpdateJobInterfaceImpl
                     result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(it.taskIn.name))
                     // if task is not edited and existing in input table
                     if (!outputTask.newTask) {
-                        // get taskDTO with id and only diffs params
-//                        val outDTOWithoutId = outToDTO.copy(id = "")
-                        // get diff map key value
+
                         val inputDTO = TaskDto.fromInputTask(it.taskIn)
-//                        val mappedDiffs = inputDTO.compareWithAndGetDiffs(outDTOWithoutId)
-                        // send in Map
-//                        val res = taskApi.sendEditedTaskMappedChanges(
-//                            userSettings.toAuthBasicDto(),
-//                            inputDTO.id,
-//                            mappedDiffs
-//                        )
-//                        result = SuccessRequest(res)
                         result = SuccessRequest(
                             taskApi.sendEditedTaskMappedChanges(
                                 credentials.toAuthBasicDto(),
@@ -128,7 +124,7 @@ class UpdateJobInterfaceImpl
                                 inputDTO.compareWithAndGetDiffs(outToDTO.copy(id = ""))
                             )
                         )
-//                        mock todo delete
+//                         todo delete mock
 //                        result = SuccessRequest(inputDTO)
                     }
                 } ?: kotlin.run {
@@ -139,7 +135,7 @@ class UpdateJobInterfaceImpl
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
 //                        result = taskApi.sendNewTask(userSettings.toAuthBasicDto(),withoutId)
-                        //mock todo delete
+                        // todo delete mock
                         delay(6000)
                         result = SuccessRequest(withoutId)
                     }
@@ -169,40 +165,21 @@ class UpdateJobInterfaceImpl
         emit(SuccessRequest(Any()))
     }
 
-    override fun inputFetchJobFlow(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
-        emit(PendingRequest())
-        val result: TaskListDto = taskApi.getTaskList(credentials.toAuthBasicDto())
-//        when (request) {
-//            is SuccessRequest -> {
-//                logger.log(TAG, "get tasks from server")
-//                val listUsers = request.data.toUserInputList()
-//                val listTasks = request.data.toTaskInputList()
-                //save input Users
-        var curTime = System.currentTimeMillis()
-        logger.log(TAG, "insertUsers")
-        inputTaskRepository.insertUsers(result.toUserInputList())
-        logger.log(TAG, "insertUsers ${System.currentTimeMillis() - curTime}ms")
+    override fun inputFetchJobFlow(credentials: Credentials, whoAmI: UserInput) =
+        flow<Request<Any>> {
+            emit(PendingRequest())
+            val result: TaskListDto = taskApi.getTaskList(credentials.toAuthBasicDto())
+            var curTime = System.currentTimeMillis()
+            logger.log(TAG, "insertUsers")
+            inputTaskRepository.insertUsers(result.toUserInputList())
+            logger.log(TAG, "insertUsers ${System.currentTimeMillis() - curTime}ms")
 
-        //save input Tasks
-                //todo delete
-//                inputTaskRepository.insertTasks(listTasks) todo delete
-//                logger.log(TAG, "Tasks: ${listTasks.map { it.name }.joinToString("\n")  }")
-//                logger.log(TAG, "WhoAmI: $whoAmi")
-        curTime = System.currentTimeMillis()
-        logger.log(TAG, "insertTasks")
-        inputTaskRepository.insertTasks(result.toTaskInputList(), whoAmI)
-        logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
-//                logger.log(TAG, "save all to DB")
-                emit(SuccessRequest(Any()))
-//            }
-//            is ErrorRequest -> {
-//                emit(ErrorRequest(request.exception))
-//            }
-//            is PendingRequest -> {
-//                emit(PendingRequest())
-//            }
-//        }
-    }.flowOn(ioDispatcher)
+            curTime = System.currentTimeMillis()
+            logger.log(TAG, "insertTasks")
+            inputTaskRepository.insertTasks(result.toTaskInputList(), whoAmI)
+            logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
+            emit(SuccessRequest(Any()))
+        }.flowOn(ioDispatcher)
 
     private fun getEqualOutputTasksInInputTasks(
         outputTasks: List<OutputTask>,

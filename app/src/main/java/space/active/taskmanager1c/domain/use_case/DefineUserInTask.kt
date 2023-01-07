@@ -20,10 +20,6 @@ class DefineUserInTask @Inject constructor() {
             }
             return TaskUserIs.Performer()
         }
-        // todo delete
-//        else if (task.users.observers.contains(whoAmI)) {
-//            return TaskUserIs.Observer
-//        }
         return TaskUserIs.NotAuthorOrPerformer()
     }
 }

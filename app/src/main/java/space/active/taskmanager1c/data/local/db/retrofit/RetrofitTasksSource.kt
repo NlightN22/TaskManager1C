@@ -36,13 +36,6 @@ class RetrofitTasksSource @Inject constructor
     override suspend fun getTaskList(auth: AuthBasicDto): TaskListDto =
         wrapRetrofitExceptions {
             retrofitApi.getTasks(auth.toBasic())
-            // todo delete
-//            logger.log(TAG, "getTaskList ${taskDto.tasks.joinToString("\n") { it.name }}")
-//            if (taskDto.tasks.isEmpty() or taskDto.users.isEmpty()) {
-//                return@wrapRetrofitExceptions ErrorRequest(EmptyObject("TaskListDto"))
-//            } else {
-//                return@wrapRetrofitExceptions SuccessRequest(taskDto)
-//            }
         }
 
     override suspend fun sendNewTask(auth: AuthBasicDto, task: TaskDto): Request<TaskDto> =
@@ -58,10 +51,6 @@ class RetrofitTasksSource @Inject constructor
         taskId: String,
         changeMap: Map<String, Any>
     ) = wrapRetrofitExceptions<TaskDto> {
-        //todo delete
-//        val mapWId = mutableMapOf<String, Any>()
-//        mapWId["id"] = taskId
-//        mapWId.putAll(changeMap)
         val changes = converters.mapToJson(changeMap)
         logger.log(TAG, "Send changes: $changeMap")
         val res = retrofitApi.saveChanges(taskId, auth.toBasic(), changes)

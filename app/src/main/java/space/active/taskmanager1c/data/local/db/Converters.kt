@@ -11,40 +11,41 @@ import space.active.taskmanager1c.data.utils.JsonParser
 @ProvidedTypeConverter
 class Converters(
     private val jsonParser: JsonParser
-)
-{
+) {
     @TypeConverter
     fun listStringToJson(listString: List<String>): String {
         return jsonParser.toJson(
             listString,
-            object : TypeToken<ArrayList<String>>(){}.type
+            object : TypeToken<ArrayList<String>>() {}.type
         ) ?: "[]"
     }
 
     @TypeConverter
-    fun jsonToListStrings (json: String): List<String> {
+    fun jsonToListStrings(json: String): List<String> {
         return jsonParser.fromJson(
             json,
-            object : TypeToken<ArrayList<String>>(){}.type
+            object : TypeToken<ArrayList<String>>() {}.type
         ) ?: emptyList<String>()
     }
 
     @TypeConverter
-    fun encryptedToString(encryptedData: EncryptedData): String =
-        Json.encodeToString(EncryptedData.serializer(), encryptedData)
+    fun encryptedToString(encryptedData: EncryptedData?): String? =
+        if (encryptedData == null) {
+            null
+        } else {
+            Json.encodeToString(EncryptedData.serializer(), encryptedData)
+        }
 
     @TypeConverter
-    fun stringToEncrypted(json: String): EncryptedData =
-        Json.decodeFromString(EncryptedData.serializer(), json)
+    fun stringToEncrypted(json: String?): EncryptedData? =
+        if (json == null) {
+            null
+        } else {
+            Json.decodeFromString(EncryptedData.serializer(), json)
+        }
 
-    fun <T,R>mapToJson(map: Map<T,R>): String {
+    fun <T, R> mapToJson(map: Map<T, R>): String {
         return jsonParser.toJsonSimple(map) ?: ""
-    }
-
-    fun taskListDtoFromJson(json: String): TaskListDto? {
-         return jsonParser.fromJson<TaskListDto>(
-             json,
-            object : TypeToken<TaskListDto>(){}.type)
     }
 
 }

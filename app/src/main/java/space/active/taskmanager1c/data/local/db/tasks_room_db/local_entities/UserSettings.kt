@@ -15,10 +15,6 @@ data class UserSettings (
     val username: EncryptedData? = null,
     val password: EncryptedData? = null,
     val serverAddress: EncryptedData? = null,
-    //todo delete
-//    val developerMode: EncryptedData,
-//    val disableUpdate: EncryptedData,
-//    val disableLogin: EncryptedData
 ) {
 
 

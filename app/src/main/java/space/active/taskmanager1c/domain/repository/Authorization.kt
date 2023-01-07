@@ -6,5 +6,5 @@ import space.active.taskmanager1c.data.remote.model.AuthUserDto
 
 
 interface Authorization {
-    fun auth(username: String, password: String): Flow<Request<AuthUserDto>>
+    fun auth(username: String, password: String, serverAddress:String): Flow<Request<AuthUserDto>>
 }

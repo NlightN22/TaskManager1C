@@ -141,7 +141,7 @@ class MainViewModel @Inject constructor(
         try {
             updateJob?.cancel()
             runningJob.compareAndSet(true, false)
-            logger.log(TAG, "updateJob is Active: ${updateJob?.isActive}")
+            logger.log(TAG, "stopUpdateJob. Job is Active: ${updateJob?.isActive}")
             updateJob = null
         } catch (e: UninitializedPropertyAccessException) {
             Log.w(TAG, "Warning updateJob already cancelled")

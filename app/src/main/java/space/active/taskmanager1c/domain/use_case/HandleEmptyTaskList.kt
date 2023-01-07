@@ -29,9 +29,6 @@ class HandleEmptyTaskList @Inject constructor(
 ) {
     var tries = 0
     operator fun invoke(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
-        // Если список пустой, то мы пытаемся получить его с сервера
-        //Если ответ с сервера успешный, то выводим информацию об отсутствии задач
-        //Если нет, то обрабатываем исключения
         logger.log(TAG, "HandleEmptyTaskList launch")
         emit(PendingRequest())
         var successResult: Boolean = false
@@ -64,38 +61,3 @@ class HandleEmptyTaskList @Inject constructor(
         emit(SuccessRequest(Any()))
     }.flowOn(ioDispatcher)
 }
-    // todo delete
-//        var listTasks: List<Task> = repository.listTasksFlow.first()
-//        if (listTasks.isEmpty()) {
-//            var iterator = 0
-//            while (iterator < TRIES_TO_FETCH) {
-//                updateJob.inputFetchJobFlow(userSettings).collect { fetchResult ->
-//                    when (fetchResult) {
-//                        is SuccessRequest -> {
-//                            listTasks = repository.listTasksFlow.first()
-//                            if (listTasks.isEmpty()) {
-//                                emit(ErrorRequest(EmptyObject("listTasks")))
-//                                iterator = TRIES_TO_FETCH
-//                            } else if (listTasks.isNotEmpty()) {
-//                                iterator = TRIES_TO_FETCH
-//                            }
-//                        }
-//                        is PendingRequest -> {
-//                            emit(PendingRequest())
-//                        }
-//                        is ErrorRequest -> {
-//                            emit(ErrorRequest(fetchResult.exception))
-//                            iterator++
-//                            delay(FETCH_TIMEOUT)
-//
-////                            when (fetchResult.exception) {
-////                                is NullAnswerFromServer -> {
-////                                    emit(ErrorRequest(EmptyObject))
-////                                }
-////                                is HttpException -> {}
-////                                else -> {} // TODO add classic exceptions
-////                            }
-//                        }
-//                    }
-//                }
-//            }

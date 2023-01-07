@@ -10,7 +10,7 @@ interface SettingsRepository {
     fun getUserFlow(): Flow<User>
     fun saveUser(user: User): Flow<Request<Any>>
     fun savePassword(pass: String): Flow<Request<Any>>
-    suspend fun getServerAddress(): String?
+    suspend fun getServerAddress(): String
     fun saveServerAddress(serverAddress: String): Flow<Request<Any>>
     fun clearSettings(): Flow<Request<Any>>
     fun getCredentials(): Flow<Credentials>

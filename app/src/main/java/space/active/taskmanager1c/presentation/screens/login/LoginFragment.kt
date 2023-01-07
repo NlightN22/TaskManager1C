@@ -51,6 +51,8 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         viewModel.viewState.collectOnStart {
             binding.editTextUsername.setText(it.username)
             binding.editTextPassword.setText(it.password)
+            binding.userNameTIL.error = it.userError?.getString(requireContext())
+            binding.passTIL.error = it.passError?.getString(requireContext())
         }
 
         viewModel.authState.collectOnStart { state ->
@@ -62,9 +64,9 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
                     renderLoading(true)
                 }
                 is Success -> {
+                    logger.log(TAG, "authState Success")
                     previousStateHandle[LOGIN_SUCCESSFUL] = true
                     successLogin()
-
                 }
             }
         }

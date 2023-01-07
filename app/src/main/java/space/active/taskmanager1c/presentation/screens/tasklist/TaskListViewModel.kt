@@ -70,24 +70,10 @@ class TaskListViewModel @Inject constructor(
         _searchFilter,
         _bottomOrder
     ) { input, bottomFilter, searchFilter, bottomOrder ->
-        // todo delete
-//        logger.log(TAG, "_bottomFilter.combine $bottomFilter")
-//        val bottomList = filterByBottom(input, bottomFilter)
-//        logger.log(TAG, "_searchFilter.combine $searchFilter")
-//        val searchList = if (searchFilter.isNullOrBlank()) {
-//            filterByBottom(input, bottomFilter)
-//        } else {
-//            filterBySearch(filterByBottom(input, bottomFilter), searchFilter)
-//        }
         orderByBottom(
             search(
+                // todo fix accepted author status - not show OK
                 filterByBottom(input, bottomFilter), searchFilter), bottomOrder)
-        // final result
-//        val whoAmI = whoAmI.first()
-//        val adapterList = orederedList.map {
-//            it.toTaskAdapter(defineStatusForList(it, whoAmI), whoAmI)
-//            }
-
     }
 
 
@@ -243,19 +229,18 @@ class TaskListViewModel @Inject constructor(
 
     private suspend fun filterByBottom(list: List<Task>, filter: TaskListFilterTypes): List<Task> {
         return viewModelScope.async(defDispatcher) {
-            val whoAmI = whoAmI.first()
             return@async when (filter) {
                 is TaskListFilterTypes.IDo -> {
-                    list.filterIDo(whoAmI)
+                    list.filterIDo()
                 }
                 is TaskListFilterTypes.IDelegate -> {
-                    list.filterIDelegate(whoAmI)
+                    list.filterIDelegate()
                 }
                 is TaskListFilterTypes.IDidNtCheck -> {
-                    list.filterIDidNtCheck(whoAmI)
+                    list.filterIDidNtCheck()
                 }
                 is TaskListFilterTypes.IObserve -> {
-                    list.filterIObserve(whoAmI)
+                    list.filterIObserve()
                 }
                 is TaskListFilterTypes.IDidNtRead -> {
                     list.filterUnread()

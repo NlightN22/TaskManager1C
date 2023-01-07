@@ -2,15 +2,14 @@ package space.active.taskmanager1c.presentation.screens.settings
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import space.active.taskmanager1c.coreutils.EmptyObject
 import space.active.taskmanager1c.coreutils.EncryptedData
 import space.active.taskmanager1c.coreutils.EncryptedData.Companion.toEncryptedData
 import space.active.taskmanager1c.coreutils.NotCorrectServerAddress
+import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
@@ -39,47 +38,45 @@ class SettingsViewModel @Inject constructor(
     init {
         // set user
         viewModelScope.launch {
+            val user = wrapGetSettings {settings.getUser().name}
+            val id = wrapGetSettings { settings.getUser().id }
+            val server = wrapGetSettings { settings.getServerAddress() }
+
             _viewState.value = SettingsViewState(
-                userId = settings.getUser()?.id ?: "",
-                userName = settings.getUser()?.name ?: "",
-                serverAddress = settings.getServerAddress() ?: ""
+                userId = id,
+                userName = user,
+                serverAddress = server
             )
         }
     }
 
+    private suspend fun wrapGetSettings(block: suspend () -> String): String {
+        return try {
+            block()
+        } catch (e:EmptyObject) {
+            ""
+        }
+    }
+
     fun saveSettings(serverAddress: String) {
-        // validation
-        val validateRes = validateCredentials.server(serverAddress)
+        viewModelScope.launch {
+            // validation
+            val validateRes = validateCredentials.server(serverAddress)
 
-        if (!validateRes) {
-            exceptionHandler(NotCorrectServerAddress)
-            return
-        }
-        // save to Settings
-        settings.saveServerAddress(serverAddress)
-    }
-
-    // todo delete
-//    fun saveMock(serverAddress: String) {
-//        val curSettings = UserSettings(
-//            username = _viewState.value.userName,
-//            userId = _viewState.value.userId,
-//            serverAddress = serverAddress
-//        )
-//        encrTmp(serverAddress)
-//    }
-
-    private fun encrTmp(serverAddress: String) {
-        val encrypted: EncryptedData? = serverAddress.toEncryptedData()
-        logger.log(TAG, "encrypted: ${encrypted}")
-        encrypted?.let {
-            val json = Json.encodeToString(EncryptedData.serializer(), it)
-            logger.log(TAG, "serialized: $json")
-            val deSerial = Json.decodeFromString(EncryptedData.serializer(), json)
-            logger.log(TAG, "deserialized: $deSerial")
-            val decrypted: String? = deSerial.getString()
-            logger.log(TAG, "decrypted: $decrypted")
+            if (!validateRes) {
+                exceptionHandler(NotCorrectServerAddress)
+                return@launch
+            }
+            // save to Settings
+            settings.saveServerAddress(serverAddress)
+                .catch {
+                    exceptionHandler(it)
+                }
+                .collect {
+                    if (it is SuccessRequest) {
+                        _saveEvent.emit(true)
+                    }
+                }
         }
     }
-
 }
