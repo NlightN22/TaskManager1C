@@ -9,7 +9,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.Tas
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.WhoIsInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.domain.models.User.Companion.toText
-import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedTaskState
+import space.active.taskmanager1c.presentation.screens.task_detailed.TaskState
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -86,7 +86,7 @@ data class Task(
         }
     }
 
-    fun toTaskState() = TaskDetailedTaskState(
+    fun toTaskState() = TaskState(
         id = this.id,
         title = this.name,
         startDate = this.date.toShortDateTime(),

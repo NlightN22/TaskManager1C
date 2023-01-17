@@ -7,8 +7,8 @@ import space.active.taskmanager1c.presentation.utils.updateText
 
 fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
     viewModel.taskState.collectOnCreate { taskState ->
-        with(taskState.state) {
-            binding.taskTitleDetailed.updateText(title)
+        with(taskState) {
+            binding.taskTitleDetailed.setText(title)
             binding.taskNumberDetailed.text = number
             binding.taskStatus.text = resources.getString(status.getResId())
             binding.taskDateDetailed.text = startDate
@@ -18,7 +18,7 @@ fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
             binding.taskPerformer.setText(performer)
             binding.taskCoPerformers.setText(coPerfomers)
             binding.taskObservers.setText(observers)
-            binding.taskDescription.updateText(description)
+            binding.taskDescription.setText(description)
             binding.taskBaseObject.setText(taskObject)
             binding.taskMain.setText(mainTask)
             binding.taskInner.setText(innerTasks)
@@ -31,10 +31,12 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
     viewModel.enabledFields.collectOnCreate { fieldsState ->
         // Title
         binding.taskTitleCardView.setState(enabled = fieldsState.title)
-        binding.taskTitleTIL.setState(
-            enabled = fieldsState.title,
-            editable = fieldsState.title
-        )
+        binding.taskTitleTIL.setState(enabled = fieldsState.title)
+        if (fieldsState.title) {
+            binding.taskTitleDetailed.setOnClickListener{
+                viewModel.showDialog(EditTitleDialog(null))
+            }
+        }
         binding.taskDateDetailed.setColorState(fieldsState.title)
         binding.taskStatus.setColorState(fieldsState.title)
         binding.taskNumberDetailed.setColorState(fieldsState.title)
@@ -72,10 +74,12 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
         }
         // Descriptions
         binding.taskDescriptionCardView.setState(enabled = fieldsState.description)
-        binding.taskDescriptionTIL.setState(
-            enabled = fieldsState.description,
-            editable = fieldsState.description
-        )
+        binding.taskDescriptionTIL.setState(enabled = fieldsState.description)
+        if (fieldsState.description) {
+            binding.taskDescription.setOnClickListener {
+                viewModel.showDialog(EditDescriptionDialog(null))
+            }
+        }
         // bottom menu state items
         binding.bottomMenu.menu.clear()
         if (fieldsState.bottomNew) {

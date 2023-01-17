@@ -37,14 +37,20 @@ class MergedTaskRepositoryImpl(
     override val listUsersFlow: Flow<List<User>> =
         inputTaskRepository.listUsersFlow.map { it.toListUserDomain() }
 
-    override fun getTask(taskId: String): Flow<Task?> =
-        combine(
-            inputTaskRepository.getTaskFlow(taskId),
-            outputTaskRepository.getTaskFlow(taskId),
-        ) { inputTask, outputTask ->
-            taskCombine(inputTask, outputTask)
-        }.flowOn(ioDispatcher)
+    override fun getTask(taskId: String): Flow<Task?> = getCombinedTask(taskId) // todo change test
+//    override fun getTask(taskId: String): Flow<Task?> = getInputTask(taskId) // todo change test
 
+    private fun getCombinedTask(taskId: String) = combine(
+        inputTaskRepository.getTaskFlow(taskId),
+        outputTaskRepository.getTaskFlow(taskId),
+    ) { inputTask, outputTask ->
+        taskCombine(inputTask, outputTask)
+    }.flowOn(ioDispatcher)
+
+    private fun getInputTask(taskId: String) = inputTaskRepository.getTaskFlow(taskId).map {
+        logger.log(TAG, "return ${it?.toTaskDomain()?.name}")
+        it?.toTaskDomain()
+    }
 
     private suspend fun taskCombine(inExtraTask: TaskInAndExtra?, outputTask: OutputTask?): Task? {
 
@@ -57,11 +63,13 @@ class MergedTaskRepositoryImpl(
                  */
                 if (convertedInput == convertedOutput) {
                     outputTaskRepository.deleteTask(output)
+                    logger.log(TAG, "return convertedInput")
                     return it.copy(taskIn = convertedInput).toTaskDomain()
                 } else {
                     /**
                      * return if tasks are different.
                      */
+                    logger.log(TAG, "return convertedOutput")
                     return it.copy(taskIn = convertedOutput).toTaskDomain()
                 }
             } ?: kotlin.run {
@@ -74,6 +82,8 @@ class MergedTaskRepositoryImpl(
             /**
              * return if output task is null
              */
+            logger.log(TAG, "return inExtraTask")
+            logger.log(TAG, "return ${it.toTaskDomain().name}")
             return it.toTaskDomain()
         } ?: kotlin.run {
             return null

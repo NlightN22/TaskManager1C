@@ -10,6 +10,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.rel
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskExtraLabelCrossRef
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskWithLabels
+import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 private const val TAG = "InputTaskRepositoryImpl"
 
@@ -43,12 +44,14 @@ class InputTaskRepositoryImpl(
         } ?: true
 
         if (saveIn || saveEx) {
+            logger.log(TAG, "saved task: ${taskInput.toString().replace(", ", "\n")}")
             extraDao.insertTaskInAndExtra(taskInput.toTaskExtra(whoAmI), taskInput)
             return 1
         }
         return 0
     }
 
+    // todo add delete tasks not in input list
     override suspend fun insertTasks(taskInputList: List<TaskInput>, whoAmI: UserInput) {
         var saveCounter = 0
         taskInputList.forEach {
@@ -88,5 +91,17 @@ class InputTaskRepositoryImpl(
 
     override suspend fun insertLabel(taskId: String, label: Label) {
         extraDao.insertLabel(TaskExtraLabelCrossRef(taskId, label.labelName))
+    }
+
+    override suspend fun saveAndDelete(
+        inputTask: TaskInput,
+        outputTask: OutputTask,
+        whoAmI: UserInput
+    ) {
+        extraDao.saveAndDelete(
+            inputTask,
+            outputTask,
+            inputTask.toTaskExtra(whoAmI)
+        )
     }
 }

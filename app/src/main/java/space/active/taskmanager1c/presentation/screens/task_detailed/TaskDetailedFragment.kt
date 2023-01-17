@@ -54,7 +54,9 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
         //observe save event
         viewModel.validationEvent.collectOnStart {
-            if (it) { onBackClick() }
+            if (it) {
+                onBackClick()
+            }
         }
 
         //validate errors observer
@@ -147,6 +149,24 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 is DatePicker -> {
                     showDatePicker()
                 }
+                is EditTitleDialog -> {
+                    event.dialogState?.let {
+                        EditTextDialog.show(
+                            parentFragmentManager,
+                            it,
+                            REQUEST_TITLE
+                        )
+                    }
+                }
+                is EditDescriptionDialog -> {
+                    event.dialogState?.let {
+                        EditTextDialog.show(
+                            parentFragmentManager,
+                            it,
+                            REQUEST_DESCRIPTION
+                        )
+                    }
+                }
             }
         }
 
@@ -158,6 +178,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
         setupMultiChooseDialog()
         setupSingleChooseDialog()
+        setupEditTextListener()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -347,8 +368,25 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         }
     }
 
+    private fun setupEditTextListener() {
+        val listener: CustomEditTextDialogListener = { requestKey, text ->
+            when (requestKey) {
+                REQUEST_TITLE -> viewModel.saveEditChanges(TaskChangesEvents.Title(text ?: ""))
+                REQUEST_DESCRIPTION -> viewModel.saveEditChanges(
+                    TaskChangesEvents.Description(
+                        text ?: ""
+                    )
+                )
+            }
+        }
+        EditTextDialog.setupListener(parentFragmentManager,this, REQUEST_TITLE, listener)
+        EditTextDialog.setupListener(parentFragmentManager,this, REQUEST_DESCRIPTION, listener)
+    }
+
     companion object {
         private const val REQUEST_COPERFOMREFRS = "REQUEST_COPERFOMREFRS"
         private const val REQUEST_OBSERVERS = "REQUEST_OBSERVERS"
+        private const val REQUEST_TITLE = "REQUEST_TITLE"
+        private const val REQUEST_DESCRIPTION = "REQUEST_DESCRIPTION"
     }
 }

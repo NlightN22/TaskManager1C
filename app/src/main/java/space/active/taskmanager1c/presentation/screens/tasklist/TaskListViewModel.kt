@@ -26,6 +26,7 @@ private const val TAG = "TaskListViewModel"
 @HiltViewModel
 class TaskListViewModel @Inject constructor(
     settings: SettingsRepository,
+    private val getCredentials: GetCredentials,
     private val repository: TasksRepository,
     private val handleEmptyTaskList: HandleEmptyTaskList,
     private val exceptionHandler: ExceptionHandler,
@@ -94,7 +95,7 @@ class TaskListViewModel @Inject constructor(
     private suspend fun checkForInputListAndTryFetch(inputList: List<Task>) {
         val curListIsEmpty = repository.listTasksFlow.first().isEmpty()
         if (inputList.isEmpty() && curListIsEmpty) {
-            handleEmptyTaskList(settings.getCredentials().first(), settings.getUser().toUserInput()).collect { request ->
+            handleEmptyTaskList(getCredentials(), settings.getUser().toUserInput()).collect { request ->
                 when (request) {
                     is SuccessRequest -> {
                         _listTask.value = SuccessRequest(inputList)

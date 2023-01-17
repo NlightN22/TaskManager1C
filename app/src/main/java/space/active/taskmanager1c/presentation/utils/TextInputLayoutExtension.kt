@@ -28,6 +28,7 @@ fun TextInputEditText.getChanges(block: (String) -> Unit) {
         })
 }
 
+// todo delete after change to dialog
 fun TextInputEditText.updateText(newText: String) {
     val curText = this.text?.toString() ?: ""
     if (curText != newText) {

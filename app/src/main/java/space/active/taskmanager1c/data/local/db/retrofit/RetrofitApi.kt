@@ -29,6 +29,7 @@ interface RetrofitApi {
 
     /**
      * POST
+     * save new task
      * http://172.16.17.242/torg_develop/hs/taskmgr/tasks
      */
     @POST("tasks")
@@ -39,7 +40,8 @@ interface RetrofitApi {
 
     /**
      * POST
-     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks
+     * save tasks changes
+     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks/taskId
     {
     "id: "dfsdsd",
     "name": "11111Фразы покупателей в магазинах"
@@ -115,6 +117,10 @@ interface RetrofitApi {
         @Body map: Map<String, String>
     ): TaskUserReadingFlagDTO
 
+    /**
+     * GET
+     * user authorization
+     */
     @GET("auth")
     suspend fun authUser(@Header("Authorization") auth: String): UserDto
 

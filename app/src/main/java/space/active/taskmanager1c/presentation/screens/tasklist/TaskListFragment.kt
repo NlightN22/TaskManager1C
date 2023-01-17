@@ -167,6 +167,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                         }
                         R.id.options_logout -> {
                             clearUserCredentialsAndExit()
+                            super.onDestroy()
                         }
                     }
                 }

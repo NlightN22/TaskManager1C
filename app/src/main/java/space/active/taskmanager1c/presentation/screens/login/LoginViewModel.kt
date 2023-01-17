@@ -89,10 +89,8 @@ class LoginViewModel @Inject constructor(
 
     private suspend fun tryToLoadServerAddress() {
         val addressAsset: String? = loadFromAsset.invoke()
-        logger.log(TAG, "addressAsset: $addressAsset")
         addressAsset?.let {
             if (validate.server(it)) {
-                logger.log(TAG, "addressAsset: $addressAsset")
                 settings.saveServerAddress(it).collect {}
             }
         }

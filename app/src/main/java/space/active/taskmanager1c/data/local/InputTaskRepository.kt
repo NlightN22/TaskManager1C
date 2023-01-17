@@ -8,6 +8,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.Tas
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.LabelWithTasks
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskWithLabels
+import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 interface InputTaskRepository {
     // tasks
@@ -27,4 +28,5 @@ interface InputTaskRepository {
     fun taskWithLabels(taskId: String): Flow<TaskWithLabels?>
     fun labelWithTasks(label: Label): Flow<LabelWithTasks?>
     suspend fun insertLabel(taskId: String, label: Label)
+    suspend fun saveAndDelete(inputTask: TaskInput, outputTask: OutputTask, whoAmI: UserInput)
 }

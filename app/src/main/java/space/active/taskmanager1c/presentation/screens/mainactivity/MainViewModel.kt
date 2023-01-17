@@ -25,6 +25,7 @@ private const val TAG = "MainViewModel"
 class MainViewModel @Inject constructor(
     private val updateJobInterface: UpdateJobInterface,
     private val settings: SettingsRepository,
+    private val getCredentials: GetCredentials,
     private val saveTaskChangesToDb: SaveTaskChangesToDb,
     private val saveBreakable: SaveBreakable,
     private val saveDelayed: SaveDelayed,
@@ -53,11 +54,11 @@ class MainViewModel @Inject constructor(
     private val runningJob: AtomicBoolean = AtomicBoolean(false)
 
     fun clearAndExit() {
+        stopUpdateJob()
         viewModelScope.launch {
             settings.clearSettings().collect { clearSettings->
                 when (clearSettings) {
                     is SuccessRequest -> {
-                        stopUpdateJob()
                         clearAllTables().collectLatest {
                             if (it) {
                                 _exitEvent.emit(true)
@@ -114,7 +115,7 @@ class MainViewModel @Inject constructor(
                         /**
                         set update work here
                          */
-                        updateJobInterface.updateJob(settings.getCredentials().first(), 1000L,
+                        updateJobInterface.updateJob(getCredentials(), 1000L,
                         settings.getUser()?.toUserInput()?: throw EmptyObject("user"))
                             .catch { e ->
                                 exceptionHandler(e)

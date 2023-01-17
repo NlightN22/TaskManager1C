@@ -12,13 +12,17 @@ class DefineUserInTask @Inject constructor() {
             if (task.status == Task.Status.Reviewed) {
                 return TaskUserIs.AuthorInReviewed()
             }
-            return TaskUserIs.Author()
+            if (task.status != Task.Status.Finished) {
+                return TaskUserIs.Author()
+            }
         } else if (task.users.performer == whoAmI || task.users.coPerformers.contains(whoAmI)) {
             //if performer in reviewed can only resume task
             if (task.status == Task.Status.Reviewed) {
                 return TaskUserIs.PerformerInReviewed()
             }
-            return TaskUserIs.Performer()
+            if (task.status != Task.Status.Finished) {
+                return TaskUserIs.Performer()
+            }
         }
         return TaskUserIs.NotAuthorOrPerformer()
     }

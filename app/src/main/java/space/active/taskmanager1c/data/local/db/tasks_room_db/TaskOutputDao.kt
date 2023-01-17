@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 @Dao
@@ -26,4 +28,5 @@ interface TaskOutputDao {
 
     @Query("DELETE FROM OutputTask WHERE outputId = :outputId")
     fun deleteOutputTask(outputId: Int)
+
 }

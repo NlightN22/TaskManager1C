@@ -12,15 +12,16 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.rel
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskExtraLabelCrossRef
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskWithLabels
+import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 @Dao
 interface TaskExtraInputDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertTaskInput(taskInput: TaskInput)
+    abstract suspend fun insertTaskInput(taskInput: TaskInput)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertTaskExtra(taskExtra: TaskExtra)
+    abstract suspend fun insertTaskExtra(taskExtra: TaskExtra)
 
     @Query("SELECT * FROM TaskInput WHERE id = :taskId")
     suspend fun getInput(taskId: String): TaskInput?
@@ -43,7 +44,7 @@ interface TaskExtraInputDao {
 
     @Transaction
     @Query("SELECT * FROM TaskInput")
-    fun taskInAndExtraList(): List<TaskInAndExtra>
+    suspend fun taskInAndExtraList(): List<TaskInAndExtra>
 
     @Transaction
     @Query("SELECT * FROM TaskInput WHERE id = :taskId")
@@ -58,7 +59,7 @@ interface TaskExtraInputDao {
 
     // Labels
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertLabel(crossRef: TaskExtraLabelCrossRef)
+    suspend fun insertLabel(crossRef: TaskExtraLabelCrossRef)
 
     @Transaction
     @Query("SELECT * FROM Label WHERE labelName = :labelName")
@@ -67,5 +68,15 @@ interface TaskExtraInputDao {
     @Transaction
     @Query("SELECT * FROM TaskExtra WHERE taskId = :taskId")
     fun getTaskWithLabels(taskId: String): Flow<TaskWithLabels?>
+
+    @Transaction
+    suspend fun saveAndDelete(inputTask: TaskInput, outputTask: OutputTask, taskExtra: TaskExtra) {
+        insertTaskInput(inputTask)
+        insertTaskExtra(taskExtra)
+        deleteOutputTask(outputTask.outputId)
+    }
+
+    @Query("DELETE FROM OutputTask WHERE outputId = :outputId")
+    abstract suspend fun deleteOutputTask(outputId: Int)
 
 }

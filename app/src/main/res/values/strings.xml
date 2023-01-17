@@ -55,10 +55,13 @@
     <string name="Accepted">В работе</string>
     <string name="Performed">На доработке</string>
     <string name="Reviewed">На проверке</string>
-    <string name="Finished">Принята</string>
+    <string name="Finished">Выполнена</string>
     <string name="Deferred">Отложена</string>
     <string name="Cancelled">Отменена</string>
 
+
+    <string name="title_dialog_hint">Введите наименование задачи</string>
+    <string name="description_dialog_hint">Введите описание задачи</string>
     <string name="title_valid_error">Заголовок не может быть пустым или больше %d символов</string>
     <string name="author_status_valid_error">Автор может установить только статусы: %s, %s</string>
     <string name="performer_status_valid_error">Испольнитель может установить только статус: %s</string>

@@ -60,12 +60,7 @@ data class TaskInput(
 
     private fun defineOk(author: Boolean, performer: Boolean, status: Status): Boolean {
         // author in Status: New, Accepted, Performed, Reviewed, Deferred
-        val authorStatus: Boolean =
-            Status.New == status ||
-                    Status.Accepted == status ||
-                    Status.Performed == status ||
-                    Status.Reviewed == status ||
-                    Status.Deferred == status
+        val authorStatus: Boolean = status != Status.Finished
         // performer in Status: New, Accepted, Performed, Deferred
         val performerStatus: Boolean =
             Status.New == status ||

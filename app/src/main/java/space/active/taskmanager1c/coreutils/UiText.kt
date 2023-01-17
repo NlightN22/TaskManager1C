@@ -1,9 +1,11 @@
 package space.active.taskmanager1c.coreutils
 
 import android.content.Context
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
 private const val TAG = "UiText"
+
 
 sealed class UiText {
     data class Dynamic(val value: String) : UiText()

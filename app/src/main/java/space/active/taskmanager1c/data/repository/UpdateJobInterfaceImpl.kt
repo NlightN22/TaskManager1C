@@ -74,7 +74,6 @@ class UpdateJobInterfaceImpl
             logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
 
             delay(updateDelay)
-//            logger.log(TAG, "Job end")
         }.flowOn(ioDispatcher)
 
     private fun updateReadingState(credentials: Credentials) = flow<Request<Any>> {
@@ -134,10 +133,10 @@ class UpdateJobInterfaceImpl
                     if (outputTask.newTask) {
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
-//                        result = taskApi.sendNewTask(userSettings.toAuthBasicDto(),withoutId)
+                        result = taskApi.sendNewTask(credentials.toAuthBasicDto(),withoutId)
                         // todo delete mock
-                        delay(6000)
-                        result = SuccessRequest(withoutId)
+//                        delay(6000)
+//                        result = SuccessRequest(withoutId)
                     }
                 }
                 result?.let { res ->
@@ -145,11 +144,17 @@ class UpdateJobInterfaceImpl
                         is SuccessRequest -> {
                             // TODO if task send with delete label
 //                        logger.log(TAG, result.data.toString())
-                            inputTaskRepository.insertTask(
-                                res.data.toTaskInput(),
-                                whoAmI
+                            inputTaskRepository.saveAndDelete(
+                                inputTask =res.data.toTaskInput(),
+                                outputTask = outputTask,
+                                whoAmI = whoAmI
                             )
-                            outputTaskRepository.deleteTasks(listOf(outputTask))
+//                            inputTaskRepository.insertTask(
+//                                ,
+//                                whoAmI
+//                            )
+//                            delay(100)
+//                            outputTaskRepository.deleteTasks(listOf(outputTask))
                             emit(SuccessRequest(Any()))
                         }
                         is ErrorRequest -> {

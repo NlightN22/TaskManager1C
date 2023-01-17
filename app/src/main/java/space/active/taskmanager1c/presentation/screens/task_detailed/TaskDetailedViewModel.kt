@@ -16,15 +16,17 @@ import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
+import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
 import javax.inject.Inject
 
-private const val TAG = "TaskDetailedViewModel"
+private const val TAG = "TaskDetailedVM"
 
 @HiltViewModel
 class TaskDetailedViewModel @Inject constructor(
     private val repository: TasksRepository,
     logger: Logger,
     settings: SettingsRepository,
+    private val getCredentials: GetCredentials,
     private val saveNewTaskToDb: SaveNewTaskToDb,
     private val validate: Validate,
     private val exceptionHandler: ExceptionHandler,
@@ -35,7 +37,7 @@ class TaskDetailedViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel(settings, logger) {
 
-    private val _taskState = MutableStateFlow<TaskDetailedViewState>(TaskDetailedViewState.New())
+    private val _taskState = MutableStateFlow<TaskState>(TaskState())
     val taskState = _taskState.asStateFlow()
 
     private val _taskErrorState = MutableSharedFlow<TaskDetailedErrorState>()
@@ -72,33 +74,27 @@ class TaskDetailedViewModel @Inject constructor(
 
     private val _changedNewTask = MutableStateFlow<Task?>(null)
     private val _newTask: Flow<Task> = whoAmI.map {
-//        logger.log(TAG, "whoAmI.map")
+        logger.log(TAG, "whoAmI.map")
         Task.newTask(it)
     }.combine(_changedNewTask) { inTask, changedTask ->
         if (changedTask == null) {
-//            logger.log(TAG, "collect newTask")
+            logger.log(TAG, "collect newTask")
             inTask
         } else {
-//            logger.log(TAG, "collect _changed")
+            logger.log(TAG, "collect _changed")
             changedTask
         }
     }
 
     private val currentTask: Flow<Task?> = _inputTaskId.flatMapLatest {
         if (it.isNotBlank()) {
-//            logger.log(TAG, "collect from DB")
+            logger.log(TAG, "collect from DB")
             getDetailedTask(it)
         } else {
-//            logger.log(TAG, "collect from mutable")
+            logger.log(TAG, "collect from mutable")
             _newTask
         }
     }
-
-    // view state for new task
-    // bottom menu with save cancel
-    // another behavior model for save changes
-    // save only on buttons
-    // preset for some fields
 
     private fun collectCurrentTask() {
         viewModelScope.launch {
@@ -113,22 +109,24 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
-    private fun updateUIState(oldState: TaskDetailedViewState, newTask: Task) {
+    private fun updateUIState(oldState: TaskState, newTask: Task) {
         viewModelScope.launch {
             if (newTask.id.isNotBlank()) {
-                val newState = TaskDetailedViewState.Edit(newTask.toTaskState())
-                logger.log(TAG, "Update Edit")
+                val newState = newTask.toTaskState()
                 if (oldState != newState) {
+                    logger.log(TAG, "oldState ${oldState.title} newState ${newState.title}")
+
+//                    logger.log(TAG, "Update Edit: ${newTask.toString().replace(", ", "\n")}")
                     _taskState.value = newState
                     // get base and inner tasks from db
                     setDependentTasks(newTask)
-                    if (oldState.state.performer != newState.state.performer || oldState.state.author != newState.state.author) {
+                    if (oldState.performer != newState.performer || oldState.author != newState.author) {
                         _enabledFields.value = whoUserInTask(newTask, whoAmI.first()).fields
                     }
                     showMessages(newTask.id)
                 }
             } else {
-                val newState = TaskDetailedViewState.New(newTask.toTaskState())
+                val newState = newTask.toTaskState()
                 if (oldState != newState) {
                     logger.log(TAG, "Update new")
                     _taskState.value = newState
@@ -141,7 +139,7 @@ class TaskDetailedViewModel @Inject constructor(
 
     private fun showMessages(taskId: String) {
         viewModelScope.launch {
-            getTaskMessages(settings.getCredentials().first(), taskId).collect { request ->
+            getTaskMessages(getCredentials(), taskId).collect { request ->
                 when (request) {
                     is PendingRequest -> {}
                     is ErrorRequest -> {
@@ -171,7 +169,7 @@ class TaskDetailedViewModel @Inject constructor(
             val curTask = currentTask.first()
             curTask?.let { task ->
                 if (task.id.isNotBlank()) {
-                    sendTaskMessages(settings.getCredentials().first(), task.id, text).collect { res ->
+                    sendTaskMessages(getCredentials(), task.id, text).collect { res ->
                         when (res) {
                             is PendingRequest -> {
                                 _sendMessageEvent.emit(Loading())
@@ -242,8 +240,10 @@ class TaskDetailedViewModel @Inject constructor(
     fun saveEditChanges(saveEvents: TaskChangesEvents) {
         viewModelScope.launch {
             val res = validateChangeEvents(saveEvents)
-            if (_taskState.value is TaskDetailedViewState.Edit) {
-                res?.let { _saveTaskEvent.emit(res) }
+            if (_taskState.value.id.isNotBlank()) {
+                res?.let {
+                    _saveTaskEvent.emit(res)
+                }
             }
         }
     }
@@ -261,7 +261,7 @@ class TaskDetailedViewModel @Inject constructor(
             when (event) {
                 is TaskChangesEvents.Title -> {
                     val changes = event.title
-                    if (changes != _taskState.first().state.title) {
+                    if (changes != _taskState.first().title) {
                         val validateResult = validate.title(event.title)
                         when (validateResult.success) {
                             true -> {
@@ -269,6 +269,8 @@ class TaskDetailedViewModel @Inject constructor(
                                 saveEvent = SaveEvents.Delayed(
                                     changedTask, event.javaClass.simpleName, textChangeDelay
                                 )
+                                val currentState = _taskState.value
+                                _taskState.value = currentState.copy(title = changes)
                             }
                             false -> {
                                 _taskErrorState.emit(TaskDetailedErrorState(title = validateResult.errorMessage))
@@ -298,11 +300,13 @@ class TaskDetailedViewModel @Inject constructor(
                 }
                 is TaskChangesEvents.Description -> {
                     val changes = event.text
-                    if (changes != _taskState.first().state.description) {
+                    if (changes != _taskState.first().description) {
                         changedTask = task.copy(description = changes)
                         saveEvent = SaveEvents.Delayed(
                             changedTask, event.javaClass.simpleName, textChangeDelay
                         )
+                        val currentState = _taskState.value
+                        _taskState.value = currentState.copy(description = changes)
                     }
                 }
                 is TaskChangesEvents.Status -> {
@@ -339,13 +343,9 @@ class TaskDetailedViewModel @Inject constructor(
             if (mainTaskId.isNotBlank()) {
                 val mainTask = repository.getTask(mainTaskId).first()
                 mainTask?.let {
-                    val currentstate = _taskState.value
-                    when (currentstate) {
-                        is TaskDetailedViewState.New -> {}
-                        is TaskDetailedViewState.Edit -> {
-                            _taskState.value =
-                                currentstate.copy(currentstate.state.copy(mainTask = it.name))
-                        }
+                    val currentState = _taskState.value
+                    if (currentState.id.isNotBlank()) {
+                        _taskState.value = currentState.copy(mainTask = it.name)
                     }
                     logger.log(TAG, "setDependentTasks ${it.name}")
                     // todo clickable for open
@@ -359,7 +359,7 @@ class TaskDetailedViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             val listUsers: List<User> = repository.listUsersFlow.first()
             val curTask: Task? = currentTask.first()
-            curTask?.let {  task ->
+            curTask?.let { task ->
                 val usersIds: List<String>
                 when (eventType) {
                     is PerformerDialog -> {
@@ -378,6 +378,29 @@ class TaskDetailedViewModel @Inject constructor(
                     }
                     is DatePicker -> {
                         _showDialogEvent.emit(DatePicker)
+                    }
+                    is EditTitleDialog -> {
+                        val currentTitle = curTask.name
+                        _showDialogEvent.emit(
+                            EditTitleDialog(
+                                EditTextDialogStates(
+                                    hint = R.string.title_dialog_hint,
+                                    text = currentTitle,
+                                    maxLength = R.integer.title_max_length,
+                                )
+                            )
+                        )
+                    }
+                    is EditDescriptionDialog -> {
+                        val currentDescription = curTask.description
+                        _showDialogEvent.emit(
+                            EditDescriptionDialog(
+                                EditTextDialogStates(
+                                    hint = R.string.description_dialog_hint,
+                                    text = currentDescription,
+                                )
+                            )
+                        )
                     }
                 }
             }
