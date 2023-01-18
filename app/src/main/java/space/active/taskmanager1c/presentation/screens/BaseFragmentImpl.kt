@@ -8,7 +8,6 @@ import android.widget.PopupMenu
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDirections
@@ -31,7 +30,6 @@ import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.Toasts
 import javax.inject.Inject
-import kotlin.system.exitProcess
 
 private const val TAG = "BaseFragment"
 const val LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL"
@@ -107,8 +105,8 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     }
 
     private fun showNavigationLog() {
-        val backdest = findNavController().previousBackStackEntry
-        logger.log(TAG, "backdest: ${backdest?.destination}")
+        val backDestination = findNavController().previousBackStackEntry
+        logger.log(TAG, "backDestination: ${backDestination?.destination}")
         val currentDestination = findNavController().currentDestination
         logger.log(TAG, "currentFragment: ${currentDestination?.displayName}")
         val currentBackStackEntry = findNavController().currentBackStackEntry

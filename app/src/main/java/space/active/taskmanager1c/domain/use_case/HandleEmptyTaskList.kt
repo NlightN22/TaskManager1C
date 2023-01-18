@@ -14,13 +14,14 @@ import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
 import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val TRIES_TO_FETCH = 10
 private const val FETCH_TIMEOUT = 5000L
 private const val TAG = "HandleEmptyTaskList"
 
 
-
+@Singleton
 class HandleEmptyTaskList @Inject constructor(
     private val updateJob: UpdateJobInterface,
     private val exceptionHandler: ExceptionHandler,

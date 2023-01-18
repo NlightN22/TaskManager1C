@@ -13,10 +13,12 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.Use
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.repository.SettingsRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val TAG = "SettingsRepositoryImpl"
-
-class SettingsRepositoryImpl(
+@Singleton
+class SettingsRepositoryImpl @Inject constructor(
     private val settingsDao: SettingsDao,
     private val logger: Logger
 ) : SettingsRepository {

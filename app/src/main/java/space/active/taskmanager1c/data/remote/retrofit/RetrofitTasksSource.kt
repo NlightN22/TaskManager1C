@@ -1,7 +1,9 @@
-package space.active.taskmanager1c.data.local.db.retrofit
+package space.active.taskmanager1c.data.remote.retrofit
 
 import okhttp3.Credentials
-import space.active.taskmanager1c.coreutils.*
+import retrofit2.Retrofit
+import space.active.taskmanager1c.coreutils.Request
+import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.Converters
 import space.active.taskmanager1c.data.remote.TaskApi
@@ -14,6 +16,7 @@ import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReading
 import space.active.taskmanager1c.data.remote.model.messages_dto.TasksReadingTimeDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
 import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
+import space.active.taskmanager1c.di.RetrofitProviderFactory
 import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -24,13 +27,18 @@ class RetrofitTasksSource @Inject constructor
     (
     private val logger: Logger,
     private val converters: Converters,
-    config: RetrofitConfig
-) : BaseRetrofitSource(config), TaskApi {
+    private val retrofit: Retrofit
+) : BaseRetrofitSource(), TaskApi {
 
     private val retrofitApi = retrofit.create(RetrofitApi::class.java)
 
-    override suspend fun authUser(auth: AuthBasicDto): UserDto = wrapRetrofitExceptions {
-        retrofitApi.authUser(auth.toBasic())
+    lateinit var baseUrl: String
+
+    override suspend fun authUser(auth: AuthBasicDto, serverAddress: String): UserDto {
+        baseUrl = serverAddress
+        return wrapRetrofitExceptions {
+            retrofitApi.authUser(auth.toBasic())
+        }
     }
 
     override suspend fun getTaskList(auth: AuthBasicDto): TaskListDto =
@@ -82,12 +90,16 @@ class RetrofitTasksSource @Inject constructor
         taskId: String,
         readingTime: LocalDateTime
     ): TasksReadingTimeDTO = wrapRetrofitExceptions {
-        val toSendMap = mapOf<String,String>("id" to taskId, "readTime" to readingTime.toString())
-        retrofitApi.setReadingTime(auth.toBasic(),toSendMap)
+        val toSendMap = mapOf<String, String>("id" to taskId, "readTime" to readingTime.toString())
+        retrofitApi.setReadingTime(auth.toBasic(), toSendMap)
     }
 
-    override suspend fun setReadingFlag(auth: AuthBasicDto, taskId: String, flag: Boolean): TaskUserReadingFlagDTO = wrapRetrofitExceptions {
-        val toSendMap = mapOf<String,String>("id" to taskId, "flag" to flag.toString())
+    override suspend fun setReadingFlag(
+        auth: AuthBasicDto,
+        taskId: String,
+        flag: Boolean
+    ): TaskUserReadingFlagDTO = wrapRetrofitExceptions {
+        val toSendMap = mapOf<String, String>("id" to taskId, "flag" to flag.toString())
         retrofitApi.setReadingFlag(auth.toBasic(), toSendMap)
     }
 

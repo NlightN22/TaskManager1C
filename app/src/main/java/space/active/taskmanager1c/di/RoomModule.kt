@@ -8,7 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import space.active.taskmanager1c.data.local.db.Converters
-import space.active.taskmanager1c.data.local.db.tasks_room_db.TaskWithUsersDatabase
+import space.active.taskmanager1c.data.local.db.tasks_room_db.*
 import space.active.taskmanager1c.data.utils.GsonParserImpl
 import space.active.taskmanager1c.data.utils.JsonParser
 import javax.inject.Singleton
@@ -22,19 +22,19 @@ class RoomModule {
 
     @Provides
     @Singleton
-    fun provideSettingsDao(db: TaskWithUsersDatabase) = db.settingsDao
+    fun provideSettingsDao(db: TaskWithUsersDatabase): SettingsDao = db.settingsDao
 
     @Provides
     @Singleton
-    fun provideTaskExtraDao(db: TaskWithUsersDatabase) = db.extraDao
+    fun provideTaskExtraDao(db: TaskWithUsersDatabase): TaskExtraInputDao = db.extraDao
 
     @Provides
     @Singleton
-    fun provideTaskInputDao(db: TaskWithUsersDatabase) = db.inputDao
+    fun provideTaskInputDao(db: TaskWithUsersDatabase): TaskInputDao = db.inputDao
 
     @Provides
     @Singleton
-    fun provideTaskOutputDao(db: TaskWithUsersDatabase) = db.outputDao
+    fun provideTaskOutputDao(db: TaskWithUsersDatabase): TaskOutputDao = db.outputDao
 
     @Provides
     @Singleton

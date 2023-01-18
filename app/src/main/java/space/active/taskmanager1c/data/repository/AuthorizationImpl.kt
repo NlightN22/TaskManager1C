@@ -18,6 +18,6 @@ class AuthorizationImpl @Inject constructor(
 
     override fun auth(username: String, password: String, serverAddress: String): Flow<Request<AuthUserDto>> = flow {
             emit(PendingRequest())
-            emit(SuccessRequest(taskApi.authUser(AuthBasicDto(username,password)).toUserDomain()))
+            emit(SuccessRequest(taskApi.authUser(AuthBasicDto(username,password),serverAddress).toUserDomain()))
     }
 }

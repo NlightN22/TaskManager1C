@@ -11,10 +11,13 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.rel
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskWithLabels
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val TAG = "InputTaskRepositoryImpl"
 
-class InputTaskRepositoryImpl(
+@Singleton
+class InputTaskRepositoryImpl @Inject constructor(
     private val inputDao: TaskInputDao,
     private val extraDao: TaskExtraInputDao,
     private val logger: Logger

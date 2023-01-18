@@ -5,11 +5,13 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.local.OutputTaskRepository
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val TAG = "OutputTaskRepositoryImpl"
 
-
-class OutputTaskRepositoryImpl (
+@Singleton
+class OutputTaskRepositoryImpl @Inject constructor(
     private val taskOutputDao: TaskOutputDao,
     private val logger: Logger
 ) : OutputTaskRepository {

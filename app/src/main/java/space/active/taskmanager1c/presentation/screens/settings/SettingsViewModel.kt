@@ -42,7 +42,7 @@ class SettingsViewModel @Inject constructor(
             val id = wrapGetSettings { settings.getUser().id }
             val server = wrapGetSettings { settings.getServerAddress() }
 
-            _viewState.value = SettingsViewState(
+            _viewState.value = _viewState.value.copy(
                 userId = id,
                 userName = user,
                 serverAddress = server
@@ -56,6 +56,11 @@ class SettingsViewModel @Inject constructor(
         } catch (e:EmptyObject) {
             ""
         }
+    }
+
+    fun setServerAddressEditState(editable: Boolean) {
+        logger.log(TAG, "setServerAddressEditState: $editable")
+        _viewState.value = _viewState.value.copy(editServerAddress = editable)
     }
 
     fun saveSettings(serverAddress: String) {

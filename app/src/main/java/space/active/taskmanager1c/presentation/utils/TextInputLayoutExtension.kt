@@ -28,14 +28,6 @@ fun TextInputEditText.getChanges(block: (String) -> Unit) {
         })
 }
 
-// todo delete after change to dialog
-fun TextInputEditText.updateText(newText: String) {
-    val curText = this.text?.toString() ?: ""
-    if (curText != newText) {
-        this.setText(newText)
-    }
-}
-
 fun TextInputLayout.setState(enabled: Boolean, editable: Boolean = false) {
     val hintColorDisabled: ColorStateList =
         resources.getColorStateList(R.color.title_not_editable, resources.newTheme())

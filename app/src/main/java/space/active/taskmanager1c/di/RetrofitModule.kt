@@ -10,33 +10,33 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import javax.inject.Singleton
 
 //todo delete
 private const val BASE_URL = "http://172.16.17.242/torg_develop/hs/taskmgr/"
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RetrofitModule {
+class RetrofitModule {
 
     @Provides
-    fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit = Retrofit.Builder()
+    @Singleton
+    fun provideRetrofit(): Retrofit = Retrofit.Builder()
         .addConverterFactory(ScalarsConverterFactory.create())
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .client(okHttpClient)
+        .addConverterFactory(MoshiConverterFactory.create(provideMoshi()))
+        .client(provideOkHttpClient())
         .baseUrl(BASE_URL)
         .build()
 
-    @Provides
     fun provideMoshi(): Moshi =
         Moshi.Builder().build() // todo replace by Kotlin Serialization Library
 
-    @Provides
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
+    fun provideOkHttpClient(): OkHttpClient =
         OkHttpClient().newBuilder()
-            .addInterceptor(loggingInterceptor)
+            .addInterceptor(provideLogginInterceptor())
             .build()
 
-    @Provides
     fun provideLogginInterceptor(): HttpLoggingInterceptor = HttpLoggingInterceptor()
         .setLevel(HttpLoggingInterceptor.Level.NONE)
+
 }

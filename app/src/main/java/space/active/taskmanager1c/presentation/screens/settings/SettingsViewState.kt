@@ -6,5 +6,6 @@ data class SettingsViewState(
     val userId: String = "",
     val userName: String = "",
     val serverAddress: String ="",
+    val editServerAddress: Boolean = false,
     val addressError: UiText? = null
 )

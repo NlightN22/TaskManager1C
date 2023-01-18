@@ -65,7 +65,7 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/settingsServerAddress"
+        android:id="@+id/settingsServerAddressCard"
         style="@style/EditableCardView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
                 android:id="@+id/settingsServerAddressET"
                 style="@style/EditTextEditable"
                 android:layout_width="match_parent"
-                android:inputType="textUri"
+                android:inputType="textUri|textMultiLine"
                 tools:text="https://super_platform.com/develop/taskmanager" />
         </com.google.android.material.textfield.TextInputLayout>
     </com.google.android.material.card.MaterialCardView>

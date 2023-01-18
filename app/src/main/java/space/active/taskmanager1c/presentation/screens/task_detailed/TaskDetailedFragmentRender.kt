@@ -3,7 +3,6 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.presentation.utils.setColorState
 import space.active.taskmanager1c.presentation.utils.setState
-import space.active.taskmanager1c.presentation.utils.updateText
 
 fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
     viewModel.taskState.collectOnCreate { taskState ->
@@ -33,7 +32,7 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
         binding.taskTitleCardView.setState(enabled = fieldsState.title)
         binding.taskTitleTIL.setState(enabled = fieldsState.title)
         if (fieldsState.title) {
-            binding.taskTitleDetailed.setOnClickListener{
+            binding.taskTitleDetailed.setOnClickListener {
                 viewModel.showDialog(EditTitleDialog(null))
             }
         }
@@ -86,7 +85,8 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
             binding.bottomMenu.inflateMenu(R.menu.menu_save_cancel)
         } else {
             binding.bottomMenu.inflateMenu(R.menu.menu_detailed)
-            binding.bottomMenu.menu.findItem(R.id.detailed_ok).isVisible = fieldsState.bottomOk //todo get from task
+            binding.bottomMenu.menu.findItem(R.id.detailed_ok).isVisible =
+                fieldsState.bottomOk //todo get from task
             binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible = //todo get from task
                 fieldsState.bottomCancel
         }

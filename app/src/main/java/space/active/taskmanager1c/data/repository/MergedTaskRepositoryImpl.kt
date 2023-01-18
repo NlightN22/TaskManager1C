@@ -15,10 +15,12 @@ import space.active.taskmanager1c.domain.models.User
 import space.active.taskmanager1c.domain.models.UsersInTaskDomain
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import java.time.format.DateTimeFormatter
+import javax.inject.Singleton
 
 private const val TAG = "MergedTaskRepositoryImpl"
 
-class MergedTaskRepositoryImpl(
+@Singleton
+class MergedTaskRepositoryImpl constructor(
     private val inputTaskRepository: InputTaskRepository,
     private val outputTaskRepository: OutputTaskRepository,
     private val ioDispatcher: CoroutineDispatcher,

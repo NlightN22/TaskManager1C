@@ -1,22 +1,16 @@
-package space.active.taskmanager1c.data.local.db.retrofit
+package space.active.taskmanager1c.data.remote.retrofit
 
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonEncodingException
 import retrofit2.HttpException
+import retrofit2.Retrofit
 import space.active.taskmanager1c.coreutils.AuthException
 import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.ConnectionException
 import space.active.taskmanager1c.coreutils.ParseBackendException
 import java.io.IOException
 
-open class BaseRetrofitSource (
-    retrofitConfig: RetrofitConfig
-        ) {
-    val retrofit = retrofitConfig.retrofit
-
-    private val errorAdapter =
-        retrofitConfig.moshi.adapter(ErrorResponseBody::class.java)
-
+open class BaseRetrofitSource {
     /**
      * Map network exceptions:
      * @throws BackendException
@@ -49,9 +43,4 @@ open class BaseRetrofitSource (
             throw ParseBackendException(inEx = e)
         }
     }
-
-    class ErrorResponseBody(
-        val error: String
-    )
-
 }

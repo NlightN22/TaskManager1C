@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.data.local.db.retrofit
+package space.active.taskmanager1c.data.remote.retrofit
 
 import retrofit2.http.*
 import space.active.taskmanager1c.data.remote.model.TaskDto
