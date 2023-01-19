@@ -171,20 +171,22 @@ class TaskDetailedViewModel @Inject constructor(
     private fun sendReadingTime(taskId: String, messageList: List<Messages>) {
         viewModelScope.launch {
             val taskReadingTime = LocalDateTime.now()
-            val messageTime = messageList.last().dateTime
-            setTaskAndMessageReadingTime(
-                credentials = getCredentials(),
-                taskId = taskId,
-                messageTime,
-                taskReadingTime
-            ).collect { request ->
-                when (request) {
-                    is SuccessRequest -> {
-                        delay(1000)
-                        _messagesList.value =
-                            SuccessRequest(messageList.map { it.copy(unread = false) })
+            if (messageList.isNotEmpty()) {
+                val messageTime = messageList.last().dateTime
+                setTaskAndMessageReadingTime(
+                    credentials = getCredentials(),
+                    taskId = taskId,
+                    messageTime,
+                    taskReadingTime
+                ).collect { request ->
+                    when (request) {
+                        is SuccessRequest -> {
+                            delay(1000)
+                            _messagesList.value =
+                                SuccessRequest(messageList.map { it.copy(unread = false) })
+                        }
+                        else -> {}
                     }
-                    else -> {}
                 }
             }
         }

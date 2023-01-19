@@ -47,7 +47,7 @@ class InputTaskRepositoryImpl @Inject constructor(
         } ?: true
 
         if (saveIn || saveEx) {
-            logger.log(TAG, "saved task: ${taskInput.toString().replace(", ", "\n")}")
+//            logger.log(TAG, "saved task: ${taskInput.toString().replace(", ", "\n")}")
             extraDao.insertTaskInAndExtra(taskInput.toTaskExtra(whoAmI), taskInput)
             return 1
         }

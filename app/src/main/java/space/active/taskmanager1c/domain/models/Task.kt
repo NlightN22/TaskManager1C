@@ -56,7 +56,6 @@ data class Task(
         }
     }
 
-
     private fun toTaskInput(new: Boolean = false) = TaskInput(
         date = this.date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         description = this.description,

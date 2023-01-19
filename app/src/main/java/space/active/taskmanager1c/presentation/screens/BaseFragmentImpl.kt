@@ -45,7 +45,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     @Inject
     lateinit var exceptionHandler: ExceptionHandler
 
-    private lateinit var currentDestination: NavDestination
+    private var currentDestination: NavDestination? = null
 
     val baseMainVM by viewModels<MainViewModel>()
 
@@ -65,7 +65,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             }
         }
 
-        currentDestination = findNavController().currentDestination!!
+        currentDestination = findNavController().currentDestination
 
         val isLoginFragment: Boolean = currentDestination?.id == R.id.loginFragment
         if (!isLoginFragment) {
@@ -76,14 +76,14 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     }
 
     private fun getLoginState(): Boolean {
-        val currentStateHandle = findNavController().currentBackStackEntry!!.savedStateHandle
+        val currentStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
 
         val previousLogin =
             findNavController().previousBackStackEntry?.savedStateHandle?.get<Boolean>(
                 LOGIN_SUCCESSFUL
             )
         previousLogin?.let {
-            currentStateHandle.set(LOGIN_SUCCESSFUL, it)
+            currentStateHandle?.set(LOGIN_SUCCESSFUL, it)
         }
         val currentLogin = currentStateHandle?.get<Boolean>(LOGIN_SUCCESSFUL)
         return currentLogin ?: false

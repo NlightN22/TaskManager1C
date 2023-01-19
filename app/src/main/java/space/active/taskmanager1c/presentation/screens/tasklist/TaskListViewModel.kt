@@ -77,7 +77,6 @@ class TaskListViewModel @Inject constructor(
                 filterByBottom(input, bottomFilter), searchFilter), bottomOrder)
     }
 
-
     private suspend fun search(filterByBottom: List<Task>, searchFilter: String): List<Task> =
         if (searchFilter.isNullOrBlank()) {
             filterByBottom
@@ -134,7 +133,6 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-
     fun changeTaskStatus(taskIn: Task) {
         viewModelScope.launch(ioDispatcher) {
             val curTask: Task? = repository.getTask(taskIn.id).first()
@@ -161,7 +159,6 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-
     fun orderByBottomMenu(orderTypes: TaskListOrderTypes) {
         viewModelScope.launch {
             if (orderTypes == _bottomOrder.value) {
@@ -184,7 +181,6 @@ class TaskListViewModel @Inject constructor(
             }
         }
     }
-
 
     fun filterByBottomMenu(filterType: TaskListFilterTypes) {
         viewModelScope.launch {
@@ -226,7 +222,6 @@ class TaskListViewModel @Inject constructor(
             }
         }.await()
     }
-
 
     private suspend fun filterByBottom(list: List<Task>, filter: TaskListFilterTypes): List<Task> {
         return viewModelScope.async(defDispatcher) {
@@ -281,7 +276,6 @@ class TaskListViewModel @Inject constructor(
 
     private fun Task.filterByNumber(number: String): Boolean = this.number.contains(number, true)
 
-
     fun find(expression: Editable?) {
         searchJob?.cancel()
 //        logger.log(TAG, "searchJob onStart ${searchJob?.isActive} expr: $expression")
@@ -291,5 +285,4 @@ class TaskListViewModel @Inject constructor(
             logger.log(TAG, "searchJob End ${searchJob?.isActive} ${_searchFilter.value}")
         }
     }
-
 }

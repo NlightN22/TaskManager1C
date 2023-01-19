@@ -82,7 +82,9 @@ class RetrofitTasksSource @Inject constructor
         auth: AuthBasicDto,
         taskIds: List<String>
     ): List<ReadingTimesTask> = wrapRetrofitExceptions {
-        retrofitApi.getReadingTimes(auth.toBasic(), FetchReadingTimes(taskIds)).Tasks
+        val toServer = FetchReadingTimes(taskIds)
+//        logger.log(TAG, "Send to server: $toServer")
+        retrofitApi.getReadingTimes(auth.toBasic(), toServer).Tasks
     }
 
     override suspend fun setReadingTime(
@@ -111,6 +113,4 @@ class RetrofitTasksSource @Inject constructor
 
     private fun AuthBasicDto.toBasic(): String =
         Credentials.basic(this.name, this.pass, StandardCharsets.UTF_8)
-
-
 }
