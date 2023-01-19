@@ -87,12 +87,6 @@ class UpdateJobInterfaceImpl
         emit(SuccessRequest(Any()))
     }
 
-    private fun ReadingTimesTask.getUnreadStatus(): Boolean {
-        val messageTime = lastMessageTime.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        val lastRead = readingTime.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        return (messageTime > lastRead)
-    }
-
     private fun outputSendJob(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
         val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
         val inputTasks: List<TaskInput> = inputTaskRepository.getTasks().map { it.taskIn }

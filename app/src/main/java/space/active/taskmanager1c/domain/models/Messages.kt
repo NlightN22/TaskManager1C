@@ -13,18 +13,28 @@ data class Messages(
     val dateTime: LocalDateTime,
     val id: String,
     val text: String,
-    val readingTime: LocalDateTime?,
+    val unread: Boolean = false,
     var my: Boolean = false
 ) {
     companion object {
-        fun TaskMessageDTO.toMessage(userName: String, readingTime: String) = Messages(
-            userName = userName,
-            authorId = this.authorId,
-            dateTime = this.date.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            id = this.id,
-            text = this.text,
-            readingTime = readingTime.toDateTimeOrNull(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        )
+        fun TaskMessageDTO.toMessage(userName: String, readingTime: String): Messages {
+            val messageTime = this.date.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            val taskTime = readingTime.toDateTimeOrNull(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            return Messages(
+                userName = userName,
+                authorId = this.authorId,
+                dateTime = messageTime,
+                id = this.id,
+                text = this.text,
+                unread = setUnreadState(taskTime , messageTime)
+            )
+        }
+
+        private fun setUnreadState(taskTime: LocalDateTime?, messageTime: LocalDateTime): Boolean {
+            return taskTime?.let { taskReadingTime ->
+                messageTime > taskReadingTime
+            } ?: false
+        }
 
         fun List<TaskMessageDTO>.toMessages(listUsers: List<TaskMessagesUserDTO>, readingTime: String): List<Messages> =
             this.map { messageDTO ->

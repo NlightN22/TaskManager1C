@@ -26,6 +26,8 @@ data class TaskInput(
     @Embedded
     val usersInTask: UsersInTask
 ) {
+
+    // todo delete
     fun toTaskInAndExtra(user: UserInput): TaskInAndExtra =
         TaskInAndExtra(this, this.toTaskExtra(user))
 

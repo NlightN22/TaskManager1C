@@ -7,7 +7,7 @@ import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
-import space.active.taskmanager1c.data.remote.model.messages_dto.TasksReadingTimeDTO
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.MessagesRepository
 import java.time.LocalDateTime
@@ -16,12 +16,6 @@ import javax.inject.Inject
 class MessagesRepositoryImpl @Inject constructor(
     private val taskApi: TaskApi
 ) : MessagesRepository {
-    override fun getMessagesReadingStatus(
-        credentials: Credentials,
-        taskListIds: List<String>
-    ): Flow<Request<List<TasksReadingTimeDTO>>> {
-        TODO("Not yet implemented")
-    }
 
     override fun getTaskMessages(
         credentials: Credentials,
@@ -40,12 +34,16 @@ class MessagesRepositoryImpl @Inject constructor(
         emit(SuccessRequest(taskApi.sendMessage(credentials.toAuthBasicDto(), taskId, text)))
     }
 
-    override fun sendReadingStatus(
+    override fun sendReadingTime(
         credentials: Credentials,
         taskId: String,
-        dataTime: LocalDateTime
-    ): Flow<Request<Any>> {
-        TODO("Not yet implemented")
+        messageReadingTime: LocalDateTime,
+        taskReadingTime: LocalDateTime
+    ): Flow<Request<ReadingTimesTask>> = flow {
+        emit(PendingRequest())
+        emit(SuccessRequest(
+            taskApi.setReadingTime(credentials.toAuthBasicDto(), taskId, messageReadingTime, taskReadingTime)
+        ))
     }
 
     override fun sendNotReadingFlag(

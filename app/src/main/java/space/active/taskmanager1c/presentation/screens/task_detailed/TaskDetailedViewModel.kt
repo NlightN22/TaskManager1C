@@ -3,6 +3,7 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
@@ -17,6 +18,7 @@ import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 private const val TAG = "TaskDetailedVM"
@@ -33,6 +35,7 @@ class TaskDetailedViewModel @Inject constructor(
     private val getDetailedTask: GetDetailedTask,
     private val getTaskMessages: GetTaskMessages,
     private val sendTaskMessages: SendTaskMessages,
+    private val setTaskAndMessageReadingTime: SetTaskAndMessageReadingTime,
     private val whoUserInTask: DefineUserInTask,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel(settings, logger) {
@@ -150,15 +153,38 @@ class TaskDetailedViewModel @Inject constructor(
                         val convertedMessages =
                             messagesList.toMessages(request.data.users, request.data.readingTime)
                                 .sortedByDescending { it.dateTime }
-                        val setMyList = convertedMessages.map {
+                        val setMyList: List<Messages> = convertedMessages.map {
                             if (it.authorId == whoAmI.first().id) {
                                 it.copy(my = true)
                             } else {
                                 it.copy(my = false)
                             }
                         }
+                        sendReadingTime(taskId, setMyList)
                         _messagesList.value = SuccessRequest(setMyList)
                     }
+                }
+            }
+        }
+    }
+
+    private fun sendReadingTime(taskId: String, messageList: List<Messages>) {
+        viewModelScope.launch {
+            val taskReadingTime = LocalDateTime.now()
+            val messageTime = messageList.last().dateTime
+            setTaskAndMessageReadingTime(
+                credentials = getCredentials(),
+                taskId = taskId,
+                messageTime,
+                taskReadingTime
+            ).collect { request ->
+                when (request) {
+                    is SuccessRequest -> {
+                        delay(1000)
+                        _messagesList.value =
+                            SuccessRequest(messageList.map { it.copy(unread = false) })
+                    }
+                    else -> {}
                 }
             }
         }

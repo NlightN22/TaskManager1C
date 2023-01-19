@@ -13,10 +13,10 @@ import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.remote.model.UserDto
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
-import space.active.taskmanager1c.data.remote.model.messages_dto.TasksReadingTimeDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
-import space.active.taskmanager1c.di.RetrofitProviderFactory
+import space.active.taskmanager1c.data.remote.model.reading_times.SetReadingTimeDTO
 import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -88,10 +88,16 @@ class RetrofitTasksSource @Inject constructor
     override suspend fun setReadingTime(
         auth: AuthBasicDto,
         taskId: String,
+        messageTime: LocalDateTime,
         readingTime: LocalDateTime
-    ): TasksReadingTimeDTO = wrapRetrofitExceptions {
-        val toSendMap = mapOf<String, String>("id" to taskId, "readTime" to readingTime.toString())
-        retrofitApi.setReadingTime(auth.toBasic(), toSendMap)
+    ): ReadingTimesTask = wrapRetrofitExceptions {
+        retrofitApi.setReadingTime(auth.toBasic(),
+            SetReadingTimeDTO(
+                taskId,
+                messageTime.toString(),
+                readingTime.toString()
+            )
+            )
     }
 
     override suspend fun setReadingFlag(

@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -31,6 +32,9 @@ class MessagesAdapter : RecyclerView.Adapter<MessagesViewHolder>() {
         val item = messages[position]
         with(holder.itemViewBind) {
             messageTitle.text = "${item.userName}  ${item.dateTime.toShortDateTime()} "
+            messageText.typeface = if (item.unread) {
+                Typeface.DEFAULT_BOLD} else {
+                Typeface.DEFAULT}
             messageText.text = item.text
             messageCard.renderMyTask(item.my)
             messageConstraint.renderMyTask(item.my)

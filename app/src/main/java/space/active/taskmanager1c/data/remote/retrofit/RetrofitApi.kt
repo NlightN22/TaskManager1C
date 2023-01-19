@@ -6,9 +6,10 @@ import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.remote.model.UserDto
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
-import space.active.taskmanager1c.data.remote.model.messages_dto.TasksReadingTimeDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
 import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesDTO
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
+import space.active.taskmanager1c.data.remote.model.reading_times.SetReadingTimeDTO
 
 interface RetrofitApi {
 //    tasks: get - получение списка задач
@@ -95,15 +96,16 @@ interface RetrofitApi {
     /**
      * POST
      * update task read time
-     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks/status
+     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks/status/time
     "id": "f54c2dfb-59ab-11ed-a023-da2dec3fdf49",
-    "readTime": "2099-12-31T23:59:59"
+    "readTime": "2099-12-31T23:59:59",
+    "messageTime" : "2099-12-31T23:59:59"
      */
     @POST("tasks/status/time")
     suspend fun setReadingTime(
         @Header("Authorization") auth: String,
-        @Body map: Map<String, String>
-    ): TasksReadingTimeDTO
+        @Body setReadingTimeDTO: SetReadingTimeDTO
+    ): ReadingTimesTask
 
     /**
      * POST
