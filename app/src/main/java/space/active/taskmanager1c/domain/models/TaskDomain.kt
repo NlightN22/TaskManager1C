@@ -5,15 +5,15 @@ import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
 import space.active.taskmanager1c.coreutils.nowDiffInDays
 import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.coreutils.toShortDateTime
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
-import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.WhoIsInTask
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.WhoIsInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
-import space.active.taskmanager1c.domain.models.User.Companion.toText
+import space.active.taskmanager1c.domain.models.UserDomain.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskState
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-data class Task(
+data class TaskDomain(
     val date: LocalDateTime,
     val description: String,
     val endDate: LocalDateTime?,
@@ -98,7 +98,7 @@ data class Task(
         observers = this.users.observers.toText(),
         description = this.description,
         taskObject = this.objName,
-        mainTask = this.mainTaskId, // todo add inner task
+        mainTask = this.mainTaskId, // todo add inner taskDomain
         status = this.status
     )
 
@@ -128,12 +128,12 @@ data class Task(
 
     companion object {
 
-        fun newTask(author: User) = Task(
+        fun newTask(author: UserDomain) = TaskDomain(
             date = LocalDateTime.now(),
             endDate = LocalDateTime.now(),
             users = UsersInTaskDomain(
                 author = author,
-                performer = User.blankUser(),
+                performer = UserDomain.blankUser(),
                 coPerformers = emptyList(),
                 observers = emptyList()
             ),
@@ -144,7 +144,7 @@ data class Task(
             number = "",
             objName = "",
             priority = "",
-            status = Task.Status.New,
+            status = TaskDomain.Status.New,
             whoIsInTask = WhoIsInTask(author = true, performer = false),
             unread = false,
             ok = true,

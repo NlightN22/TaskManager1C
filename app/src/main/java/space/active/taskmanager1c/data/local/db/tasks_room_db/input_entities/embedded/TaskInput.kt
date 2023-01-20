@@ -1,16 +1,12 @@
-package space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities
+package space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded
 
 import androidx.room.Embedded
-import androidx.room.Entity
 import androidx.room.PrimaryKey
 import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.UsersInTask
-import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.TaskExtra
-import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.WhoIsInTask
-import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.relations.TaskInAndExtra
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInputHandled
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 
 
-@Entity
 data class TaskInput(
     val date: String,
     val description: String,
@@ -27,22 +23,17 @@ data class TaskInput(
     val usersInTask: UsersInTask
 ) {
 
-    // todo delete
-    fun toTaskInAndExtra(user: UserInput): TaskInAndExtra =
-        TaskInAndExtra(this, this.toTaskExtra(user))
-
-    fun toTaskExtra(user: UserInput): TaskExtra {
-        val author = this.usersInTask.authorId == user.id
-        val performer = definePerformer(user)
+    fun toTaskInputHandled(userDomain: UserInput): TaskInputHandled {
+        val author = this.usersInTask.authorId == userDomain.id
+        val performer = definePerformer(userDomain)
         val status = this.status.toTaskStatus()
-        return TaskExtra(
-            taskId = this.id,
+        return TaskInputHandled(
+            taskIn = this,
             whoIsInTask = WhoIsInTask(
-                author = author,
-                performer = performer
+                author, performer
             ),
             ok = defineOk(author, performer, status),
-            cancel = defineCancel(author, status),
+            cancel = defineCancel(author, status)
         )
     }
 
@@ -100,5 +91,4 @@ data class TaskInput(
         Deferred,
         Cancelled
     }
-
 }

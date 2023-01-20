@@ -90,7 +90,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     }
 
     private fun checkLoginState(login: Boolean) {
-        val currentFragment: Int = findNavController().currentDestination!!.id
+        val currentFragment = findNavController().currentDestination?.id
         val loginFragment: Int = R.id.loginFragment
         if (!login) {
             logger.log(TAG, "Not login")

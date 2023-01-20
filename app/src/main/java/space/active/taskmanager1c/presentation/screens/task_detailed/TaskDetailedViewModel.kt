@@ -12,7 +12,7 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.*
 import space.active.taskmanager1c.domain.models.Messages.Companion.toMessages
-import space.active.taskmanager1c.domain.models.User.Companion.toDialogItems
+import space.active.taskmanager1c.domain.models.UserDomain.Companion.toDialogItems
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
@@ -71,15 +71,15 @@ class TaskDetailedViewModel @Inject constructor(
     private val _sendMessageEvent = MutableSharedFlow<StateProgress<Any>>()
     val sendMessageEvent = _sendMessageEvent.asSharedFlow()
 
-    private val whoAmI: Flow<User> = settings.getUserFlow()
+    private val whoAmI: Flow<UserDomain> = settings.getUserFlow()
 
     private val _inputTaskId = MutableStateFlow<String>("")
 
-    private val _changedNewTask = MutableStateFlow<Task?>(null)
-    private val _newTask: Flow<Task> = whoAmI.map {
+    private val _changedNewTaskDomain = MutableStateFlow<TaskDomain?>(null)
+    private val _newTaskDomain: Flow<TaskDomain> = whoAmI.map {
         logger.log(TAG, "whoAmI.map")
-        Task.newTask(it)
-    }.combine(_changedNewTask) { inTask, changedTask ->
+        TaskDomain.newTask(it)
+    }.combine(_changedNewTaskDomain) { inTask, changedTask ->
         if (changedTask == null) {
             logger.log(TAG, "collect newTask")
             inTask
@@ -89,47 +89,47 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
-    private val currentTask: Flow<Task?> = _inputTaskId.flatMapLatest {
+    private val currentTaskDomain: Flow<TaskDomain?> = _inputTaskId.flatMapLatest {
         if (it.isNotBlank()) {
             logger.log(TAG, "collect from DB")
             getDetailedTask(it)
         } else {
             logger.log(TAG, "collect from mutable")
-            _newTask
+            _newTaskDomain
         }
     }
 
     private fun collectCurrentTask() {
         viewModelScope.launch {
             logger.log(TAG, "collectCurrentTask launch")
-            currentTask.collectLatest { curTask ->
+            currentTaskDomain.collectLatest { curTask ->
                 curTask?.let {
-                    updateUIState(oldState = _taskState.value, newTask = curTask)
+                    updateUIState(oldState = _taskState.value, newTaskDomain = curTask)
                 } ?: kotlin.run {
-                    exceptionHandler(EmptyObject("currentTask"))
+                    exceptionHandler(EmptyObject("currentTaskDomain"))
                 }
             }
         }
     }
 
-    private fun updateUIState(oldState: TaskState, newTask: Task) {
+    private fun updateUIState(oldState: TaskState, newTaskDomain: TaskDomain) {
         viewModelScope.launch {
-            if (newTask.id.isNotBlank()) {
-                val newState = newTask.toTaskState()
+            if (newTaskDomain.id.isNotBlank()) {
+                val newState = newTaskDomain.toTaskState()
                 if (oldState != newState) {
                     logger.log(TAG, "oldState ${oldState.title} newState ${newState.title}")
 
-//                    logger.log(TAG, "Update Edit: ${newTask.toString().replace(", ", "\n")}")
+//                    logger.log(TAG, "Update Edit: ${newTaskDomain.toString().replace(", ", "\n")}")
                     _taskState.value = newState
-                    // get base and inner tasks from db
-                    setDependentTasks(newTask)
+                    // get base and inner taskDomains from db
+                    setDependentTasks(newTaskDomain)
                     if (oldState.performer != newState.performer || oldState.author != newState.author) {
-                        _enabledFields.value = whoUserInTask(newTask, whoAmI.first()).fields
+                        _enabledFields.value = whoUserInTask(newTaskDomain, whoAmI.first()).fields
                     }
-                    showMessages(newTask.id)
+                    showMessages(newTaskDomain.id)
                 }
             } else {
-                val newState = newTask.toTaskState()
+                val newState = newTaskDomain.toTaskState()
                 if (oldState != newState) {
                     logger.log(TAG, "Update new")
                     _taskState.value = newState
@@ -172,11 +172,13 @@ class TaskDetailedViewModel @Inject constructor(
         viewModelScope.launch {
             val taskReadingTime = LocalDateTime.now()
             if (messageList.isNotEmpty()) {
-                val messageTime = messageList.last().dateTime
+                val lastMessageTime: LocalDateTime = messageList.maxBy { it.dateTime }.dateTime
+                // todo not show like unread if it is my message
+                logger.log(TAG, "lastMessageTime: $lastMessageTime")
                 setTaskAndMessageReadingTime(
                     credentials = getCredentials(),
                     taskId = taskId,
-                    messageTime,
+                    lastMessageTime,
                     taskReadingTime
                 ).collect { request ->
                     when (request) {
@@ -194,7 +196,7 @@ class TaskDetailedViewModel @Inject constructor(
 
     fun sendMessage(text: String) {
         viewModelScope.launch {
-            val curTask = currentTask.first()
+            val curTask = currentTaskDomain.first()
             curTask?.let { task ->
                 if (task.id.isNotBlank()) {
                     sendTaskMessages(getCredentials(), task.id, text).collect { res ->
@@ -216,7 +218,7 @@ class TaskDetailedViewModel @Inject constructor(
                     _showSnackBar.emit(UiText.Resource(R.string.error_new_task_send_message))
                 }
             } ?: kotlin.run {
-                exceptionHandler(EmptyObject("currentTask"))
+                exceptionHandler(EmptyObject("currentTaskDomain"))
             }
         }
     }
@@ -231,7 +233,7 @@ class TaskDetailedViewModel @Inject constructor(
 
     fun saveNewTask() {
         viewModelScope.launch {
-            val curTask = currentTask.first()
+            val curTask = currentTaskDomain.first()
             curTask?.let { task ->
                 val titleResult = validate.title(task.name)
                 val endDateResult = validate.endDate(task.endDate)
@@ -281,10 +283,10 @@ class TaskDetailedViewModel @Inject constructor(
      */
     private suspend fun validateChangeEvents(event: TaskChangesEvents): SaveEvents? {
         var saveEvent: SaveEvents? = null
-        var curTask: Task? = currentTask.first()
+        var curTaskDomain: TaskDomain? = currentTaskDomain.first()
         val textChangeDelay = 1
-        curTask?.let { task ->
-            var changedTask: Task = task
+        curTaskDomain?.let { task ->
+            var changedTaskDomain: TaskDomain = task
             // validation
             when (event) {
                 is TaskChangesEvents.Title -> {
@@ -293,9 +295,9 @@ class TaskDetailedViewModel @Inject constructor(
                         val validateResult = validate.title(event.title)
                         when (validateResult.success) {
                             true -> {
-                                changedTask = task.copy(name = changes)
+                                changedTaskDomain = task.copy(name = changes)
                                 saveEvent = SaveEvents.Delayed(
-                                    changedTask, event.javaClass.simpleName, textChangeDelay
+                                    changedTaskDomain, event.javaClass.simpleName, textChangeDelay
                                 )
                                 val currentState = _taskState.value
                                 _taskState.value = currentState.copy(title = changes)
@@ -308,30 +310,30 @@ class TaskDetailedViewModel @Inject constructor(
                 }
                 is TaskChangesEvents.EndDate -> {
                     val changes = event.date
-                    changedTask = task.copy(endDate = changes)
-                    saveEvent = SaveEvents.Simple(changedTask)
+                    changedTaskDomain = task.copy(endDate = changes)
+                    saveEvent = SaveEvents.Simple(changedTaskDomain)
                 }
                 is TaskChangesEvents.Performer -> {
-                    val changes = event.user
-                    changedTask = task.copy(users = task.users.copy(performer = changes))
-                    saveEvent = SaveEvents.Simple(changedTask)
+                    val changes = event.userDomain
+                    changedTaskDomain = task.copy(users = task.users.copy(performer = changes))
+                    saveEvent = SaveEvents.Simple(changedTaskDomain)
                 }
                 is TaskChangesEvents.CoPerformers -> {
-                    val changes = event.users
-                    changedTask = task.copy(users = task.users.copy(coPerformers = changes))
-                    saveEvent = SaveEvents.Simple(changedTask)
+                    val changes = event.userDomains
+                    changedTaskDomain = task.copy(users = task.users.copy(coPerformers = changes))
+                    saveEvent = SaveEvents.Simple(changedTaskDomain)
                 }
                 is TaskChangesEvents.Observers -> {
-                    val changes = event.users
-                    changedTask = task.copy(users = task.users.copy(observers = changes))
-                    saveEvent = SaveEvents.Simple(changedTask)
+                    val changes = event.userDomains
+                    changedTaskDomain = task.copy(users = task.users.copy(observers = changes))
+                    saveEvent = SaveEvents.Simple(changedTaskDomain)
                 }
                 is TaskChangesEvents.Description -> {
                     val changes = event.text
                     if (changes != _taskState.first().description) {
-                        changedTask = task.copy(description = changes)
+                        changedTaskDomain = task.copy(description = changes)
                         saveEvent = SaveEvents.Delayed(
-                            changedTask, event.javaClass.simpleName, textChangeDelay
+                            changedTaskDomain, event.javaClass.simpleName, textChangeDelay
                         )
                         val currentState = _taskState.value
                         _taskState.value = currentState.copy(description = changes)
@@ -348,8 +350,8 @@ class TaskDetailedViewModel @Inject constructor(
                     )
                     when (validationResult.success) {
                         true -> {
-                            changedTask = task.copy(status = taskStatus)
-                            saveEvent = SaveEvents.Breakable(changedTask, cancelDuration)
+                            changedTaskDomain = task.copy(status = taskStatus)
+                            saveEvent = SaveEvents.Breakable(changedTaskDomain, cancelDuration)
                         }
                         false -> {
                             validationResult.errorMessage?.let { _showSnackBar.emit(it) }
@@ -357,17 +359,17 @@ class TaskDetailedViewModel @Inject constructor(
                     }
                 }
             }
-//            logger.log(TAG, "Task after changes: ${task}")
-            _changedNewTask.emit(changedTask)
+//            logger.log(TAG, "TaskDomain after changes: ${taskDomain}")
+            _changedNewTaskDomain.emit(changedTaskDomain)
         } ?: kotlin.run {
-            exceptionHandler(EmptyObject("currentTask"))
+            exceptionHandler(EmptyObject("currentTaskDomain"))
         }
         return saveEvent
     }
 
-    private fun setDependentTasks(task: Task) {
+    private fun setDependentTasks(taskDomain: TaskDomain) {
         viewModelScope.launch {
-            val mainTaskId = task.mainTaskId
+            val mainTaskId = taskDomain.mainTaskId
             if (mainTaskId.isNotBlank()) {
                 val mainTask = repository.getTask(mainTaskId).first()
                 mainTask?.let {
@@ -379,36 +381,36 @@ class TaskDetailedViewModel @Inject constructor(
                     // todo clickable for open
                 }
             }
-            // todo add inner tasks
+            // todo add inner taskDomains
         }
     }
 
     fun showDialog(eventType: TaskDetailedDialogs) {
         viewModelScope.launch(ioDispatcher) {
-            val listUsers: List<User> = repository.listUsersFlow.first()
-            val curTask: Task? = currentTask.first()
-            curTask?.let { task ->
+            val listUserDomains: List<UserDomain> = repository.listUsersFlow.first()
+            val curTaskDomain: TaskDomain? = currentTaskDomain.first()
+            curTaskDomain?.let { task ->
                 val usersIds: List<String>
                 when (eventType) {
                     is PerformerDialog -> {
-                        val listItems = listUsers.toDialogItems(listOf(task.users.performer.id))
+                        val listItems = listUserDomains.toDialogItems(listOf(task.users.performer.id))
                         _showDialogEvent.emit(PerformerDialog(listItems))
                     }
                     is CoPerformersDialog -> {
                         usersIds = task.users.coPerformers.map { it.id }
-                        val dialogItems = listUsers.toDialogItems(currentSelectedUsersId = usersIds)
+                        val dialogItems = listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(CoPerformersDialog(dialogItems))
                     }
                     is ObserversDialog -> {
                         usersIds = task.users.observers.map { it.id }
-                        val dialogItems = listUsers.toDialogItems(currentSelectedUsersId = usersIds)
+                        val dialogItems = listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(ObserversDialog(dialogItems))
                     }
                     is DatePicker -> {
                         _showDialogEvent.emit(DatePicker)
                     }
                     is EditTitleDialog -> {
-                        val currentTitle = curTask.name
+                        val currentTitle = curTaskDomain.name
                         _showDialogEvent.emit(
                             EditTitleDialog(
                                 EditTextDialogStates(
@@ -420,7 +422,7 @@ class TaskDetailedViewModel @Inject constructor(
                         )
                     }
                     is EditDescriptionDialog -> {
-                        val currentDescription = curTask.description
+                        val currentDescription = curTaskDomain.description
                         _showDialogEvent.emit(
                             EditDescriptionDialog(
                                 EditTextDialogStates(

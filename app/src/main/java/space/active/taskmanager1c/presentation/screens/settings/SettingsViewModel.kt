@@ -36,7 +36,7 @@ class SettingsViewModel @Inject constructor(
     val saveEvent = _saveEvent.asSharedFlow()
 
     init {
-        // set user
+        // set userDomain
         viewModelScope.launch {
             val user = wrapGetSettings {settings.getUser().name}
             val id = wrapGetSettings { settings.getUser().id }

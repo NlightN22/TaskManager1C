@@ -5,7 +5,7 @@ package space.active.taskmanager1c.data.remote
 //private val API_URL = "http://172.16.17.242/torg_develop/hs/taskmgr/"
 //
 //interface Api {
-//    @GET("tasks")
+//    @GET("taskDomains")
 //    suspend fun listTasks(): TaskListDto
 //}
 
@@ -29,7 +29,7 @@ package space.active.taskmanager1c.data.remote
 //
 //    try {
 //        val response = api.listTasks()
-//        println("Response: ${response.tasks}")
+//        println("Response: ${response.taskDomains}")
 //    } catch (e: HttpException) {
 //        println("ERROR ${e.response()}")
 //    }

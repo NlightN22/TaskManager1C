@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.local.OutputTaskRepository
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,19 +18,19 @@ class OutputTaskRepositoryImpl @Inject constructor(
 
     override suspend fun insertTask(outputTask: OutputTask)  {
         /**
-         * check for the same task in table by input taskId
+         * check for the same taskDomain in table by input taskId
          */
         val existingInTable = getTask(outputTask.taskInput.id)
         existingInTable?.let {
             /**
-             *  check the same without output task fields
+             *  check the same without output taskDomain fields
              */
             val incomeWithoutId = outputTask.copy(outputId = 0)
             val existingWithoutId = it.copy(outputId = 0)
             if (incomeWithoutId == existingWithoutId) {
                 logger.error(
                     TAG,
-                    "fun insertTask find existing task ${outputTask.taskInput.id} in table"
+                    "fun insertTask find existing taskDomain ${outputTask.taskInput.id} in table"
                 )
             } else {
                 taskOutputDao.insertTask(outputTask.copy(outputId = it.outputId))

@@ -12,8 +12,8 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.models.TaskChangesEvents
-import space.active.taskmanager1c.domain.models.User
-import space.active.taskmanager1c.domain.models.User.Companion.fromDialogItems
+import space.active.taskmanager1c.domain.models.UserDomain
+import space.active.taskmanager1c.domain.models.UserDomain.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.utils.*
 import java.util.*
@@ -363,7 +363,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun setupSingleChooseDialog() {
         SingleChooseDialog.setupListener(parentFragmentManager, this) {
             it?.let {
-                viewModel.saveEditChanges(TaskChangesEvents.Performer(User.fromDialogItem(it)))
+                viewModel.saveEditChanges(TaskChangesEvents.Performer(UserDomain.fromDialogItem(it)))
             }
         }
     }

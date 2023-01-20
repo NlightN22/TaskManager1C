@@ -4,7 +4,6 @@ import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -12,19 +11,19 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.databinding.ItemTaskBinding
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskDomain
 
 interface TaskActionListener {
-    fun onTaskStatusClick(task: Task)
-    fun onTaskClick(task: Task)
-    fun onTaskLongClick(task: Task)
+    fun onTaskStatusClick(taskDomain: TaskDomain)
+    fun onTaskClick(taskDomain: TaskDomain)
+    fun onTaskLongClick(taskDomain: TaskDomain)
 }
 
 // TODO implement ListAdapter
 class TaskListAdapter(
     private val actionListener: TaskActionListener
 ) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener {
-    var tasks: List<Task> = emptyList()
+    var taskDomains: List<TaskDomain> = emptyList()
         set(newValue) {
             val diffCallback = TasksDiffCallback(field, newValue)
             val diffResult = DiffUtil.calculateDiff(diffCallback)
@@ -33,13 +32,13 @@ class TaskListAdapter(
         }
 
     override fun onClick(v: View) {
-        val task = v.tag as Task
+        val taskDomain = v.tag as TaskDomain
         when (v.id) {
             R.id.taskStatus -> {
-                actionListener.onTaskStatusClick(task)
+                actionListener.onTaskStatusClick(taskDomain)
             }
             else -> {
-                actionListener.onTaskClick(task)
+                actionListener.onTaskClick(taskDomain)
             }
         }
     }
@@ -55,28 +54,28 @@ class TaskListAdapter(
     }
 
     override fun onBindViewHolder(holder: TasksViewHolder, position: Int) {
-        val task: Task = tasks[position]
+        val taskDomain: TaskDomain = taskDomains[position]
         with(holder.binding) {
-            holder.itemView.tag = task           // send to onClick
-            taskStatus.tag = task             // send to onClick
-            taskStatus.isClickable = !task.isSending // not clickable if is sending
-            taskTitle.text = task.name
-            taskTitle.typeface = if (task.unread) { Typeface.DEFAULT_BOLD } else { Typeface.DEFAULT}
-            taskDate.text = task.date.toShortDate()
-            taskNumber.text = task.number
+            holder.itemView.tag = taskDomain           // send to onClick
+            taskStatus.tag = taskDomain             // send to onClick
+            taskStatus.isClickable = !taskDomain.isSending // not clickable if is sending
+            taskTitle.text = taskDomain.name
+            taskTitle.typeface = if (taskDomain.unread) { Typeface.DEFAULT_BOLD } else { Typeface.DEFAULT}
+            taskDate.text = taskDomain.date.toShortDate()
+            taskNumber.text = taskDomain.number
             taskAuthor.text = abbreviationName(
-                if (task.whoIsInTask.author) {
-                    task.users.performer.name
+                if (taskDomain.whoIsInTask.author) {
+                    taskDomain.users.performer.name
                 } else {
-                    task.users.author.name
+                    taskDomain.users.author.name
                 }
             )
-            isObserved.isVisible = task.users.observers.isNotEmpty()
-            isCoPerformed.isVisible = task.users.coPerformers.isNotEmpty()
-            isSending.isVisible = task.isSending
-            listItemShimmer.setSendingState(task.isSending)
-            taskStatus.isVisible = task.ok
-            taskStatus.isSelected = task.status == Task.Status.Reviewed
+            isObserved.isVisible = taskDomain.users.observers.isNotEmpty()
+            isCoPerformed.isVisible = taskDomain.users.coPerformers.isNotEmpty()
+            isSending.isVisible = taskDomain.isSending
+            listItemShimmer.setSendingState(taskDomain.isSending)
+            taskStatus.isVisible = taskDomain.ok
+            taskStatus.isSelected = taskDomain.status == TaskDomain.Status.Reviewed
         }
     }
 
@@ -90,7 +89,7 @@ class TaskListAdapter(
         }
     }
 
-    override fun getItemCount(): Int = tasks.size
+    override fun getItemCount(): Int = taskDomains.size
 
     private fun abbreviationName(name: String): String {
         // split by " "

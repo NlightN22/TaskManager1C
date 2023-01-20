@@ -1,13 +1,12 @@
 package space.active.taskmanager1c.domain.use_case
 
 import android.util.Patterns
-import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.UserSettings
-import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.UserDomain
 
 class ValidateCredentials  {
-    fun user(user: User): Boolean {
-        val nameResult: Boolean = validateString(user.name)
-        val idResult: Boolean = validateString(user.id)
+    fun user(userDomain: UserDomain): Boolean {
+        val nameResult: Boolean = validateString(userDomain.name)
+        val idResult: Boolean = validateString(userDomain.id)
 
         val finalResultList = listOf(nameResult,idResult)
         val finalRes = !finalResultList.contains(false)

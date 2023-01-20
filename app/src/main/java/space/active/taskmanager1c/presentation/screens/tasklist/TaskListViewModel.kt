@@ -43,13 +43,13 @@ class TaskListViewModel @Inject constructor(
     private val _saveTaskEvent = MutableSharedFlow<SaveEvents>()
     val saveTaskEvent = _saveTaskEvent.asSharedFlow()
 
-    private val _incomeSavedId = MutableSharedFlow<String>() // for block tasks in list
+    private val _incomeSavedId = MutableSharedFlow<String>() // for block taskDomains in list
 
     private val _showSnackBar = MutableSharedFlow<UiText>()
     val showSnackBar = _showSnackBar.asSharedFlow()
 
-    private val _listTask = MutableStateFlow<Request<List<Task>>>(PendingRequest())
-    val listTask = _listTask.asStateFlow()
+    private val _listTaskDomain = MutableStateFlow<Request<List<TaskDomain>>>(PendingRequest())
+    val listTask = _listTaskDomain.asStateFlow()
 
     private val _searchFilter = MutableStateFlow<String>("")
     private val _bottomFilter = MutableStateFlow<TaskListFilterTypes>(TaskListFilterTypes.All)
@@ -59,13 +59,23 @@ class TaskListViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    val whoAmI: Flow<User> = settings.getUserFlow()
+    val whoAmI: Flow<UserDomain> = settings.getUserFlow()
 
     private val inputUserList = repository.listUsersFlow
-    val userList: StateFlow<List<User>> =
+    val userDomainList: StateFlow<List<UserDomain>> =
         inputUserList.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
-    private val inputListTask: Flow<List<Task>> = combine(
+    private val filteredInput: Flow<List<TaskDomain>> = repository.getTasksFiltered(
+        _bottomFilter,
+        _bottomOrder,
+        whoAmI.map { it.id }
+    ).combine(_searchFilter) {
+        input, searchFilter ->
+        search(input,searchFilter)
+    }
+
+    // todo delete
+    private val inputListTaskDomain: Flow<List<TaskDomain>> = combine(
         repository.listTasksFlow,
         _bottomFilter,
         _searchFilter,
@@ -74,10 +84,15 @@ class TaskListViewModel @Inject constructor(
         orderByBottom(
             search(
                 // todo fix accepted author status - not show OK
-                filterByBottom(input, bottomFilter), searchFilter), bottomOrder)
+                filterByBottom(input, bottomFilter), searchFilter
+            ), bottomOrder
+        )
     }
 
-    private suspend fun search(filterByBottom: List<Task>, searchFilter: String): List<Task> =
+    private suspend fun search(
+        filterByBottom: List<TaskDomain>,
+        searchFilter: String
+    ): List<TaskDomain> =
         if (searchFilter.isNullOrBlank()) {
             filterByBottom
         } else {
@@ -86,22 +101,28 @@ class TaskListViewModel @Inject constructor(
 
     fun collectListTasks() {
         logger.log(TAG, "collectListTasks")
-        inputListTask.collectInScope { inputList ->
+        filteredInput.collectInScope { inputList ->
             checkForInputListAndTryFetch(inputList)
         }
+//        filteredInput.collectInScope { list->
+//            logger.log(TAG, "filteredInput: ${ list.map { it.taskIn.name }.joinToString("\n")}")
+//        }
     }
 
-    private suspend fun checkForInputListAndTryFetch(inputList: List<Task>) {
+    private suspend fun checkForInputListAndTryFetch(inputList: List<TaskDomain>) {
         val curListIsEmpty = repository.listTasksFlow.first().isEmpty()
         if (inputList.isEmpty() && curListIsEmpty) {
-            handleEmptyTaskList(getCredentials(), settings.getUser().toUserInput()).collect { request ->
+            handleEmptyTaskList(
+                getCredentials(),
+                settings.getUser().toUserInput()
+            ).collect { request ->
                 when (request) {
                     is SuccessRequest -> {
-                        _listTask.value = SuccessRequest(inputList)
+                        _listTaskDomain.value = SuccessRequest(inputList)
                         _startUpdateJob.value = true
                     }
                     is PendingRequest -> {
-                        _listTask.value = PendingRequest()
+                        _listTaskDomain.value = PendingRequest()
                     }
                     is ErrorRequest -> {
                         exceptionHandler(request.exception)
@@ -109,14 +130,14 @@ class TaskListViewModel @Inject constructor(
                 }
             }
         } else {
-            _listTask.value = SuccessRequest(inputList)
+            _listTaskDomain.value = SuccessRequest(inputList)
             _startUpdateJob.value = true
         }
     }
 
-    // todo set task as unreadable
+    // todo set taskDomain as unreadable
     // todo implement
-    private fun changeIsSending(list: List<Task>, taskId: String): List<Task> {
+    private fun changeIsSending(list: List<TaskDomain>, taskId: String): List<TaskDomain> {
         logger.log(TAG, "_incomeSavedId.combine $taskId")
         return list.map {
             if (it.id == taskId) {
@@ -133,10 +154,10 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    fun changeTaskStatus(taskIn: Task) {
+    fun changeTaskStatus(taskDomainIn: TaskDomain) {
         viewModelScope.launch(ioDispatcher) {
-            val curTask: Task? = repository.getTask(taskIn.id).first()
-            curTask?.let {
+            val curTaskDomain: TaskDomain? = repository.getTask(taskDomainIn.id).first()
+            curTaskDomain?.let {
                 val cancelDuration = 5
                 val ok = TaskChangesEvents.Status(true)
                 val userIs = whoUserInTask(it, whoAmI.first())
@@ -154,7 +175,7 @@ class TaskListViewModel @Inject constructor(
                     validateResult.errorMessage?.let { error -> _showSnackBar.emit(error) }
                 }
             } ?: kotlin.run {
-                exceptionHandler(EmptyObject("task"))
+                exceptionHandler(EmptyObject("taskDomain"))
             }
         }
     }
@@ -188,7 +209,10 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    private suspend fun orderByBottom(list: List<Task>, order: TaskListOrderTypes): List<Task> {
+    private suspend fun orderByBottom(
+        list: List<TaskDomain>,
+        order: TaskListOrderTypes
+    ): List<TaskDomain> {
         return viewModelScope.async(defDispatcher) {
             return@async when (order) {
                 is TaskListOrderTypes.StartDate -> {
@@ -223,7 +247,10 @@ class TaskListViewModel @Inject constructor(
         }.await()
     }
 
-    private suspend fun filterByBottom(list: List<Task>, filter: TaskListFilterTypes): List<Task> {
+    private suspend fun filterByBottom(
+        list: List<TaskDomain>,
+        filter: TaskListFilterTypes
+    ): List<TaskDomain> {
         return viewModelScope.async(defDispatcher) {
             return@async when (filter) {
                 is TaskListFilterTypes.IDo -> {
@@ -248,7 +275,7 @@ class TaskListViewModel @Inject constructor(
         }.await()
     }
 
-    private suspend fun filterBySearch(list: List<Task>, filter: String): List<Task> {
+    private suspend fun filterBySearch(list: List<TaskDomain>, filter: String): List<TaskDomain> {
         return withContext(viewModelScope.coroutineContext + defDispatcher) {
             list.filter {
                 it.filterByName(filter) ||
@@ -261,20 +288,21 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    private fun Task.filterByName(name: String): Boolean = this.name.contains(name, true)
-    private fun Task.filterByAuthor(name: String): Boolean =
+    private fun TaskDomain.filterByName(name: String): Boolean = this.name.contains(name, true)
+    private fun TaskDomain.filterByAuthor(name: String): Boolean =
         this.users.author.name.contains(name, true)
 
-    private fun Task.filterByPerformer(name: String): Boolean =
+    private fun TaskDomain.filterByPerformer(name: String): Boolean =
         this.users.performer.name.contains(name, true)
 
-    private fun Task.filterByCoPerformer(name: String): Boolean =
+    private fun TaskDomain.filterByCoPerformer(name: String): Boolean =
         this.users.coPerformers.any { user -> user.name.contains(name, true) }
 
-    private fun Task.filterByObservers(name: String): Boolean =
+    private fun TaskDomain.filterByObservers(name: String): Boolean =
         this.users.observers.any { user -> user.name.contains(name, true) }
 
-    private fun Task.filterByNumber(number: String): Boolean = this.number.contains(number, true)
+    private fun TaskDomain.filterByNumber(number: String): Boolean =
+        this.number.contains(number, true)
 
     fun find(expression: Editable?) {
         searchJob?.cancel()

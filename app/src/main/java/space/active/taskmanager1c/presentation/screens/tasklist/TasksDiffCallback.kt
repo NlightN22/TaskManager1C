@@ -1,11 +1,11 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
 import androidx.recyclerview.widget.DiffUtil
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskDomain
 
 class  TasksDiffCallback(
-    private val oldList: List<Task>,
-    private val newList: List<Task>
+    private val oldList: List<TaskDomain>,
+    private val newList: List<TaskDomain>
 ): DiffUtil.Callback() {
     override fun getOldListSize(): Int = oldList.size
 

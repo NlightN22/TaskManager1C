@@ -48,7 +48,7 @@ class MainViewModel @Inject constructor(
 
     /**
      *
-     * Variable for stoppable job witch regular update data after user login
+     * Variable for stoppable job witch regular update data after userDomain login
      */
     private var updateJob: Job? = null
     private val runningJob: AtomicBoolean = AtomicBoolean(false)
@@ -76,25 +76,25 @@ class MainViewModel @Inject constructor(
         when (saveEvents) {
             is SaveEvents.Simple -> {
                 viewModelScope.launch(SupervisorJob()) {
-                    saveTaskChangesToDb(saveEvents.task)
+                    saveTaskChangesToDb(saveEvents.taskDomain)
                 }
             }
             is SaveEvents.Breakable -> {
                 viewModelScope.launch(SupervisorJob()) {
-                    _savedTaskIdEvent.emit(saveEvents.task.id)
+                    _savedTaskIdEvent.emit(saveEvents.taskDomain.id)
                     _showSaveSnack.emit(
                         SnackBarState(
-                            saveEvents.task.name,
+                            saveEvents.taskDomain.name,
                             saveEvents.cancelDuration
                         )
                     )
-                    saveBreakable(this, saveEvents.cancelDuration, saveEvents.task)
+                    saveBreakable(this, saveEvents.cancelDuration, saveEvents.taskDomain)
                 }
             }
             is SaveEvents.Delayed -> saveDelayed(
                 viewModelScope,
                 saveEvents.jobKey,
-                saveEvents.task,
+                saveEvents.taskDomain,
                 saveEvents.delay
             )
             is SaveEvents.BreakSave -> {
@@ -116,7 +116,7 @@ class MainViewModel @Inject constructor(
                         set update work here
                          */
                         updateJobInterface.updateJob(getCredentials(), 1000L,
-                        settings.getUser()?.toUserInput()?: throw EmptyObject("user"))
+                        settings.getUser()?.toUserInput()?: throw EmptyObject("userDomain"))
                             .catch { e ->
                                 exceptionHandler(e)
                                 //TODO add error counter and pause

@@ -13,23 +13,23 @@ sealed class TaskListFilterTypes {
     object All : TaskListFilterTypes() // none
 
     companion object {
-        fun List<Task>.filterIDo(): List<Task> {
+        fun List<TaskDomain>.filterIDo(): List<TaskDomain> {
             return this.filter { it.whoIsInTask.performer }
         }
 
-        fun List<Task>.filterIDelegate(): List<Task> {
+        fun List<TaskDomain>.filterIDelegate(): List<TaskDomain> {
             return this.filter { it.whoIsInTask.author && !it.whoIsInTask.performer && !it.cancel }
        }
 
-        fun List<Task>.filterIDidNtCheck(): List<Task> {
+        fun List<TaskDomain>.filterIDidNtCheck(): List<TaskDomain> {
             return this.filter { it.whoIsInTask.author && it.cancel }
        }
 
-        fun List<Task>.filterIObserve(): List<Task> {
+        fun List<TaskDomain>.filterIObserve(): List<TaskDomain> {
            return this.filter { !it.whoIsInTask.author && !it.whoIsInTask.performer }
         }
 
-        fun List<Task>.filterUnread() = this.filter { it.unread }
+        fun List<TaskDomain>.filterUnread() = this.filter { it.unread }
     }
 }
 

@@ -1,7 +1,7 @@
 package space.active.taskmanager1c.domain.use_case
 
 import kotlinx.coroutines.*
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskDomain
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -11,7 +11,7 @@ class SaveDelayed @Inject constructor(
 
     private val delayedJobsList: ArrayList<SaveJob> = arrayListOf()
 
-    operator fun invoke(coroutineScope: CoroutineScope, key: String, task: Task, delay: Int) {
+    operator fun invoke(coroutineScope: CoroutineScope, key: String, taskDomain: TaskDomain, delay: Int) {
         val newJob: SaveJob = SaveJob(context = CoroutineName(key))
 //                logger.log(TAG, "Input list: $delayedJobsList")
         if (delayedJobsList.map { it.context }.contains(newJob.context)) {
@@ -41,8 +41,8 @@ class SaveDelayed @Inject constructor(
             delay((delay * 1000).toLong())
             delayedJobsList.remove(newJob)
 //                    logger.log(TAG, "Removed list: $delayedJobsList")
-//                    logger.log(TAG, "Task to save: $task")
-            saveTaskChangesToDb(task)
+//                    logger.log(TAG, "TaskDomain to save: $taskDomain")
+            saveTaskChangesToDb(taskDomain)
         }
     }
 

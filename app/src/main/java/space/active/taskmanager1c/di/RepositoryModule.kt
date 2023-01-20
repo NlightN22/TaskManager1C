@@ -1,12 +1,8 @@
 package space.active.taskmanager1c.di
 
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
-import dagger.hilt.android.components.FragmentComponent
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import space.active.taskmanager1c.coreutils.logger.Logger
@@ -29,10 +25,10 @@ class RepositoryModule {
     @Singleton
     fun providesInputTaskRepository(
         inputDao: TaskInputDao,
-        extraDao: TaskExtraInputDao,
+        sortedDao: SortedDao,
         logger: Logger
     ): InputTaskRepository {
-        return InputTaskRepositoryImpl(inputDao, extraDao, logger)
+        return InputTaskRepositoryImpl(inputDao, sortedDao, logger)
     }
 
     @Provides

@@ -3,10 +3,10 @@ package space.active.taskmanager1c.domain.models
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.UsersInTask
 
 data class UsersInTaskDomain(
-    val author: User,
-    val performer: User,
-    val coPerformers: List<User>,
-    val observers: List<User>,
+    val author: UserDomain,
+    val performer: UserDomain,
+    val coPerformers: List<UserDomain>,
+    val observers: List<UserDomain>,
 ) {
 
     fun toTaskInput() = UsersInTask(

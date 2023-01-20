@@ -4,9 +4,9 @@ import android.util.Log
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.coreutils.nowDiffInDays
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskUserIs
-import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.models.Validation
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -49,7 +49,7 @@ class Validate @Inject constructor() {
         return Validation(false, UiText.Resource(R.string.end_date_valid_error, maxDateRange))
     }
 
-    fun author(author: User?): Validation {
+    fun author(author: UserDomain?): Validation {
         author?.let {
             if (it.name.isNotBlank() && it.id.isNotBlank()) {
                 return Validation(true)
@@ -58,7 +58,7 @@ class Validate @Inject constructor() {
         return Validation(false, UiText.Resource(R.string.author_valid_error))
     }
 
-    fun performer(performer: User?): Validation {
+    fun performer(performer: UserDomain?): Validation {
         Log.d("Validate", "performer $performer")
         performer?.let {
             if (it.name.isNotBlank() && it.id.isNotBlank()) {
@@ -68,18 +68,18 @@ class Validate @Inject constructor() {
         return Validation(false, UiText.Resource(R.string.performer_valid_error))
     }
 
-    fun okCancelChoose(ok: Boolean, userIs: TaskUserIs, newStatus: Task.Status): Validation {
+    fun okCancelChoose(ok: Boolean, userIs: TaskUserIs, newStatus: TaskDomain.Status): Validation {
         Log.d("Status validate", "userIs $userIs newStatus $newStatus")
         when (userIs) {
             is TaskUserIs.Author -> {
                 // not in Reviewed and Finished changeType true can set Finished
                 // not in Finished changeType false can set Performed
                 if (ok) {
-                    if (newStatus == Task.Status.Finished) {
+                    if (newStatus == TaskDomain.Status.Finished) {
                         return Validation(true)
                     }
                 } else {
-                    if (newStatus != Task.Status.Finished) {
+                    if (newStatus != TaskDomain.Status.Finished) {
                         return Validation(true)
                     }
                 }
@@ -87,23 +87,23 @@ class Validate @Inject constructor() {
                     false,
                     UiText.ResInRes(
                         R.string.author_status_valid_error, listOf(
-                            Task.Status.Performed.getResId(),
-                            Task.Status.Finished.getResId()
+                            TaskDomain.Status.Performed.getResId(),
+                            TaskDomain.Status.Finished.getResId()
                         )
                     )
                 )
             }
             is TaskUserIs.AuthorInReviewed -> {
                 // author can set only Performed Finished in Reviewed
-                if (newStatus == Task.Status.Performed || newStatus == Task.Status.Finished) {
+                if (newStatus == TaskDomain.Status.Performed || newStatus == TaskDomain.Status.Finished) {
                     return Validation(true)
                 }
                 return Validation(
                     false,
                     UiText.ResInRes(
                         R.string.author_status_valid_error, listOf(
-                            Task.Status.Performed.getResId(),
-                            Task.Status.Finished.getResId()
+                            TaskDomain.Status.Performed.getResId(),
+                            TaskDomain.Status.Finished.getResId()
                         )
                     )
                 )
@@ -113,28 +113,28 @@ class Validate @Inject constructor() {
             }
             is TaskUserIs.Performer -> {
                 // performer can set only Reviewed
-                if (newStatus == Task.Status.Reviewed) {
+                if (newStatus == TaskDomain.Status.Reviewed) {
                     return Validation(true)
                 }
                 return Validation(
                     false,
                     UiText.ResInRes(
                         R.string.performer_status_valid_error,
-                        listOf(Task.Status.Reviewed.getResId())
+                        listOf(TaskDomain.Status.Reviewed.getResId())
                     )
                 )
             }
 
             is TaskUserIs.PerformerInReviewed -> {
                 // Can set only Accepted
-                if (newStatus == Task.Status.Accepted) {
+                if (newStatus == TaskDomain.Status.Accepted) {
                     return Validation(true)
                 }
                 return Validation(
                     false,
                     UiText.ResInRes(
                         R.string.performer_status_valid_error,
-                        listOf(Task.Status.Accepted.getResId())
+                        listOf(TaskDomain.Status.Accepted.getResId())
                     )
                 )
             }

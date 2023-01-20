@@ -1,26 +1,26 @@
 package space.active.taskmanager1c.domain.use_case
 
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskUserIs
-import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.UserDomain
 import javax.inject.Inject
 
 
 class DefineUserInTask @Inject constructor() {
-    operator fun invoke(task: Task, whoAmI: User): TaskUserIs {
-        if (task.users.author == whoAmI) {
-            if (task.status == Task.Status.Reviewed) {
+    operator fun invoke(taskDomain: TaskDomain, whoAmI: UserDomain): TaskUserIs {
+        if (taskDomain.users.author == whoAmI) {
+            if (taskDomain.status == TaskDomain.Status.Reviewed) {
                 return TaskUserIs.AuthorInReviewed()
             }
-            if (task.status != Task.Status.Finished) {
+            if (taskDomain.status != TaskDomain.Status.Finished) {
                 return TaskUserIs.Author()
             }
-        } else if (task.users.performer == whoAmI || task.users.coPerformers.contains(whoAmI)) {
-            //if performer in reviewed can only resume task
-            if (task.status == Task.Status.Reviewed) {
+        } else if (taskDomain.users.performer == whoAmI || taskDomain.users.coPerformers.contains(whoAmI)) {
+            //if performer in reviewed can only resume taskDomain
+            if (taskDomain.status == TaskDomain.Status.Reviewed) {
                 return TaskUserIs.PerformerInReviewed()
             }
-            if (task.status != Task.Status.Finished) {
+            if (taskDomain.status != TaskDomain.Status.Finished) {
                 return TaskUserIs.Performer()
             }
         }

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.di.IoDispatcher
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import javax.inject.Inject
 
@@ -15,8 +15,8 @@ class SaveNewTaskToDb @Inject constructor(
     private val exceptionHandler: ExceptionHandler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    operator fun invoke(task: Task): Flow<Request<Any>> =
-        repository.createNewTask(task)
+    operator fun invoke(taskDomain: TaskDomain): Flow<Request<Any>> =
+        repository.createNewTask(taskDomain)
             .catch {
                 exceptionHandler(it)
             }

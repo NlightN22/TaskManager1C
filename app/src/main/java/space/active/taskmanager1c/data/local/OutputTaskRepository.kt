@@ -1,8 +1,6 @@
 package space.active.taskmanager1c.data.local
 
 import kotlinx.coroutines.flow.Flow
-import space.active.taskmanager1c.coreutils.Request
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 interface OutputTaskRepository {
@@ -11,7 +9,7 @@ interface OutputTaskRepository {
     suspend fun getTasks(): List<OutputTask>
 
     /**
-     * Get null if we don't have sending tasks
+     * Get null if we don't have sending taskDomains
      */
     fun getTaskFlow(taskInputId: String): Flow<OutputTask?>
     suspend fun getTask(taskInputId: String): OutputTask?

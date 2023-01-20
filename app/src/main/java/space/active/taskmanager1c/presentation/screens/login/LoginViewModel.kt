@@ -13,7 +13,7 @@ import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
-import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.repository.Authorization
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
@@ -168,7 +168,7 @@ class LoginViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             var exceptions = false
-            settings.saveUser(User(id = userId, name = name))
+            settings.saveUser(UserDomain(id = userId, name = name))
                 .catch {
                     exceptionHandler(it)
                     exceptions = true

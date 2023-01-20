@@ -1,6 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.presentation.utils.DialogItem
 import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
 import java.time.LocalDate
@@ -17,7 +17,7 @@ sealed class TaskDetailedViewState(
                     author = author,
                     startDate = LocalDate.now().toString(),
                     deadLine = LocalDate.now().toString(),
-                    status = Task.Status.New
+                    status = TaskDomain.Status.New
                 )
             )
         }
@@ -43,7 +43,7 @@ data class TaskState(
     val taskObject: String = "",
     val mainTask: String = "",
     val innerTasks: String = "",
-    val status: Task.Status = Task.Status.New,
+    val status: TaskDomain.Status = TaskDomain.Status.New,
 )
 
 data class TaskDetailedExpandState(

@@ -11,7 +11,7 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.db.tasks_room_db.SettingsDao
 import space.active.taskmanager1c.data.local.db.tasks_room_db.local_entities.UserSettings
 import space.active.taskmanager1c.domain.models.Credentials
-import space.active.taskmanager1c.domain.models.User
+import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,28 +23,28 @@ class SettingsRepositoryImpl @Inject constructor(
     private val logger: Logger
 ) : SettingsRepository {
 
-    override suspend fun getUser(): User {
+    override suspend fun getUser(): UserDomain {
         settingsDao.getSettings()?.let {
-            return User(
+            return UserDomain(
                 id = it.userId ?: throw EmptyObject("userId"),
                 name = it.username?.getString() ?: throw EmptyObject("username")
             )
-        } ?: throw EmptyObject("user")
+        } ?: throw EmptyObject("userDomain")
     }
 
-    override fun getUserFlow(): Flow<User> = flow {
+    override fun getUserFlow(): Flow<UserDomain> = flow {
         emit(getUser())?: throw EmptyObject("getUserFlow")
     }
 
-    override fun saveUser(user: User): Flow<Request<Any>> = flow {
+    override fun saveUser(userDomain: UserDomain): Flow<Request<Any>> = flow {
         emit(PendingRequest())
         settingsDao.getSettings()?.let {
-            settingsDao.insert(it.copy(username = user.name.toEncryptedData(), userId = user.id))
+            settingsDao.insert(it.copy(username = userDomain.name.toEncryptedData(), userId = userDomain.id))
         } ?: kotlin.run {
             settingsDao.insert(
                 UserSettings(
-                    userId = user.id,
-                    username = user.name.toEncryptedData()
+                    userId = userDomain.id,
+                    username = userDomain.name.toEncryptedData()
                 )
             )
         }

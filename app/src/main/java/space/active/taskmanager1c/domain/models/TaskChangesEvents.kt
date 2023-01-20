@@ -1,10 +1,6 @@
 package space.active.taskmanager1c.domain.models
 
-import android.util.Log
-import space.active.taskmanager1c.R
-import space.active.taskmanager1c.coreutils.UiText
 import java.time.LocalDateTime
-import java.util.*
 
 sealed class TaskChangesEvents {
 
@@ -17,15 +13,15 @@ sealed class TaskChangesEvents {
     ) : TaskChangesEvents()
 
     data class Performer(
-        val user: User
+        val userDomain: UserDomain
     ) : TaskChangesEvents()
 
     data class CoPerformers(
-        val users: List<User>
+        val userDomains: List<UserDomain>
     ) : TaskChangesEvents()
 
     data class Observers(
-        val users: List<User>
+        val userDomains: List<UserDomain>
     ) : TaskChangesEvents()
 
     data class Description(

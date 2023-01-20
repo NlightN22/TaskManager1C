@@ -2,17 +2,17 @@ package space.active.taskmanager1c.domain.models
 
 sealed class SaveEvents {
     data class Simple(
-        val task: Task
+        val taskDomain: TaskDomain
     ) : SaveEvents()
 
     data class Delayed(
-        val task: Task,
+        val taskDomain: TaskDomain,
         val jobKey: String,
         val delay: Int
     ) : SaveEvents()
 
     data class Breakable(
-        val task: Task,
+        val taskDomain: TaskDomain,
         val cancelDuration: Int
     ) : SaveEvents()
     object BreakSave: SaveEvents()

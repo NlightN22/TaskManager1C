@@ -10,7 +10,7 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.remote.TaskApi
@@ -21,7 +21,6 @@ import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTa
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 private const val TAG = "UpdateJobInterfaceImpl"
@@ -42,16 +41,6 @@ class UpdateJobInterfaceImpl
         whoAmI: UserInput
     ): Flow<Request<Any>> =
         channelFlow<Request<Any>> {
-            // Проверяем таблицу исходящих задач. С определенной переодичностью
-            // Если в таблице исходящих есть задачи, то сравниваем их с таблицей входящих задач.
-            // При совпадении исходящих и входящих задач удаляем совпадающие из таблицы исходящих.
-            // Оставшиеся исходящие задачи отправляем на сервер.
-            // При успешной отправке на сервер:
-            //  в качестве подтверждения получаем входящую задачу с актуальными значениями
-            //  записываем задачу во входящие задачи и удаляем из исходящих отправленную
-            // Далее запрашиваем с сервера входящие задачи.
-            // Обновляем список входящих задач в таблице.
-            // Дополнительные параметры - попытки отправки на сервер, таймауты отправки на сервер. Исключения при их достижении
             var curTime = System.currentTimeMillis()
             logger.log(TAG, "outputSendJob start")
             outputSendJob(credentials, whoAmI).collect {
@@ -76,11 +65,12 @@ class UpdateJobInterfaceImpl
             delay(updateDelay)
         }.flowOn(ioDispatcher)
 
+    // todo change to update after show list at screen
     private fun updateReadingState(credentials: Credentials) = flow<Request<Any>> {
         emit(PendingRequest())
         val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(
             credentials.toAuthBasicDto(),
-            inputTaskRepository.getTasks().map { it.extra.taskId })
+            inputTaskRepository.getTasks().map { it.taskIn.id })
         result.forEach {
             inputTaskRepository.updateReading(it.id, it.getUnreadStatus())
         }
@@ -91,11 +81,11 @@ class UpdateJobInterfaceImpl
         val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
         val inputTasks: List<TaskInput> = inputTaskRepository.getTasks().map { it.taskIn }
         if (outputTasks.isNotEmpty()) {
-            // find an delete the same tasks in output and input table
+            // find an delete the same taskDomains in output and input table
             val deleteOutputTaskList: List<OutputTask> =
                 getEqualOutputTasksInInputTasks(outputTasks, inputTasks)
             outputTaskRepository.deleteTasks(deleteOutputTaskList)
-            // get only not deleted output tasks
+            // get only not deleted output taskDomains
             val outputTasksAfterDelete: List<OutputTask> = outputTaskRepository.getTasks()
             var result: Request<TaskDto>? = null
             outputTasksAfterDelete.forEach { outputTask ->
@@ -106,7 +96,7 @@ class UpdateJobInterfaceImpl
                 // find diffs with TaskInput if id in input table or send as is
                 existingInputTask?.let {
                     result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(it.taskIn.name))
-                    // if task is not edited and existing in input table
+                    // if taskDomain is not edited and existing in input table
                     if (!outputTask.newTask) {
 
                         val inputDTO = TaskDto.fromInputTask(it.taskIn)
@@ -121,9 +111,9 @@ class UpdateJobInterfaceImpl
 //                        result = SuccessRequest(inputDTO)
                     }
                 } ?: kotlin.run {
-                    // if task is not new
+                    // if taskDomain is not new
                     result = ErrorRequest<TaskDto>(ThisTaskIsNotNew)
-                    // clear id for new tasks
+                    // clear id for new taskDomains
                     if (outputTask.newTask) {
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
@@ -136,7 +126,7 @@ class UpdateJobInterfaceImpl
                 result?.let { res ->
                     when (res) {
                         is SuccessRequest -> {
-                            // TODO if task send with delete label
+                            // TODO if taskDomain send with delete label
 //                        logger.log(TAG, result.data.toString())
                             inputTaskRepository.saveAndDelete(
                                 inputTask =res.data.toTaskInput(),

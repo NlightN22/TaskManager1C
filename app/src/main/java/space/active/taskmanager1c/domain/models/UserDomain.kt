@@ -3,13 +3,13 @@ package space.active.taskmanager1c.domain.models
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.presentation.utils.DialogItem
 
-data class User(
+data class UserDomain(
     val id: String,
     val name: String
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) {return true}
-        if (other != null && other is User) {
+        if (other != null && other is UserDomain) {
             return this.id == other!!.id
         }
         return false
@@ -25,14 +25,14 @@ data class User(
 
     companion object {
 
-        fun UserInput.fromUserInput(): User = User (
+        fun UserInput.fromUserInput(): UserDomain = UserDomain (
             id = this.id,
             name = this.name
                 )
 
-        fun blankUser() = User (id = "", name = "")
+        fun blankUser() = UserDomain (id = "", name = "")
 
-        fun List<User>.toDialogItems(currentSelectedUsersId: List<String>): List<DialogItem> {
+        fun List<UserDomain>.toDialogItems(currentSelectedUsersId: List<String>): List<DialogItem> {
             return this.map {
                 if (currentSelectedUsersId.contains(it.id)) {
                     it.toDialogItem(true)
@@ -42,16 +42,16 @@ data class User(
             }
         }
 
-        fun List<DialogItem>?.fromDialogItems(): List<User> {
-            return this?.filter { it.checked }?.map { fromDialogItem(it) } ?: emptyList<User>()
+        fun List<DialogItem>?.fromDialogItems(): List<UserDomain> {
+            return this?.filter { it.checked }?.map { fromDialogItem(it) } ?: emptyList<UserDomain>()
         }
 
-        fun fromDialogItem(dialogItem: DialogItem) = User(
+        fun fromDialogItem(dialogItem: DialogItem) = UserDomain(
             id = dialogItem.id,
             name = dialogItem.text
         )
 
-        fun List<User>.toText(): String {
+        fun List<UserDomain>.toText(): String {
             if (this.isNotEmpty()) {
                 return this.map { it.name }.toString().dropLast(1).drop(1)
             } else {

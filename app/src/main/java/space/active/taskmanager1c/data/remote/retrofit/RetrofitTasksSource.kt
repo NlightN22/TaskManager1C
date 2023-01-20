@@ -50,7 +50,7 @@ class RetrofitTasksSource @Inject constructor
         wrapRetrofitExceptions {
             logger.log(TAG, "sendNewTask: $task")
             val res = retrofitApi.sendNew(auth.toBasic(), task).tasks.first()
-            logger.log(TAG, "Get from server task: $res")
+            logger.log(TAG, "Get from server taskDomain: $res")
             SuccessRequest(res)
         }
 

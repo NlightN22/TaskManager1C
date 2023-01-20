@@ -9,14 +9,13 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
-import space.active.taskmanager1c.domain.models.Task
+import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
 import space.active.taskmanager1c.domain.models.TaskListOrderTypes
 import space.active.taskmanager1c.presentation.screens.BaseFragment
@@ -41,15 +40,15 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
         recyclerTasks = TaskListAdapter(object : TaskActionListener {
-            override fun onTaskStatusClick(task: Task) {
-                viewModel.changeTaskStatus(task)
+            override fun onTaskStatusClick(taskDomain: TaskDomain) {
+                viewModel.changeTaskStatus(taskDomain)
             }
 
-            override fun onTaskClick(task: Task) {
-                launchTaskDetailed(taskId = task.id)
+            override fun onTaskClick(taskDomain: TaskDomain) {
+                launchTaskDetailed(taskId = taskDomain.id)
             }
 
-            override fun onTaskLongClick(task: Task) {
+            override fun onTaskLongClick(taskDomain: TaskDomain) {
                 // add popup menu set priority and unread status
                 TODO("Not yet implemented")
             }
@@ -120,12 +119,12 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         }
 
         // for autocomplete search
-        viewModel.userList.collectOnStart { users ->
+        viewModel.userDomainList.collectOnStart { users ->
             val arrayNames: Array<String> = users.map { it.name }.toTypedArray()
             binding.searchEditText.setSimpleItems(arrayNames)
         }
 
-        // task list for recycler view
+        // taskDomain list for recycler view
         viewModel.listTask.collectOnStart { request ->
             when (request) {
                 is PendingRequest -> {
@@ -133,7 +132,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                 }
                 is SuccessRequest -> {
 
-                    recyclerTasks.tasks = request.data
+                    recyclerTasks.taskDomains = request.data
                     shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
                 }
                 is ErrorRequest -> {
