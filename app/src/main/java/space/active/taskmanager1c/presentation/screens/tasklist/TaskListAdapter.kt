@@ -64,7 +64,7 @@ class TaskListAdapter(
             taskDate.text = taskDomain.date.toShortDate()
             taskNumber.text = taskDomain.number
             taskAuthor.text = abbreviationName(
-                if (taskDomain.whoIsInTask.author) {
+                if (taskDomain.isAuthor) {
                     taskDomain.users.performer.name
                 } else {
                     taskDomain.users.author.name

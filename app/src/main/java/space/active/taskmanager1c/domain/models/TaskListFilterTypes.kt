@@ -14,19 +14,19 @@ sealed class TaskListFilterTypes {
 
     companion object {
         fun List<TaskDomain>.filterIDo(): List<TaskDomain> {
-            return this.filter { it.whoIsInTask.performer }
+            return this.filter { it.isPerformer }
         }
 
         fun List<TaskDomain>.filterIDelegate(): List<TaskDomain> {
-            return this.filter { it.whoIsInTask.author && !it.whoIsInTask.performer && !it.cancel }
+            return this.filter { it.isAuthor && !it.isPerformer && !it.cancel }
        }
 
         fun List<TaskDomain>.filterIDidNtCheck(): List<TaskDomain> {
-            return this.filter { it.whoIsInTask.author && it.cancel }
+            return this.filter { it.isAuthor && it.cancel }
        }
 
         fun List<TaskDomain>.filterIObserve(): List<TaskDomain> {
-           return this.filter { !it.whoIsInTask.author && !it.whoIsInTask.performer }
+           return this.filter { !it.isAuthor && !it.isPerformer }
         }
 
         fun List<TaskDomain>.filterUnread() = this.filter { it.unread }

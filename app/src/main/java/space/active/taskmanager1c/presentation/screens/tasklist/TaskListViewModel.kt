@@ -75,19 +75,19 @@ class TaskListViewModel @Inject constructor(
     }
 
     // todo delete
-    private val inputListTaskDomain: Flow<List<TaskDomain>> = combine(
-        repository.listTasksFlow,
-        _bottomFilter,
-        _searchFilter,
-        _bottomOrder
-    ) { input, bottomFilter, searchFilter, bottomOrder ->
-        orderByBottom(
-            search(
-                // todo fix accepted author status - not show OK
-                filterByBottom(input, bottomFilter), searchFilter
-            ), bottomOrder
-        )
-    }
+//    private val inputListTaskDomain: Flow<List<TaskDomain>> = combine(
+//        repository.listTasksFlow,
+//        _bottomFilter,
+//        _searchFilter,
+//        _bottomOrder
+//    ) { input, bottomFilter, searchFilter, bottomOrder ->
+//        orderByBottom(
+//            search(
+//                // todo fix accepted author status - not show OK
+//                filterByBottom(input, bottomFilter), searchFilter
+//            ), bottomOrder
+//        )
+//    }
 
     private suspend fun search(
         filterByBottom: List<TaskDomain>,
@@ -104,14 +104,11 @@ class TaskListViewModel @Inject constructor(
         filteredInput.collectInScope { inputList ->
             checkForInputListAndTryFetch(inputList)
         }
-//        filteredInput.collectInScope { list->
-//            logger.log(TAG, "filteredInput: ${ list.map { it.taskIn.name }.joinToString("\n")}")
-//        }
     }
 
     private suspend fun checkForInputListAndTryFetch(inputList: List<TaskDomain>) {
-        val curListIsEmpty = repository.listTasksFlow.first().isEmpty()
-        if (inputList.isEmpty() && curListIsEmpty) {
+        val curListCount: Int = repository.getInputTasksCount()
+        if (inputList.isEmpty() && curListCount == 0) {
             handleEmptyTaskList(
                 getCredentials(),
                 settings.getUser().toUserInput()
@@ -130,6 +127,7 @@ class TaskListViewModel @Inject constructor(
                 }
             }
         } else {
+            logger.log(TAG, "inputList.size ${inputList.size}")
             _listTaskDomain.value = SuccessRequest(inputList)
             _startUpdateJob.value = true
         }

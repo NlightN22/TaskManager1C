@@ -2,15 +2,93 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9ef3f5c61aad1f4dbc1d0e5f874240ea",
+    "identityHash": "898478a4a7034293a99bb636cd5196d3",
     "entities": [
       {
         "tableName": "TaskInputHandled",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`unread` INTEGER NOT NULL, `ok` INTEGER NOT NULL, `cancel` INTEGER NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT, `id` TEXT NOT NULL, `mainTaskId` TEXT, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `observers` TEXT NOT NULL, `author` INTEGER NOT NULL, `performer` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT, `id` TEXT NOT NULL, `mainTaskId` TEXT, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `authorId` TEXT NOT NULL, `performerId` TEXT NOT NULL, `isAuthor` INTEGER NOT NULL, `isPerformer` INTEGER NOT NULL, `ok` INTEGER NOT NULL, `cancel` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
-            "fieldPath": "unread",
-            "columnName": "unread",
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endDate",
+            "columnName": "endDate",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mainTaskId",
+            "columnName": "mainTaskId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "objName",
+            "columnName": "objName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authorId",
+            "columnName": "authorId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "performerId",
+            "columnName": "performerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isAuthor",
+            "columnName": "isAuthor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPerformer",
+            "columnName": "isPerformer",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -25,102 +103,6 @@
             "columnName": "cancel",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.date",
-            "columnName": "date",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.description",
-            "columnName": "description",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.endDate",
-            "columnName": "endDate",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "taskIn.id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.mainTaskId",
-            "columnName": "mainTaskId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "taskIn.name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.number",
-            "columnName": "number",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.objName",
-            "columnName": "objName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "taskIn.priority",
-            "columnName": "priority",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.status",
-            "columnName": "status",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.usersInTask.authorId",
-            "columnName": "authorId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.usersInTask.coPerformers",
-            "columnName": "coPerformers",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.usersInTask.performerId",
-            "columnName": "performerId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskIn.usersInTask.observers",
-            "columnName": "observers",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "whoIsInTask.author",
-            "columnName": "author",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "whoIsInTask.performer",
-            "columnName": "performer",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -131,6 +113,104 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "CoPerformersInTask",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`coPerformerId` TEXT NOT NULL, `taskId` TEXT NOT NULL, PRIMARY KEY(`coPerformerId`, `taskId`), FOREIGN KEY(`taskId`) REFERENCES `TaskInputHandled`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "coPerformerId",
+            "columnName": "coPerformerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskId",
+            "columnName": "taskId",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "coPerformerId",
+            "taskId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_CoPerformersInTask_taskId",
+            "unique": false,
+            "columnNames": [
+              "taskId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CoPerformersInTask_taskId` ON `${TABLE_NAME}` (`taskId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "TaskInputHandled",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "taskId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ObserversInTask",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`observerId` TEXT NOT NULL, `taskId` TEXT NOT NULL, PRIMARY KEY(`observerId`, `taskId`), FOREIGN KEY(`taskId`) REFERENCES `TaskInputHandled`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "observerId",
+            "columnName": "observerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskId",
+            "columnName": "taskId",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "observerId",
+            "taskId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ObserversInTask_taskId",
+            "unique": false,
+            "columnNames": [
+              "taskId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ObserversInTask_taskId` ON `${TABLE_NAME}` (`taskId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "TaskInputHandled",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "taskId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       },
       {
         "tableName": "UserInput",
@@ -160,7 +240,7 @@
       },
       {
         "tableName": "OutputTask",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`outputId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `newTask` INTEGER NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT, `id` TEXT NOT NULL, `mainTaskId` TEXT, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `observers` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`outputId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `newTask` INTEGER NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT NOT NULL, `id` TEXT NOT NULL, `mainTaskId` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT NOT NULL, `observers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `priority` TEXT NOT NULL, `status` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "outputId",
@@ -175,86 +255,86 @@
             "notNull": true
           },
           {
-            "fieldPath": "taskInput.date",
-            "columnName": "date",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskInput.description",
-            "columnName": "description",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskInput.endDate",
-            "columnName": "endDate",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "taskInput.id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskInput.mainTaskId",
-            "columnName": "mainTaskId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "taskInput.name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskInput.number",
-            "columnName": "number",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskInput.objName",
-            "columnName": "objName",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "taskInput.priority",
-            "columnName": "priority",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskInput.status",
-            "columnName": "status",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "taskInput.usersInTask.authorId",
+            "fieldPath": "taskDto.authorId",
             "columnName": "authorId",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "taskInput.usersInTask.coPerformers",
+            "fieldPath": "taskDto.coPerformers",
             "columnName": "coPerformers",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "taskInput.usersInTask.performerId",
+            "fieldPath": "taskDto.date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.endDate",
+            "columnName": "endDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.mainTaskId",
+            "columnName": "mainTaskId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.number",
+            "columnName": "number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.objName",
+            "columnName": "objName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.observers",
+            "columnName": "observers",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.performerId",
             "columnName": "performerId",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "taskInput.usersInTask.observers",
-            "columnName": "observers",
+            "fieldPath": "taskDto.priority",
+            "columnName": "priority",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.status",
+            "columnName": "status",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -336,7 +416,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9ef3f5c61aad1f4dbc1d0e5f874240ea')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '898478a4a7034293a99bb636cd5196d3')"
     ]
   }
 }

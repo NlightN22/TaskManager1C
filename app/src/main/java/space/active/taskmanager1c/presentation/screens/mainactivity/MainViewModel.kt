@@ -119,8 +119,8 @@ class MainViewModel @Inject constructor(
                         settings.getUser()?.toUserInput()?: throw EmptyObject("userDomain"))
                             .catch { e ->
                                 exceptionHandler(e)
-                                //TODO add error counter and pause
-                                delay(5000)
+                                //TODO add error counter
+                                delay(5000) // pause after error
                             }
                             .collectLatest {
                                 if (it is ErrorRequest) {

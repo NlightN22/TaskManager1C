@@ -12,6 +12,7 @@ import space.active.taskmanager1c.data.utils.JsonParser
 class Converters(
     private val jsonParser: JsonParser
 ) {
+    // todo delete list converters
     @TypeConverter
     fun listStringToJson(listString: List<String>): String {
         return jsonParser.toJson(

@@ -24,7 +24,7 @@ interface TaskOutputDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTask(outputTask: OutputTask)
 
-    @Query("DELETE FROM OutputTask WHERE outputId = :outputId")
-    fun deleteOutputTask(outputId: Int)
+    @Query("DELETE FROM OutputTask WHERE id = :taskDTOid")
+    fun deleteOutputTask(taskDTOid: String)
 
 }

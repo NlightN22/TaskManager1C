@@ -9,7 +9,7 @@ import space.active.taskmanager1c.domain.models.TaskListOrderTypes
 import space.active.taskmanager1c.domain.models.UserDomain
 
 interface TasksRepository {
-    val listTasksFlow: Flow<List<TaskDomain>>
+    suspend fun getInputTasksCount(): Int
     fun getTasksFiltered(filterTypes: Flow<TaskListFilterTypes>,
                          orderTypes: Flow<TaskListOrderTypes>,
                          myIdFlow: Flow<String>

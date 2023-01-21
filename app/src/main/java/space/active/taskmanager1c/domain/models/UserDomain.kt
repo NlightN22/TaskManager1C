@@ -1,5 +1,7 @@
 package space.active.taskmanager1c.domain.models
 
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.CoPerformersInTask
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.ObserversInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.presentation.utils.DialogItem
 
@@ -7,8 +9,21 @@ data class UserDomain(
     val id: String,
     val name: String
 ) {
+
+    fun toCoPerformer(taskId: String) = CoPerformersInTask(
+        coPerformerId = id,
+        taskId = taskId
+    )
+
+    fun toObservers(taskId: String) = ObserversInTask(
+        observerId = id,
+        taskId = taskId
+    )
+
     override fun equals(other: Any?): Boolean {
-        if (this === other) {return true}
+        if (this === other) {
+            return true
+        }
         if (other != null && other is UserDomain) {
             return this.id == other!!.id
         }
@@ -25,12 +40,12 @@ data class UserDomain(
 
     companion object {
 
-        fun UserInput.fromUserInput(): UserDomain = UserDomain (
+        fun UserInput.fromUserInput(): UserDomain = UserDomain(
             id = this.id,
             name = this.name
-                )
+        )
 
-        fun blankUser() = UserDomain (id = "", name = "")
+        fun blankUser() = UserDomain(id = "", name = "")
 
         fun List<UserDomain>.toDialogItems(currentSelectedUsersId: List<String>): List<DialogItem> {
             return this.map {
@@ -43,7 +58,8 @@ data class UserDomain(
         }
 
         fun List<DialogItem>?.fromDialogItems(): List<UserDomain> {
-            return this?.filter { it.checked }?.map { fromDialogItem(it) } ?: emptyList<UserDomain>()
+            return this?.filter { it.checked }?.map { fromDialogItem(it) }
+                ?: emptyList<UserDomain>()
         }
 
         fun fromDialogItem(dialogItem: DialogItem) = UserDomain(

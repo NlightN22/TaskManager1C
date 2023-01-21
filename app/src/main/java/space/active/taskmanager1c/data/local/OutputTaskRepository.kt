@@ -13,6 +13,6 @@ interface OutputTaskRepository {
      */
     fun getTaskFlow(taskInputId: String): Flow<OutputTask?>
     suspend fun getTask(taskInputId: String): OutputTask?
-    suspend fun deleteTasks(outputTasks: List<OutputTask>)
+    suspend fun deleteTasks(outputIdList: List<String>)
     suspend fun deleteTask(outputTask: OutputTask)
 }

@@ -8,10 +8,10 @@ import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
 import space.active.taskmanager1c.data.local.db.tasks_room_db.SortField
 import space.active.taskmanager1c.data.local.db.tasks_room_db.SortType
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInputHandled
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput.Companion.toListUserDomain
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
+import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
 import space.active.taskmanager1c.domain.models.TaskListOrderTypes
@@ -30,14 +30,16 @@ class MergedTaskRepositoryImpl constructor(
 ) : TasksRepository {
 
     // todo delete
-    override val listTasksFlow: Flow<List<TaskDomain>> =
-        combine(
-            inputTaskRepository.listTaskFlow,
-            outputTaskRepository.outputTaskList,
-        ) { inputList, outputList ->
-            combineListTasks(inputList, outputList)
-        }
-            .flowOn(ioDispatcher)
+//    override val listTasksFlow: Flow<List<TaskDomain>> =
+//        combine(
+//            inputTaskRepository.listTaskFlow,
+//            outputTaskRepository.outputTaskList,
+//        ) { inputList, outputList ->
+//            combineListTasks(inputList, outputList)
+//        }
+//            .flowOn(ioDispatcher)
+
+    override suspend fun getInputTasksCount(): Int = inputTaskRepository.getInputTasksCount()
 
     override fun getTasksFiltered(
         filterTypes: Flow<TaskListFilterTypes>,
@@ -50,9 +52,9 @@ class MergedTaskRepositoryImpl constructor(
             val sortType = order.getSortFieldAndType().second
             selectFilter(filter, myId, sortField, sortType)
         }
-    }.combine(outputTaskRepository.outputTaskList) {
-            inputList, outputList ->
-        combineListTasks(inputList, outputList)
+    }.combine(outputTaskRepository.outputTaskList) { inputList, outputList ->
+        val myId = myIdFlow.first()
+        combineListTasks(inputList, outputList, myId)
     }.flowOn(ioDispatcher)
 
     private fun selectFilter(
@@ -60,7 +62,7 @@ class MergedTaskRepositoryImpl constructor(
         myId: String,
         sortField: SortField,
         sortType: SortType
-    ): Flow<List<TaskInputHandled>> {
+    ): Flow<List<TaskInputHandledWithUsers>> {
         return when (filter) {
             is TaskListFilterTypes.IDo -> inputTaskRepository.filteredIdo(myId, sortField, sortType)
             is TaskListFilterTypes.IDelegate -> inputTaskRepository.filteredIDelegate(
@@ -78,11 +80,11 @@ class MergedTaskRepositoryImpl constructor(
                 sortField,
                 sortType
             )
-            is TaskListFilterTypes.IDidNtRead -> inputTaskRepository.filteredIDidNtRead(
-                sortField,
-                sortType
-            )
-            is TaskListFilterTypes.All -> inputTaskRepository.sortedAll(sortField, sortType)
+//            is TaskListFilterTypes.IDidNtRead -> inputTaskRepository.filteredIDidNtRead(
+//                sortField,
+//                sortType
+//            )
+            else -> inputTaskRepository.sortedAll(sortField, sortType)
         }
     }
 
@@ -105,27 +107,27 @@ class MergedTaskRepositoryImpl constructor(
 //    }
 
     private suspend fun taskCombine(
-        inputTask: TaskInputHandled?,
+        inputTask: TaskInputHandledWithUsers?,
         outputTask: OutputTask?
     ): TaskDomain? {
         val usersInputList = inputTaskRepository.getUsers()
         outputTask?.let { output ->
-            val convertedOutput: TaskInput = output.taskInput
+            val convertedOutput: TaskDto = output.taskDto
             inputTask?.let {
-                val convertedInput: TaskInput = inputTask.taskIn
+                val convertedInput: TaskDto = inputTask.toTaskDTO()
                 /**
                  * return if taskDomains are same. It's unbelievable, but still...
                  */
                 if (convertedInput == convertedOutput) {
                     outputTaskRepository.deleteTask(output)
                     logger.log(TAG, "return convertedInput")
-                    return it.copy(taskIn = convertedInput).toTaskDomain(usersInputList)
+                    return it.toTaskDomain(usersInputList)
                 } else {
                     /**
                      * return if taskDomains are different.
                      */
                     logger.log(TAG, "return convertedOutput")
-                    return it.copy(taskIn = convertedOutput).toTaskDomain(usersInputList)
+                    return it.toTaskDomain(usersInputList)
                 }
             } ?: kotlin.run {
                 /**
@@ -182,8 +184,9 @@ class MergedTaskRepositoryImpl constructor(
     }.flowOn(ioDispatcher)
 
     private suspend fun combineListTasks(
-        taskInput: List<TaskInputHandled>,
-        taskOut: List<OutputTask>
+        taskInput: List<TaskInputHandledWithUsers>,
+        taskOut: List<OutputTask>,
+        myId: String
     ): List<TaskDomain> {
         val usersInputList = inputTaskRepository.getUsers()
         if (taskInput.isNotEmpty() or taskOut.isNotEmpty()) {
@@ -196,18 +199,14 @@ class MergedTaskRepositoryImpl constructor(
                 /**
                  * Data type casting to TaskDomain
                  */
-                val convertedTaskOutputDomain: List<TaskInput> = taskOut.map { it.taskInput }
+                val convertedTaskOutputDomain: List<TaskInputHandledWithUsers> =
+                    taskOut.map { it.taskDto.toTaskInputHandledWithUsers(myId) }
                 /**
                  *  Find in taskDomain input list the same taskDomains by id and replace them by output taskDomains
                  *  Add new output taskDomains to final list
                  */
-                return taskInput.map { ex ->
-                    ex.copy(taskIn = taskInput.map { it.taskIn }
-                        .mapAndReplaceById(convertedTaskOutputDomain)
-                        .addNotContainedFromList(convertedTaskOutputDomain)
-                        .find { input -> input.id == ex.taskIn.id }
-                        ?: ex.taskIn)
-                }
+                return taskInput.mapAndReplaceById(convertedTaskOutputDomain)
+                    .addNotContainedFromList(convertedTaskOutputDomain)
                     .map { it.toTaskDomain(usersInputList) }
             } else if (taskInput.isNotEmpty()) {
                 return taskInput.map { it.toTaskDomain(usersInputList) }
@@ -222,9 +221,10 @@ class MergedTaskRepositoryImpl constructor(
             ?: UserDomain(id = userId, name = userId)
 
 
-    private fun List<TaskInput>.mapAndReplaceById(newList: List<TaskInput>): List<TaskInput> {
+    private fun List<TaskInputHandledWithUsers>.mapAndReplaceById(newList: List<TaskInputHandledWithUsers>): List<TaskInputHandledWithUsers> {
         return this.map { list1Item ->
-            newList.find { list2Item -> (list1Item.id == list2Item.id) } ?: list1Item
+            newList.find { list2Item -> (list1Item.taskInput.id == list2Item.taskInput.id) }
+                ?: list1Item
         }
 
     }

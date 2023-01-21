@@ -5,9 +5,10 @@ import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
 import space.active.taskmanager1c.coreutils.nowDiffInDays
 import space.active.taskmanager1c.coreutils.toShortDate
 import space.active.taskmanager1c.coreutils.toShortDateTime
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.TaskInput
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.WhoIsInTask
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInputHandled
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
+import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.domain.models.UserDomain.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskState
 import java.time.LocalDateTime
@@ -29,7 +30,8 @@ data class TaskDomain(
     val isSending: Boolean = false,
     val outputId: Int = 0,
     val unread: Boolean = false,
-    val whoIsInTask: WhoIsInTask,
+    val isAuthor: Boolean,
+    val isPerformer: Boolean,
     val ok: Boolean,
     val cancel: Boolean
 ) {
@@ -54,35 +56,73 @@ data class TaskDomain(
                 Cancelled -> R.string.Cancelled
             }
         }
+
+        fun toStatusDTO(): String {
+            return when (this) {
+                New -> "new"
+                Accepted -> "accepted"
+                Performed -> "performed"
+                Reviewed -> "reviewed"
+                Finished -> "finished"
+                Deferred -> "deferred"
+                Cancelled -> "cancelled"
+            }
+        }
     }
 
-    private fun toTaskInput(new: Boolean = false) = TaskInput(
-        date = this.date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-        description = this.description,
-        endDate = this.endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
+    private fun toTaskInputHandledWithUsers(new: Boolean = false) = TaskInputHandledWithUsers(
+        taskInput = this.toTaskInputHandled(new),
+        coPerformers = users.coPerformers.map { it.toCoPerformer(id) },
+        observers = users.observers.map { it.toObservers(id) }
+    )
+
+    private fun toTaskInputHandled(new: Boolean = false) = TaskInputHandled(
+        date = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+        description = description,
+        endDate = endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
         id = if (new) {
-            this.hashCode().toString()
+            hashCode().toString()
         } else {
-            this.id
+            id
         },
-        mainTaskId = this.mainTaskId,
-        name = this.name,
-        number = this.number,
-        objName = this.objName,
-        priority = this.priority,
-        status = this.fromTaskStatus(this.status),
-        usersInTask = this.users.toTaskInput(),
+        mainTaskId = mainTaskId,
+        name = name,
+        number = number,
+        objName = objName,
+        priority = priority,
+        status = status.toStatusDTO(),
+        authorId = users.author.id,
+        performerId = users.performer.id,
+        isAuthor = isAuthor,
+        isPerformer = isPerformer,
+        ok = ok,
+        cancel = cancel,
     )
 
     fun toOutputTask(new: Boolean = false): OutputTask {
-        return if (new) {
-            OutputTask(newTask = new, taskInput = this.toTaskInput(new))
-        } else {
-            OutputTask(
-                taskInput = this.toTaskInput(),
-                outputId = this.outputId
-            )
-        }
+        return OutputTask(
+            newTask = new,
+            taskDto = toTaskDTO()
+        )
+    }
+
+    fun toTaskDTO(): TaskDto {
+        return TaskDto(
+            authorId = users.author.id,
+            coPerformers = users.coPerformers.map { it.id },
+            date = date.toString(),
+            description = description,
+            endDate = endDate.toString(),
+            id = id,
+            mainTaskId = mainTaskId,
+            name = name,
+            number = number,
+            objName = objName,
+            observers = users.observers.map { it.id },
+            performerId = users.performer.id,
+            priority = priority,
+            status = status.toStatusDTO(),
+        )
     }
 
     fun toTaskState() = TaskState(
@@ -102,17 +142,6 @@ data class TaskDomain(
         status = this.status
     )
 
-    private fun fromTaskStatus(status: Status): String {
-        return when (status) {
-            Status.New -> "new"
-            Status.Accepted -> "accepted"
-            Status.Performed -> "performed"
-            Status.Reviewed -> "reviewed"
-            Status.Finished -> "finished"
-            Status.Deferred -> "deferred"
-            Status.Cancelled -> "cancelled"
-        }
-    }
 
     /**
      * Return days deadline in string
@@ -127,7 +156,6 @@ data class TaskDomain(
     }
 
     companion object {
-
         fun newTask(author: UserDomain) = TaskDomain(
             date = LocalDateTime.now(),
             endDate = LocalDateTime.now(),
@@ -144,14 +172,13 @@ data class TaskDomain(
             number = "",
             objName = "",
             priority = "",
-            status = TaskDomain.Status.New,
-            whoIsInTask = WhoIsInTask(author = true, performer = false),
+            status = Status.New,
+            isAuthor = true,
+            isPerformer = false,
             unread = false,
             ok = true,
             cancel = false
         )
-
-
 
         fun toTaskStatus(status: String): Status {
             return when (status) {

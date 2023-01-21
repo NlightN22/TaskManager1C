@@ -7,26 +7,28 @@ import java.time.LocalDate
 
 sealed class TaskDetailedViewState(
     open val state: TaskState
-) {
-    data class New(
-        override val state: TaskState = TaskState()
-    ) : TaskDetailedViewState(state) {
-        fun setNew(author: String): TaskDetailedViewState.New {
-            return this.copy(
-                state = state.copy(
-                    author = author,
-                    startDate = LocalDate.now().toString(),
-                    deadLine = LocalDate.now().toString(),
-                    status = TaskDomain.Status.New
-                )
-            )
-        }
-    }
-
-    data class Edit(
-        override val state: TaskState
-    ) : TaskDetailedViewState(state)
-}
+)
+    //todo delete
+//{
+//    data class New(
+//        override val state: TaskState = TaskState()
+//    ) : TaskDetailedViewState(state) {
+//        fun setNew(author: String): TaskDetailedViewState.New {
+//            return this.copy(
+//                state = state.copy(
+//                    author = author,
+//                    startDate = LocalDate.now().toString(),
+//                    deadLine = LocalDate.now().toString(),
+//                    status = TaskDomain.Status.New
+//                )
+//            )
+//        }
+//    }
+//
+//    data class Edit(
+//        override val state: TaskState
+//    ) : TaskDetailedViewState(state)
+//}
 
 data class TaskState(
     val id: String = "",

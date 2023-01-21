@@ -2,39 +2,56 @@ package space.active.taskmanager1c.data.local.db.tasks_room_db
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.CoPerformersInTask
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.ObserversInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInputHandled
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.TaskInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
 @Dao
 interface TaskInputDao {
 
+    @Query("SELECT COUNT(id) FROM TaskInputHandled")
+    suspend fun getInputCount(): Int
+
+    @Transaction
     @Query("SELECT * FROM TaskInputHandled")
-    fun getTasksFlow(): Flow<List<TaskInputHandled>>
+    fun getTasksFlow(): Flow<List<TaskInputHandledWithUsers>>
 
+    @Transaction
     @Query("SELECT * FROM TaskInputHandled")
-    suspend fun getTasks(): List<TaskInputHandled>
+    suspend fun getTasks(): List<TaskInputHandledWithUsers>
 
+    @Transaction
     @Query("SELECT * FROM TaskInputHandled WHERE id = :taskId")
-    fun getTaskFlow(taskId: String): Flow<TaskInputHandled?>
+    fun getTaskFlow(taskId: String): Flow<TaskInputHandledWithUsers?>
 
+    @Transaction
     @Query("SELECT * FROM TaskInputHandled WHERE id = :taskId")
-    suspend fun getTask(taskId: String): TaskInputHandled?
+    suspend fun getTask(taskId: String): TaskInputHandledWithUsers?
+
+    @Transaction
+    suspend fun insertTask(taskInputHandled: TaskInputHandledWithUsers) {
+        insertTaskInputHandled(taskInputHandled.taskInput)
+        insertCoPerformersInTask(taskInputHandled.coPerformers)
+        insertObserversInTask(taskInputHandled.observers)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertTask(TaskInputHandled: TaskInputHandled)
+    abstract fun insertTaskInputHandled(taskInputHandled: TaskInputHandled)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertCoPerformersInTask(coPerformersInTask: List<CoPerformersInTask>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertObserversInTask(observersInTask: List<ObserversInTask>)
 
-    @Query("UPDATE TaskInputHandled SET unread = :unread WHERE id = :taskId ")
-    fun updateReadingState(taskId: String, unread: Boolean)
 
     @Transaction
     suspend fun saveAndDelete(
-        inputTask: TaskInput,
+        inputTask: TaskInputHandledWithUsers,
         outputTask: OutputTask,
-        taskExtra: TaskInputHandled
     ) {
-        insertTask(taskExtra)
+        insertTask(inputTask)
         deleteOutputTask(outputTask.outputId)
     }
 

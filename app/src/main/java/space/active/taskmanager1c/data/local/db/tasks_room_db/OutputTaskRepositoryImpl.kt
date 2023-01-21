@@ -20,7 +20,7 @@ class OutputTaskRepositoryImpl @Inject constructor(
         /**
          * check for the same taskDomain in table by input taskId
          */
-        val existingInTable = getTask(outputTask.taskInput.id)
+        val existingInTable = getTask(outputTask.taskDto.id)
         existingInTable?.let {
             /**
              *  check the same without output taskDomain fields
@@ -30,7 +30,7 @@ class OutputTaskRepositoryImpl @Inject constructor(
             if (incomeWithoutId == existingWithoutId) {
                 logger.error(
                     TAG,
-                    "fun insertTask find existing taskDomain ${outputTask.taskInput.id} in table"
+                    "fun insertTask find existing taskDomain ${outputTask.taskDto.id} in table"
                 )
             } else {
                 taskOutputDao.insertTask(outputTask.copy(outputId = it.outputId))
@@ -48,14 +48,14 @@ class OutputTaskRepositoryImpl @Inject constructor(
     override suspend fun getTask(taskInputId: String): OutputTask? =
         taskOutputDao.getOutputTask(taskInputId)
 
-    override suspend fun deleteTasks(outputTasks: List<OutputTask>) {
-        outputTasks.forEach {
-            taskOutputDao.deleteOutputTask(it.outputId)
+    override suspend fun deleteTasks(outputIdList: List<String>) {
+        outputIdList.forEach {
+            taskOutputDao.deleteOutputTask(it)
         }
     }
 
     override suspend fun deleteTask(outputTask: OutputTask) {
-        taskOutputDao.deleteOutputTask(outputTask.outputId)
+        taskOutputDao.deleteOutputTask(outputTask.taskDto.id)
     }
 
 }

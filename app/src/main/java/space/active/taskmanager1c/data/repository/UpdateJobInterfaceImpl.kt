@@ -10,7 +10,6 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.embedded.TaskInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.remote.TaskApi
@@ -54,35 +53,36 @@ class UpdateJobInterfaceImpl
                 send(it)
             }
             logger.log(TAG, "inputFetchJobFlow stop ${System.currentTimeMillis() - curTime}ms")
-
-            curTime = System.currentTimeMillis()
-            logger.log(TAG, "updateReadingState start")
-            updateReadingState(credentials).collect {
-                send(it)
-            }
-            logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
-
             delay(updateDelay)
         }.flowOn(ioDispatcher)
 
-    // todo change to update after show list at screen
-    private fun updateReadingState(credentials: Credentials) = flow<Request<Any>> {
-        emit(PendingRequest())
-        val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(
-            credentials.toAuthBasicDto(),
-            inputTaskRepository.getTasks().map { it.taskIn.id })
-        result.forEach {
-            inputTaskRepository.updateReading(it.id, it.getUnreadStatus())
+
+    private fun updateReadingState(credentials: Credentials, currentListId: List<String>) =
+        flow<Request<List<ReadingTimesTask>>> {
+            val curTime = System.currentTimeMillis()
+            logger.log(TAG, "updateReadingState start")
+            emit(PendingRequest())
+            // todo change to update after show list at screen
+//        val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(
+//            credentials.toAuthBasicDto(),
+//            inputTaskRepository.getTasks().map { it.taskIn.id })
+//        result.forEach {
+//            inputTaskRepository.updateReading(it.id, it.getUnreadStatus())
+//        }
+            val result = taskApi.getMessagesTimes(
+                credentials.toAuthBasicDto(),
+                currentListId
+            )
+            emit(SuccessRequest(result))
+            logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
         }
-        emit(SuccessRequest(Any()))
-    }
 
     private fun outputSendJob(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
-        val outputTasks: List<OutputTask> = outputTaskRepository.getTasks()
-        val inputTasks: List<TaskInput> = inputTaskRepository.getTasks().map { it.taskIn }
+        val outputTasks: List<TaskDto> = outputTaskRepository.getTasks().map { it.taskDto }
+        val inputTasks: List<TaskDto> = inputTaskRepository.getTasks().map { it.toTaskDTO() }
         if (outputTasks.isNotEmpty()) {
             // find an delete the same taskDomains in output and input table
-            val deleteOutputTaskList: List<OutputTask> =
+            val deleteOutputTaskList: List<String> =
                 getEqualOutputTasksInInputTasks(outputTasks, inputTasks)
             outputTaskRepository.deleteTasks(deleteOutputTaskList)
             // get only not deleted output taskDomains
@@ -90,21 +90,20 @@ class UpdateJobInterfaceImpl
             var result: Request<TaskDto>? = null
             outputTasksAfterDelete.forEach { outputTask ->
                 // prepare to send changes
-                val existingInputTask = inputTaskRepository.getTask(outputTask.taskInput.id)
+                val existingInputTask: TaskDto? =
+                    inputTaskRepository.getTask(outputTask.taskDto.id)?.toTaskDTO()
                 // convert to DTO
-                val outToDTO = TaskDto.fromOutputTask(outputTask)
+                val outToDTO: TaskDto = outputTask.taskDto
                 // find diffs with TaskInput if id in input table or send as is
-                existingInputTask?.let {
-                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(it.taskIn.name))
+                existingInputTask?.let { existingInput ->
+                    result = ErrorRequest<TaskDto>(ThisTaskIsNotEdited(existingInput.name))
                     // if taskDomain is not edited and existing in input table
                     if (!outputTask.newTask) {
-
-                        val inputDTO = TaskDto.fromInputTask(it.taskIn)
                         result = SuccessRequest(
                             taskApi.sendEditedTaskMappedChanges(
                                 credentials.toAuthBasicDto(),
-                                inputDTO.id,
-                                inputDTO.compareWithAndGetDiffs(outToDTO.copy(id = ""))
+                                existingInput.id,
+                                existingInput.compareWithAndGetDiffs(outToDTO.copy(id = ""))
                             )
                         )
 //                         todo delete mock
@@ -117,7 +116,7 @@ class UpdateJobInterfaceImpl
                     if (outputTask.newTask) {
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
-                        result = taskApi.sendNewTask(credentials.toAuthBasicDto(),withoutId)
+                        result = taskApi.sendNewTask(credentials.toAuthBasicDto(), withoutId)
                         // todo delete mock
 //                        delay(6000)
 //                        result = SuccessRequest(withoutId)
@@ -129,10 +128,11 @@ class UpdateJobInterfaceImpl
                             // TODO if taskDomain send with delete label
 //                        logger.log(TAG, result.data.toString())
                             inputTaskRepository.saveAndDelete(
-                                inputTask =res.data.toTaskInput(),
+                                inputTask = res.data.toTaskInputHandledWithUsers(whoAmI.id),
                                 outputTask = outputTask,
                                 whoAmI = whoAmI
                             )
+                            //todo delete
 //                            inputTaskRepository.insertTask(
 //                                ,
 //                                whoAmI
@@ -165,20 +165,23 @@ class UpdateJobInterfaceImpl
 
             curTime = System.currentTimeMillis()
             logger.log(TAG, "insertTasks")
-            inputTaskRepository.insertTasks(result.toTaskInputList(), whoAmI)
+            inputTaskRepository.insertTasks(result.toTaskInputList(whoAmI.id))
             logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
             emit(SuccessRequest(Any()))
         }.flowOn(ioDispatcher)
 
+    /**
+     * return equal tasks IDs list
+     */
     private fun getEqualOutputTasksInInputTasks(
-        outputTasks: List<OutputTask>,
-        inputTasks: List<TaskInput>
-    ): List<OutputTask> {
-        val listToDelete = arrayListOf<OutputTask>()
+        outputTasks: List<TaskDto>,
+        inputTasks: List<TaskDto>
+    ): List<String> {
+        val listToDelete = arrayListOf<String>()
 
         outputTasks.forEach { outputTask ->
-            if (inputTasks.contains(outputTask.taskInput)) {
-                listToDelete.add(outputTask)
+            if (inputTasks.contains(outputTask)) {
+                listToDelete.add(outputTask.id)
             }
         }
         return listToDelete
