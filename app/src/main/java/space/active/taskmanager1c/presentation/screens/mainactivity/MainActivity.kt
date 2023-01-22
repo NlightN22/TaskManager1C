@@ -77,7 +77,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
         exitWithTimer()
-
     }
 
     private var lastPress: Long = 0

@@ -8,12 +8,11 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
-import space.active.taskmanager1c.coreutils.ErrorRequest
-import space.active.taskmanager1c.coreutils.PendingRequest
-import space.active.taskmanager1c.coreutils.SuccessRequest
-import space.active.taskmanager1c.coreutils.UiText
+import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
 import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
@@ -39,6 +38,8 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         binding = FragmentTaskListBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
+
+
         recyclerTasks = TaskListAdapter(object : TaskActionListener {
             override fun onTaskStatusClick(taskDomain: TaskDomain) {
                 viewModel.changeTaskStatus(taskDomain)
@@ -54,11 +55,31 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             }
         }
         )
+        binding.listTasksRV.layoutManager = NotifyingLinearLayoutManager(requireContext())
         binding.listTasksRV.adapter = recyclerTasks
+        initUpdateVisibleRVList(binding.listTasksRV)
 
         initOrderMenu()
         observers()
         listeners()
+    }
+
+    private fun initUpdateVisibleRVList(recyclerView: RecyclerView) {
+        recyclerView.getPositionsAfterLoading { first, last ->
+            logger.log(
+                TAG,
+                "getVisibleItem first: $first , last: $last"
+            )
+            viewModel.updateReadingStatus(first, last)
+        }
+
+        recyclerView.getPositionsAfterScroll { first, last ->
+            logger.log(
+                TAG,
+                "getVisibleItem first: $first , last: $last"
+            )
+            viewModel.updateReadingStatus(first, last)
+        }
     }
 
     override fun navigateToLogin() {

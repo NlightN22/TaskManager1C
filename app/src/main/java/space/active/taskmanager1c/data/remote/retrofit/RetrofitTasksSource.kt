@@ -14,8 +14,7 @@ import space.active.taskmanager1c.data.remote.model.UserDto
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesDTO
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.SetReadingTimeDTO
 import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
@@ -81,7 +80,7 @@ class RetrofitTasksSource @Inject constructor
     override suspend fun getMessagesTimes(
         auth: AuthBasicDto,
         taskIds: List<String>
-    ): List<ReadingTimesTask> = wrapRetrofitExceptions {
+    ): List<ReadingTimesTaskDTO> = wrapRetrofitExceptions {
         val toServer = FetchReadingTimes(taskIds)
 //        logger.log(TAG, "Send to server: $toServer")
         retrofitApi.getReadingTimes(auth.toBasic(), toServer).Tasks
@@ -92,7 +91,7 @@ class RetrofitTasksSource @Inject constructor
         taskId: String,
         messageTime: LocalDateTime,
         readingTime: LocalDateTime
-    ): ReadingTimesTask = wrapRetrofitExceptions {
+    ): ReadingTimesTaskDTO = wrapRetrofitExceptions {
         retrofitApi.setReadingTime(auth.toBasic(),
             SetReadingTimeDTO(
                 taskId,

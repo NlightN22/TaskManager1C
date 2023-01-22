@@ -19,6 +19,7 @@ sealed class TaskListFilterTypes {
         is IDelegate -> FilterType.IDelegate
         is IDidNtCheck -> FilterType.IDidNtCheck
         is IObserve -> FilterType.IObserve
+        is IDidNtRead -> FilterType.IDidNtRead
         else -> FilterType.ALl
     }
 

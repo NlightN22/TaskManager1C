@@ -4,6 +4,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.ReadingTimesTaskEntity
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
@@ -15,6 +16,7 @@ private const val TAG = "InputTaskRepositoryImpl"
 @Singleton
 class InputTaskRepositoryImpl @Inject constructor(
     private val inputDao: TaskInputDao,
+    private val readingDao: TaskReadingDao,
     private val logger: Logger
 ) : InputTaskRepository {
 
@@ -74,15 +76,6 @@ class InputTaskRepositoryImpl @Inject constructor(
         return 0
     }
 
-    // todo delete
-//    override suspend fun updateReading(taskId: String, unread: Boolean) {
-//        inputDao.getTask(taskId)?.let {
-//            if (it.unread != unread) {
-//                inputDao.updateReadingState(taskId, unread)
-//            }
-//        }
-//    }
-
     override suspend fun saveAndDelete(
         inputTask: TaskInputHandledWithUsers,
         outputTask: OutputTask,
@@ -113,4 +106,23 @@ class InputTaskRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateReadingStates(readingTimes: List<ReadingTimesTaskEntity>) {
+        logger.log(TAG, "Count ReadingStates: ${readingTimes.size}")
+        var saveCounter = 0
+        readingTimes.forEach { item ->
+            val current = readingDao.getReading(item.mainTaskId)
+            current?.let {
+                if (it != item) {
+                    readingDao.insertReading(item)
+                    saveCounter += 1
+                }
+            } ?: kotlin.run {
+                readingDao.insertReading(item)
+                saveCounter += 1
+            }
+        }
+        logger.log(TAG, "Count saved ReadingStates: $saveCounter")
+    }
+
+    override fun getUnreadIds(): Flow<List<String>> = readingDao.getUnreadIds()
 }

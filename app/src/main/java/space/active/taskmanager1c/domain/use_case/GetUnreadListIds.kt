@@ -5,29 +5,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import space.active.taskmanager1c.coreutils.Request
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.MessagesRepository
-import java.time.LocalDateTime
 import javax.inject.Inject
 
-class SetTaskAndMessageReadingTime @Inject constructor(
+class GetUnreadListIds @Inject constructor(
     private val messagesRepository: MessagesRepository,
     private val exceptionHandler: ExceptionHandler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    operator fun invoke(
-        credentials: Credentials,
-        taskId: String,
-        messageReadingTime: LocalDateTime,
-        taskReadingTime: LocalDateTime
-    ): Flow<Request<ReadingTimesTaskDTO>> = messagesRepository.sendReadingTime(
-        credentials,
-        taskId,
-        messageReadingTime,
-        taskReadingTime
-    ).catch {
-        exceptionHandler(it)
-    }.flowOn(ioDispatcher)
+    operator fun invoke(credentials: Credentials, listIDs: List<String>): Flow<Request<List<String>>> =
+        messagesRepository.getUnreadTaskIds(credentials, listIDs)
+            .catch {
+                exceptionHandler(it)
+            }
+            .flowOn(ioDispatcher)
 }

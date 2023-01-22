@@ -2,10 +2,7 @@ package space.active.taskmanager1c.data.repository
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
@@ -16,7 +13,7 @@ import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
 import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.data.remote.model.TaskListDto
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
@@ -46,34 +43,37 @@ class UpdateJobInterfaceImpl
                 send(it)
             }
             logger.log(TAG, "outputSendJob stop ${System.currentTimeMillis() - curTime}ms")
-
             curTime = System.currentTimeMillis()
             logger.log(TAG, "inputFetchJobFlow start")
-            inputFetchJobFlow(credentials, whoAmI).collect {
-                send(it)
+            inputFetchJobFlow(credentials, whoAmI).collect { request ->
+                when (request) {
+                    is SuccessRequest -> {
+                        send(SuccessRequest(Any()))
+                        logger.log(TAG, "inputFetchJobFlow stop ${System.currentTimeMillis() - curTime}ms")
+                        val resultListIDs = request.data
+                        updateReadingState(credentials, resultListIDs).collect {
+                            send(it)
+                        }
+                    }
+                    is PendingRequest -> send(PendingRequest())
+                    is ErrorRequest -> send(ErrorRequest(request.exception))
+                }
             }
-            logger.log(TAG, "inputFetchJobFlow stop ${System.currentTimeMillis() - curTime}ms")
             delay(updateDelay)
         }.flowOn(ioDispatcher)
 
 
     private fun updateReadingState(credentials: Credentials, currentListId: List<String>) =
-        flow<Request<List<ReadingTimesTask>>> {
+        flow<Request<Any>> {
             val curTime = System.currentTimeMillis()
             logger.log(TAG, "updateReadingState start")
             emit(PendingRequest())
-            // todo change to update after show list at screen
-//        val result: List<ReadingTimesTask> = taskApi.getMessagesTimes(
-//            credentials.toAuthBasicDto(),
-//            inputTaskRepository.getTasks().map { it.taskIn.id })
-//        result.forEach {
-//            inputTaskRepository.updateReading(it.id, it.getUnreadStatus())
-//        }
             val result = taskApi.getMessagesTimes(
                 credentials.toAuthBasicDto(),
                 currentListId
             )
-            emit(SuccessRequest(result))
+            inputTaskRepository.updateReadingStates(result.map { it.toReadingTimesTaskEntity() })
+            emit(SuccessRequest(Any()))
             logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
         }
 
@@ -132,13 +132,6 @@ class UpdateJobInterfaceImpl
                                 outputTask = outputTask,
                                 whoAmI = whoAmI
                             )
-                            //todo delete
-//                            inputTaskRepository.insertTask(
-//                                ,
-//                                whoAmI
-//                            )
-//                            delay(100)
-//                            outputTaskRepository.deleteTasks(listOf(outputTask))
                             emit(SuccessRequest(Any()))
                         }
                         is ErrorRequest -> {
@@ -154,8 +147,8 @@ class UpdateJobInterfaceImpl
         emit(SuccessRequest(Any()))
     }
 
-    override fun inputFetchJobFlow(credentials: Credentials, whoAmI: UserInput) =
-        flow<Request<Any>> {
+    override fun inputFetchJobFlow(credentials: Credentials, whoAmI: UserInput): Flow<Request<List<String>>> =
+        flow {
             emit(PendingRequest())
             val result: TaskListDto = taskApi.getTaskList(credentials.toAuthBasicDto())
             var curTime = System.currentTimeMillis()
@@ -167,7 +160,7 @@ class UpdateJobInterfaceImpl
             logger.log(TAG, "insertTasks")
             inputTaskRepository.insertTasks(result.toTaskInputList(whoAmI.userId))
             logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
-            emit(SuccessRequest(Any()))
+            emit(SuccessRequest(result.tasks.map { it.id }))
         }.flowOn(ioDispatcher)
 
     /**

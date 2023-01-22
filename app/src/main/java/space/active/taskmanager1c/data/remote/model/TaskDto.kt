@@ -1,6 +1,5 @@
 package space.active.taskmanager1c.data.remote.model
 
-import android.util.Log
 import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.CoPerformersInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.ObserversInTask
@@ -24,13 +23,12 @@ data class TaskDto(
     val status: String
 ) {
 
-    fun toTaskInputHandledWithUsers(myId: String): TaskInputHandledWithUsers {
-        return TaskInputHandledWithUsers(
+    fun toTaskInputHandledWithUsers(myId: String): TaskInputHandledWithUsers =
+        TaskInputHandledWithUsers(
             taskInput = toTaskInputHandled(myId),
             coPerformers = coPerformers.map { it.toCoPerformer() },
-            observers = observers.map { it.toObservers() },
+            observers = observers.map { it.toObservers() }
         )
-    }
 
     private fun String.toCoPerformer(): CoPerformersInTask = CoPerformersInTask(
         coPerformerId = this,

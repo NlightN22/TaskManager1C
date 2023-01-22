@@ -25,9 +25,10 @@ class RepositoryModule {
     @Singleton
     fun providesInputTaskRepository(
         inputDao: TaskInputDao,
+        readingDao: TaskReadingDao,
         logger: Logger
     ): InputTaskRepository {
-        return InputTaskRepositoryImpl(inputDao, logger)
+        return InputTaskRepositoryImpl(inputDao, readingDao, logger)
     }
 
     @Provides

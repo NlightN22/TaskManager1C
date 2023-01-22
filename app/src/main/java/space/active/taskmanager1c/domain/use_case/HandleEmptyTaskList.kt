@@ -41,11 +41,11 @@ class HandleEmptyTaskList @Inject constructor(
                     when (request) {
                         is SuccessRequest -> {
                             logger.log(TAG, "HandleEmptyTaskList success ")
-                            emit(request)
+                            emit(SuccessRequest(Any()))
                             successResult = true
                         }
                         is PendingRequest -> {
-                            emit(request)
+                            emit(PendingRequest())
                             delay(FETCH_TIMEOUT)
                         }
                         is ErrorRequest -> {

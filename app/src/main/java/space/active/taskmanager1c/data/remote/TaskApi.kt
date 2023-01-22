@@ -7,7 +7,7 @@ import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.remote.model.UserDto
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import java.time.LocalDateTime
 
 interface TaskApi {
@@ -22,13 +22,13 @@ interface TaskApi {
 
     suspend fun getMessages(auth: AuthBasicDto, taskId: String): TaskMessagesDTO
     suspend fun sendMessage(auth: AuthBasicDto, taskId: String, text: String): TaskMessagesDTO
-    suspend fun getMessagesTimes(auth: AuthBasicDto, taskIds: List<String>): List<ReadingTimesTask>
+    suspend fun getMessagesTimes(auth: AuthBasicDto, taskIds: List<String>): List<ReadingTimesTaskDTO>
     suspend fun setReadingTime(
         auth: AuthBasicDto,
         taskId: String,
         messageTime: LocalDateTime,
         readingTime: LocalDateTime
-    ): ReadingTimesTask
+    ): ReadingTimesTaskDTO
 
     suspend fun setReadingFlag(
         auth: AuthBasicDto,

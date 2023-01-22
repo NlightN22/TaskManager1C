@@ -8,7 +8,7 @@ import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
 import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesDTO
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.SetReadingTimeDTO
 
 interface RetrofitApi {
@@ -105,7 +105,7 @@ interface RetrofitApi {
     suspend fun setReadingTime(
         @Header("Authorization") auth: String,
         @Body setReadingTimeDTO: SetReadingTimeDTO
-    ): ReadingTimesTask
+    ): ReadingTimesTaskDTO
 
     /**
      * POST

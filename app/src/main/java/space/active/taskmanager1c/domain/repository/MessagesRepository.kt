@@ -3,12 +3,15 @@ package space.active.taskmanager1c.domain.repository
 import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.domain.models.Credentials
 import java.time.LocalDateTime
 
 interface MessagesRepository {
     fun getTaskMessages(credentials: Credentials, taskId: String): Flow<Request<TaskMessagesDTO>>
+
+    fun getUnreadTaskIds(credentials: Credentials, fetchTaskIds: List<String>): Flow<Request<List<String>>>
+
     fun sendNewMessage(
         credentials: Credentials,
         taskId: String,
@@ -20,7 +23,7 @@ interface MessagesRepository {
         taskId: String,
         messageReadingTime: LocalDateTime,
         taskReadingTime: LocalDateTime
-    ): Flow<Request<ReadingTimesTask>>
+    ): Flow<Request<ReadingTimesTaskDTO>>
 
     fun sendNotReadingFlag(
         credentials: Credentials,

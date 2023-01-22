@@ -7,8 +7,6 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
 import space.active.taskmanager1c.data.local.db.tasks_room_db.FilterType
-import space.active.taskmanager1c.data.local.db.tasks_room_db.SortField
-import space.active.taskmanager1c.data.local.db.tasks_room_db.SortType
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput.Companion.toListUserDomain
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
@@ -30,16 +28,6 @@ class MergedTaskRepositoryImpl constructor(
     private val logger: Logger
 ) : TasksRepository {
 
-    // todo delete
-//    override val listTasksFlow: Flow<List<TaskDomain>> =
-//        combine(
-//            inputTaskRepository.listTaskFlow,
-//            outputTaskRepository.outputTaskList,
-//        ) { inputList, outputList ->
-//            combineListTasks(inputList, outputList)
-//        }
-//            .flowOn(ioDispatcher)
-
     override suspend fun getInputTasksCount(): Int = inputTaskRepository.getInputTasksCount()
 
 
@@ -58,7 +46,12 @@ class MergedTaskRepositoryImpl constructor(
     }.combine(outputTaskRepository.outputTaskList) { inputList, outputList ->
         val myId = myIdFlow.first()
         combineListTasks(inputList, outputList, myId)
-    }.flowOn(ioDispatcher)
+    }.combine(inputTaskRepository.getUnreadIds()) {
+        input, unReadingIds ->
+        // replace reading state
+        input.map { if (unReadingIds.contains(it.id)) {it.copy(unread = true)} else {it} }
+    }
+        .flowOn(ioDispatcher)
 
     override val listUsersFlow: Flow<List<UserDomain>> =
         inputTaskRepository.listUsersFlow.map { it.toListUserDomain() }
@@ -71,12 +64,6 @@ class MergedTaskRepositoryImpl constructor(
     ) { inputTask, outputTask ->
         taskCombine(inputTask, outputTask)
     }.flowOn(ioDispatcher)
-
-    // todo delete
-//    private fun getInputTask(taskId: String) = inputTaskRepository.getTaskFlow(taskId).map {
-//        logger.log(TAG, "return ${it?.toTaskDomain()?.name}")
-//        it?.toTaskDomain()
-//    }
 
     private suspend fun taskCombine(
         inputTask: TaskInputHandledWithUsers?,
@@ -151,10 +138,6 @@ class MergedTaskRepositoryImpl constructor(
         }
     }.flowOn(ioDispatcher)
 
-    override fun attachFileToTask(file: ByteArray, taskId: String) = flow<Request<Any>> {
-        TODO("Not yet implemented")
-    }.flowOn(ioDispatcher)
-
     private suspend fun combineListTasks(
         taskInput: List<TaskInputHandledWithUsers>,
         taskOut: List<OutputTask>,
@@ -186,12 +169,6 @@ class MergedTaskRepositoryImpl constructor(
         }
         return emptyList()
     }
-
-    // todo delete
-    private suspend fun getUserTaskInput(userId: String): UserDomain =
-        inputTaskRepository.getUser(userId)?.toUserDomain()
-            ?: UserDomain(id = userId, name = userId)
-
 
     private fun List<TaskInputHandledWithUsers>.mapAndReplaceById(newList: List<TaskInputHandledWithUsers>): List<TaskInputHandledWithUsers> {
         return this.map { list1Item ->

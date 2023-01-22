@@ -7,7 +7,7 @@ import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTask
+import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.MessagesRepository
 import java.time.LocalDateTime
@@ -25,6 +25,17 @@ class MessagesRepositoryImpl @Inject constructor(
         emit(SuccessRequest(taskApi.getMessages(credentials.toAuthBasicDto(), taskId)))
     }
 
+    override fun getUnreadTaskIds(
+        credentials: Credentials,
+        fetchTaskIds: List<String>
+    ): Flow<Request<List<String>>> = flow {
+        emit(PendingRequest())
+        emit(SuccessRequest(
+            taskApi.getMessagesTimes(credentials.toAuthBasicDto(), fetchTaskIds)
+                .filter { it.getUnreadStatus() }.map { it.id }
+        ))
+    }
+
     override fun sendNewMessage(
         credentials: Credentials,
         taskId: String,
@@ -39,11 +50,18 @@ class MessagesRepositoryImpl @Inject constructor(
         taskId: String,
         messageReadingTime: LocalDateTime,
         taskReadingTime: LocalDateTime
-    ): Flow<Request<ReadingTimesTask>> = flow {
+    ): Flow<Request<ReadingTimesTaskDTO>> = flow {
         emit(PendingRequest())
-        emit(SuccessRequest(
-            taskApi.setReadingTime(credentials.toAuthBasicDto(), taskId, messageReadingTime, taskReadingTime)
-        ))
+        emit(
+            SuccessRequest(
+                taskApi.setReadingTime(
+                    credentials.toAuthBasicDto(),
+                    taskId,
+                    messageReadingTime,
+                    taskReadingTime
+                )
+            )
+        )
     }
 
     override fun sendNotReadingFlag(

@@ -33,9 +33,6 @@ object GetSort {
 
     fun getFilterSQL(filterType: FilterType, filterExp: String): String {
         return when (filterType) {
-            FilterType.ALl -> "SELECT * FROM TaskInputHandled " +
-                    "LEFT JOIN UserInput " +
-                    "ON UserInput.userId = TaskInputHandled.performerId "
             FilterType.IDo -> "SELECT * FROM TaskInputHandled " +
                     "LEFT JOIN UserInput " +
                     "ON UserInput.userId = TaskInputHandled.performerId " +
@@ -72,6 +69,15 @@ object GetSort {
                     "OR status = 'performed' " +
                     "OR status = 'reviewed' " +
                     "OR status = 'deferred') "
+            FilterType.IDidNtRead -> "SELECT * FROM TaskInputHandled " +
+                    "LEFT JOIN UserInput " +
+                    "ON UserInput.userId = TaskInputHandled.performerId " +
+                    "LEFT JOIN ReadingTimesTaskEntity " +
+                    "ON ReadingTimesTaskEntity.mainTaskId = TaskInputHandled.id " +
+                    "WHERE ReadingTimesTaskEntity.isUnread = 1 "
+            else -> "SELECT * FROM TaskInputHandled " +
+                    "LEFT JOIN UserInput " +
+                    "ON UserInput.userId = TaskInputHandled.performerId "
         }
     }
 }
@@ -93,5 +99,6 @@ enum class FilterType {
     IDo,
     IDelegate,
     IDidNtCheck,
-    IObserve
+    IObserve,
+    IDidNtRead
 }

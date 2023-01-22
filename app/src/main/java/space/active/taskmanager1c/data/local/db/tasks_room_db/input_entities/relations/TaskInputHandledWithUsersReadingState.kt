@@ -11,7 +11,7 @@ import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.models.UsersInTaskDomain
 import java.time.format.DateTimeFormatter
 
-data class TaskInputHandledWithUsers(
+data class TaskInputHandledWithUsersReadingState(
     @Embedded val taskInput: TaskInputHandled,
     @Relation(
         parentColumn = "id",
@@ -22,7 +22,14 @@ data class TaskInputHandledWithUsers(
         parentColumn = "id",
         entityColumn = "taskId"
     )
-    val observers: List<ObserversInTask>
+    val observers: List<ObserversInTask>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "mainTaskId",
+        entity = ReadingTimesTaskEntity::class,
+        projection = ["isUnread"]
+    )
+    val isUnread: Boolean? = false
 ) {
     fun toTaskDomain(listUsersInput: List<UserInput>): TaskDomain {
         with(this.taskInput) {
@@ -43,7 +50,8 @@ data class TaskInputHandledWithUsers(
                 isAuthor = isAuthor,
                 isPerformer = isPerformer,
                 ok = ok,
-                cancel = cancel
+                cancel = cancel,
+                unread = isUnread ?: false
             )
         }
     }
@@ -69,7 +77,7 @@ data class TaskInputHandledWithUsers(
         }
     }
 
-    fun toUsersDomain(listUsers: List<UserInput>): UsersInTaskDomain = UsersInTaskDomain(
+    private fun toUsersDomain(listUsers: List<UserInput>): UsersInTaskDomain = UsersInTaskDomain(
         author = listUsers.toUserDomain(this.taskInput.authorId),
         performer = listUsers.toUserDomain(this.taskInput.performerId),
         coPerformers = coPerformers.map { listUsers.toUserDomain(it.coPerformerId) },

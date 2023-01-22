@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b9014e43657644fb4315d75d2ce85b23",
+    "identityHash": "933327d0cf2ea436f3269cf2cceb168e",
     "entities": [
       {
         "tableName": "TaskInputHandled",
@@ -411,12 +411,50 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "ReadingTimesTaskEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mainTaskId` TEXT NOT NULL, `lastMessageTime` TEXT NOT NULL, `taskReadingTime` TEXT NOT NULL, `isUnread` INTEGER NOT NULL, PRIMARY KEY(`mainTaskId`))",
+        "fields": [
+          {
+            "fieldPath": "mainTaskId",
+            "columnName": "mainTaskId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastMessageTime",
+            "columnName": "lastMessageTime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskReadingTime",
+            "columnName": "taskReadingTime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isUnread",
+            "columnName": "isUnread",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "mainTaskId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b9014e43657644fb4315d75d2ce85b23')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '933327d0cf2ea436f3269cf2cceb168e')"
     ]
   }
 }

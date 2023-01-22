@@ -10,11 +10,6 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.DefaultDispatcher
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.*
-import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDelegate
-import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDidNtCheck
-import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIDo
-import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterIObserve
-import space.active.taskmanager1c.domain.models.TaskListFilterTypes.Companion.filterUnread
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
@@ -27,6 +22,7 @@ private const val TAG = "TaskListViewModel"
 class TaskListViewModel @Inject constructor(
     settings: SettingsRepository,
     private val getCredentials: GetCredentials,
+    private val getUnreadListIds: GetUnreadListIds,
     private val repository: TasksRepository,
     private val handleEmptyTaskList: HandleEmptyTaskList,
     private val exceptionHandler: ExceptionHandler,
@@ -74,21 +70,6 @@ class TaskListViewModel @Inject constructor(
         search(input,searchFilter)
     }
 
-    // todo delete
-//    private val inputListTaskDomain: Flow<List<TaskDomain>> = combine(
-//        repository.listTasksFlow,
-//        _bottomFilter,
-//        _searchFilter,
-//        _bottomOrder
-//    ) { input, bottomFilter, searchFilter, bottomOrder ->
-//        orderByBottom(
-//            search(
-//                // todo fix accepted author status - not show OK
-//                filterByBottom(input, bottomFilter), searchFilter
-//            ), bottomOrder
-//        )
-//    }
-
     private suspend fun search(
         filterByBottom: List<TaskDomain>,
         searchFilter: String
@@ -133,6 +114,7 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
+
     // todo set taskDomain as unreadable
     // todo implement
     private fun changeIsSending(list: List<TaskDomain>, taskId: String): List<TaskDomain> {
@@ -149,6 +131,34 @@ class TaskListViewModel @Inject constructor(
     fun changeIsSending(taskId: String) {
         viewModelScope.launch {
             _incomeSavedId.emit(taskId)
+        }
+    }
+
+    // todo delete no need it
+    fun updateReadingStatus(first: Int, last: Int) {
+        viewModelScope.launch {
+            val currentRequest = _listTaskDomain.first()
+            if (currentRequest is SuccessRequest) {
+                val currentList = currentRequest.data
+                val firstExt =
+                if (first > 0 )  {
+                    first - 1
+                } else {
+                    first
+                }
+                val lastExt =
+                if (last != currentList.lastIndex) {
+                    last + 1
+                } else {
+                    last
+                }
+                val fetchIDs = currentList.subList(firstExt, lastExt).map { it.id }
+                getUnreadListIds(getCredentials(), fetchIDs).collectLatest {
+                    if (it is SuccessRequest) {
+                        logger.log(TAG, "getUnreadListIds: ${it.data}")
+                    }
+                }
+            }
         }
     }
 
@@ -205,72 +215,6 @@ class TaskListViewModel @Inject constructor(
         viewModelScope.launch {
             _bottomFilter.value = filterType
         }
-    }
-
-    private suspend fun orderByBottom(
-        list: List<TaskDomain>,
-        order: TaskListOrderTypes
-    ): List<TaskDomain> {
-        return viewModelScope.async(defDispatcher) {
-            return@async when (order) {
-                is TaskListOrderTypes.StartDate -> {
-                    if (order.desc) {
-                        list.sortedByDescending { it.date }
-                    } else {
-                        list.sortedBy { it.date }
-                    }
-                }
-                is TaskListOrderTypes.EndDate -> {
-                    if (order.desc) {
-                        list.sortedByDescending { it.endDate }
-                    } else {
-                        list.sortedBy { it.endDate }
-                    }
-                }
-                is TaskListOrderTypes.Name -> {
-                    if (order.desc) {
-                        list.sortedByDescending { it.name }
-                    } else {
-                        list.sortedBy { it.name }
-                    }
-                }
-                is TaskListOrderTypes.Performer -> {
-                    if (order.desc) {
-                        list.sortedByDescending { it.users.performer.name }
-                    } else {
-                        list.sortedBy { it.users.performer.name }
-                    }
-                }
-            }
-        }.await()
-    }
-
-    private suspend fun filterByBottom(
-        list: List<TaskDomain>,
-        filter: TaskListFilterTypes
-    ): List<TaskDomain> {
-        return viewModelScope.async(defDispatcher) {
-            return@async when (filter) {
-                is TaskListFilterTypes.IDo -> {
-                    list.filterIDo()
-                }
-                is TaskListFilterTypes.IDelegate -> {
-                    list.filterIDelegate()
-                }
-                is TaskListFilterTypes.IDidNtCheck -> {
-                    list.filterIDidNtCheck()
-                }
-                is TaskListFilterTypes.IObserve -> {
-                    list.filterIObserve()
-                }
-                is TaskListFilterTypes.IDidNtRead -> {
-                    list.filterUnread()
-                }
-                is TaskListFilterTypes.All -> {
-                    list
-                }
-            }
-        }.await()
     }
 
     private suspend fun filterBySearch(list: List<TaskDomain>, filter: String): List<TaskDomain> {
