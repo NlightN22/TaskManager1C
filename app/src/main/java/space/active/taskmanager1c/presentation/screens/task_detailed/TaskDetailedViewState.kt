@@ -3,32 +3,6 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.presentation.utils.DialogItem
 import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
-import java.time.LocalDate
-
-sealed class TaskDetailedViewState(
-    open val state: TaskState
-)
-    //todo delete
-//{
-//    data class New(
-//        override val state: TaskState = TaskState()
-//    ) : TaskDetailedViewState(state) {
-//        fun setNew(author: String): TaskDetailedViewState.New {
-//            return this.copy(
-//                state = state.copy(
-//                    author = author,
-//                    startDate = LocalDate.now().toString(),
-//                    deadLine = LocalDate.now().toString(),
-//                    status = TaskDomain.Status.New
-//                )
-//            )
-//        }
-//    }
-//
-//    data class Edit(
-//        override val state: TaskState
-//    ) : TaskDetailedViewState(state)
-//}
 
 data class TaskState(
     val id: String = "",
@@ -57,16 +31,20 @@ sealed class TaskDetailedDialogs
 data class CoPerformersDialog(
     val listDialogItems: List<DialogItem>?
 ) : TaskDetailedDialogs()
+
 data class ObserversDialog(
     val listDialogItems: List<DialogItem>?
 ) : TaskDetailedDialogs()
+
 data class PerformerDialog(
     val listUsers: List<DialogItem>?
 ) : TaskDetailedDialogs()
+
 object DatePicker : TaskDetailedDialogs()
 data class EditTitleDialog(
     val dialogState: EditTextDialogStates?,
 ) : TaskDetailedDialogs()
+
 data class EditDescriptionDialog(
     val dialogState: EditTextDialogStates?,
 ) : TaskDetailedDialogs()

@@ -70,16 +70,6 @@ data class TaskDto(
         return false
     }
 
-    //todo delete
-//    private fun definePerformer(myId: String): Boolean {
-//        var inList = if (this.usersInTask.coPerformers.isNullOrEmpty()) {
-//            false
-//        } else {
-//            this.usersInTask.coPerformers.any { it == user.id }
-//        }
-//        return this.usersInTask.performerId == user.id || inList
-//    }
-
     private fun defineCancel(author: Boolean, status: String): Boolean {
         // author in Status Reviewed
         val curStatus = status.toTaskStatus()
@@ -127,41 +117,4 @@ data class TaskDto(
         Deferred,
         Cancelled
     }
-
-    //todo delete
-//    companion object {
-//        fun fromOutputTask(outputTask: OutputTask): TaskDto = TaskDto(
-//            authorId = outputTask.taskHandled.taskInput.authorId,
-//            coPerformers = outputTask.taskHandled.usersInTask.coPerformers,
-//            date = outputTask.taskHandled.date,
-//            description = outputTask.taskHandled.description,
-//            endDate = outputTask.taskHandled.endDate ?: "",
-//            id = outputTask.taskHandled.id,
-//            mainTaskId = outputTask.taskHandled.mainTaskId ?: "",
-//            name = outputTask.taskHandled.name,
-//            number = outputTask.taskHandled.number,
-//            objName = outputTask.taskHandled.objName ?: "",
-//            observers = outputTask.taskHandled.usersInTask.observers,
-//            performerId = outputTask.taskHandled.usersInTask.performerId,
-//            priority = outputTask.taskHandled.priority,
-//            status = outputTask.taskHandled.status
-//        )
-//
-//        fun fromInputTask(inputTask: TaskInput): TaskDto = TaskDto(
-//            authorId = inputTask.usersInTask.authorId,
-//            coPerformers = inputTask.usersInTask.coPerformers,
-//            date = inputTask.date,
-//            description = inputTask.description,
-//            endDate = inputTask.endDate ?: "",
-//            id = inputTask.id,
-//            mainTaskId = inputTask.mainTaskId ?: "",
-//            name = inputTask.name,
-//            number = inputTask.number,
-//            objName = inputTask.objName ?: "",
-//            observers = inputTask.usersInTask.observers,
-//            performerId = inputTask.usersInTask.performerId,
-//            priority = inputTask.priority,
-//            status = inputTask.status
-//        )
-//    }
 }

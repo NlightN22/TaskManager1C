@@ -10,7 +10,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
-// todo use it or delete
 class RetrofitProvider @AssistedInject constructor(
     @Assisted private val serverAddress: String
 ) {

@@ -30,8 +30,7 @@ class LoginViewModel @Inject constructor(
     private val loadFromAsset: LoadFromAsset,
     private val authorization: Authorization,
     private val exceptionHandler: ExceptionHandler,
-    logger: Logger,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    logger: Logger
 ) : BaseViewModel(settings, logger) {
 
     private val _viewState = MutableStateFlow(LoginViewState())
@@ -133,7 +132,6 @@ class LoginViewModel @Inject constructor(
     }
 
     private suspend fun tryToAuth(name: String, pass: String, serverAddress: String) {
-        // todo send address to retrofit module
         authorization.auth(name, pass, serverAddress)
             .catch {
                 exceptionHandler(it)

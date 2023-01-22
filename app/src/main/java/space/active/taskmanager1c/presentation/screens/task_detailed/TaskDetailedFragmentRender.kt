@@ -86,8 +86,8 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
         } else {
             binding.bottomMenu.inflateMenu(R.menu.menu_detailed)
             binding.bottomMenu.menu.findItem(R.id.detailed_ok).isVisible =
-                fieldsState.bottomOk //todo get from taskDomain
-            binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible = //todo get from taskDomain
+                fieldsState.bottomOk
+            binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible =
                 fieldsState.bottomCancel
         }
     }

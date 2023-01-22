@@ -31,7 +31,7 @@ sealed class TaskListOrderTypes {
             }
         is Performer -> {
             if (this.desc) {
-                SortField.PERFORMER to SortType.DESCENDING // todo replace to Performer
+                SortField.PERFORMER to SortType.DESCENDING
             } else {
                 SortField.PERFORMER to SortType.ASCENDING
             }

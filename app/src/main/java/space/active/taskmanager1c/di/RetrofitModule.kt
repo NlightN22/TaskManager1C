@@ -12,7 +12,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Singleton
 
-//todo delete
 private const val BASE_URL = "http://172.16.17.242/torg_develop/hs/taskmgr/"
 
 @Module
