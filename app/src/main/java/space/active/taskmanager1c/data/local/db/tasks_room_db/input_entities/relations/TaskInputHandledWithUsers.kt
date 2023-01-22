@@ -81,6 +81,6 @@ data class TaskInputHandledWithUsers(
     )
 
     private fun List<UserInput>.toUserDomain(id: String): UserDomain {
-        return this.find { it.id == id }?.toUserDomain() ?: UserDomain(id = id, name = id)
+        return this.find { it.userId == id }?.toUserDomain() ?: UserDomain(id = id, name = id)
     }
 }

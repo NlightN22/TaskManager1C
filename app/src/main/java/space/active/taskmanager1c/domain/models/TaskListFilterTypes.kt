@@ -1,5 +1,7 @@
 package space.active.taskmanager1c.domain.models
 
+import space.active.taskmanager1c.data.local.db.tasks_room_db.FilterType
+
 sealed class TaskListFilterTypes {
     object IDo :
         TaskListFilterTypes() // i am performer or coperfromer and status is not Reviewed Finished Cancelled
@@ -11,6 +13,14 @@ sealed class TaskListFilterTypes {
     object IObserve : TaskListFilterTypes() // i am observer and status is New, Accepted, Deferred
     object IDidNtRead : TaskListFilterTypes() // unread status
     object All : TaskListFilterTypes() // none
+
+    fun toFilterType(): FilterType = when (this) {
+        is IDo -> FilterType.IDo
+        is IDelegate -> FilterType.IDelegate
+        is IDidNtCheck -> FilterType.IDidNtCheck
+        is IObserve -> FilterType.IObserve
+        else -> FilterType.ALl
+    }
 
     companion object {
         fun List<TaskDomain>.filterIDo(): List<TaskDomain> {

@@ -6,6 +6,7 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
+import space.active.taskmanager1c.data.local.db.tasks_room_db.FilterType
 import space.active.taskmanager1c.data.local.db.tasks_room_db.SortField
 import space.active.taskmanager1c.data.local.db.tasks_room_db.SortType
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput.Companion.toListUserDomain
@@ -41,6 +42,7 @@ class MergedTaskRepositoryImpl constructor(
 
     override suspend fun getInputTasksCount(): Int = inputTaskRepository.getInputTasksCount()
 
+
     override fun getTasksFiltered(
         filterTypes: Flow<TaskListFilterTypes>,
         orderTypes: Flow<TaskListOrderTypes>,
@@ -50,43 +52,13 @@ class MergedTaskRepositoryImpl constructor(
             val myId = myIdFlow.first()
             val sortField = order.getSortFieldAndType().first
             val sortType = order.getSortFieldAndType().second
-            selectFilter(filter, myId, sortField, sortType)
+            val filterType: FilterType = filter.toFilterType()
+            inputTaskRepository.sortedQuery(myId,filterType,sortField, sortType)
         }
     }.combine(outputTaskRepository.outputTaskList) { inputList, outputList ->
         val myId = myIdFlow.first()
         combineListTasks(inputList, outputList, myId)
     }.flowOn(ioDispatcher)
-
-    private fun selectFilter(
-        filter: TaskListFilterTypes,
-        myId: String,
-        sortField: SortField,
-        sortType: SortType
-    ): Flow<List<TaskInputHandledWithUsers>> {
-        return when (filter) {
-            is TaskListFilterTypes.IDo -> inputTaskRepository.filteredIdo(myId, sortField, sortType)
-            is TaskListFilterTypes.IDelegate -> inputTaskRepository.filteredIDelegate(
-                myId,
-                sortField,
-                sortType
-            )
-            is TaskListFilterTypes.IDidNtCheck -> inputTaskRepository.filteredIDidNtCheck(
-                myId,
-                sortField,
-                sortType
-            )
-            is TaskListFilterTypes.IObserve -> inputTaskRepository.filteredIObserve(
-                myId,
-                sortField,
-                sortType
-            )
-//            is TaskListFilterTypes.IDidNtRead -> inputTaskRepository.filteredIDidNtRead(
-//                sortField,
-//                sortType
-//            )
-            else -> inputTaskRepository.sortedAll(sortField, sortType)
-        }
-    }
 
     override val listUsersFlow: Flow<List<UserDomain>> =
         inputTaskRepository.listUsersFlow.map { it.toListUserDomain() }

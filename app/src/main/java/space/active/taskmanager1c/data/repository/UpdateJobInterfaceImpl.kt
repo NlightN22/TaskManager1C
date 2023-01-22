@@ -128,7 +128,7 @@ class UpdateJobInterfaceImpl
                             // TODO if taskDomain send with delete label
 //                        logger.log(TAG, result.data.toString())
                             inputTaskRepository.saveAndDelete(
-                                inputTask = res.data.toTaskInputHandledWithUsers(whoAmI.id),
+                                inputTask = res.data.toTaskInputHandledWithUsers(whoAmI.userId),
                                 outputTask = outputTask,
                                 whoAmI = whoAmI
                             )
@@ -165,7 +165,7 @@ class UpdateJobInterfaceImpl
 
             curTime = System.currentTimeMillis()
             logger.log(TAG, "insertTasks")
-            inputTaskRepository.insertTasks(result.toTaskInputList(whoAmI.id))
+            inputTaskRepository.insertTasks(result.toTaskInputList(whoAmI.userId))
             logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
             emit(SuccessRequest(Any()))
         }.flowOn(ioDispatcher)

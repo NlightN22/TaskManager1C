@@ -41,8 +41,8 @@ data class UserDomain(
     companion object {
 
         fun UserInput.fromUserInput(): UserDomain = UserDomain(
-            id = this.id,
-            name = this.name
+            id = this.userId,
+            name = this.userName
         )
 
         fun blankUser() = UserDomain(id = "", name = "")

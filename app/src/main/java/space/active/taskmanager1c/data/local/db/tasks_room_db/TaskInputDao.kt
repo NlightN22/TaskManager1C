@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.data.local.db.tasks_room_db
 
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.CoPerformersInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.ObserversInTask
@@ -14,6 +15,9 @@ interface TaskInputDao {
 
     @Query("SELECT COUNT(id) FROM TaskInputHandled")
     suspend fun getInputCount(): Int
+
+    @RawQuery
+    fun getSortedTaskQuery(query: SupportSQLiteQuery): Flow<List<TaskInputHandledWithUsers>>
 
     @Transaction
     @Query("SELECT * FROM TaskInputHandled")
@@ -64,7 +68,7 @@ interface TaskInputDao {
     @Query("SELECT * FROM UserInput")
     fun getUsers(): List<UserInput>
 
-    @Query("SELECT * FROM UserInput WHERE id = :userId")
+    @Query("SELECT * FROM UserInput WHERE userId = :userId")
     fun getUser(userId: String): UserInput?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

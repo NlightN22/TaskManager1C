@@ -7,13 +7,13 @@ import space.active.taskmanager1c.domain.models.UserDomain
 @Entity
 data class UserInput(
     @PrimaryKey(autoGenerate = false)
-    val id: String,
-    val name: String
+    val userId: String,
+    val userName: String
 )
 {
     fun toUserDomain(): UserDomain = UserDomain (
-        id = this.id,
-        name = this.name
+        id = this.userId,
+        name = this.userName
             )
     companion object {
         fun List<UserInput>.toListUserDomain(): List<UserDomain> {

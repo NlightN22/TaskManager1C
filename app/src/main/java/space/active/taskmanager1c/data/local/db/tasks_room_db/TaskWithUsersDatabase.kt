@@ -28,7 +28,6 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
 @TypeConverters(Converters::class)
 abstract class TaskWithUsersDatabase : RoomDatabase() {
     abstract val inputDao: TaskInputDao
-    abstract val sortedDao: SortedDao
     abstract val outputDao: TaskOutputDao
     abstract val settingsDao: SettingsDao
 }

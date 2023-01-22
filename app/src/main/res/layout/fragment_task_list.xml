@@ -49,6 +49,7 @@
                 android:layout_width="match_parent"
                 android:inputType="textShortMessage"
                 android:gravity="top|start"
+                android:paddingLeft="10dp"
                 tools:text=""
                 android:maxLines="1"
                 />

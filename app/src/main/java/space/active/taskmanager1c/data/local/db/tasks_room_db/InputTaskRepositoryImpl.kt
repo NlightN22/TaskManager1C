@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.data.local.db.tasks_room_db
 
+import androidx.sqlite.db.SimpleSQLiteQuery
 import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
@@ -14,53 +15,22 @@ private const val TAG = "InputTaskRepositoryImpl"
 @Singleton
 class InputTaskRepositoryImpl @Inject constructor(
     private val inputDao: TaskInputDao,
-    private val sortedDao: SortedDao,
     private val logger: Logger
 ) : InputTaskRepository {
 
 
     override suspend fun getInputTasksCount(): Int = inputDao.getInputCount()
 
-    override fun sortedAll(
-        sortField: SortField,
-        sortType: SortType
-    ): Flow<List<TaskInputHandledWithUsers>> =
-        sortedDao.getSortedTasks(GetSortInt(sortType, sortField))
-
-    override fun filteredIdo(
+    override fun sortedQuery(
         myId: String,
+        filterType: FilterType,
         sortField: SortField,
         sortType: SortType
-    ): Flow<List<TaskInputHandledWithUsers>> =
-        sortedDao.getTasksIDo(myId, GetSortInt(sortType, sortField))
-
-    override fun filteredIDelegate(
-        myId: String,
-        sortField: SortField,
-        sortType: SortType
-    ): Flow<List<TaskInputHandledWithUsers>> =
-        sortedDao.getTasksIDelegate(myId, GetSortInt(sortType, sortField))
-
-    override fun filteredIDidNtCheck(
-        myId: String,
-        sortField: SortField,
-        sortType: SortType
-    ): Flow<List<TaskInputHandledWithUsers>> =
-        sortedDao.getTasksIDidNtCheck(myId, GetSortInt(sortType, sortField))
-
-    override fun filteredIObserve(
-        myId: String,
-        sortField: SortField,
-        sortType: SortType
-    ): Flow<List<TaskInputHandledWithUsers>> =
-        sortedDao.getTasksIObserve(myId, GetSortInt(sortType, sortField))
-
-    //todo delete
-//    override fun filteredIDidNtRead(
-//        sortField: SortField,
-//        sortType: SortType
-//    ): Flow<List<TaskInputHandledWithUsers>> =
-//        sortedDao.getTasksIDidNtRead(GetSortInt(sortType, sortField))
+    ): Flow<List<TaskInputHandledWithUsers>> {
+        val query = GetSort.getFilterSQL(filterType, myId) + GetSort.getFieldSQL(sortField) + GetSort.getSortSQL(sortType)
+        logger.log(TAG, "query: $query")
+        return inputDao.getSortedTaskQuery(SimpleSQLiteQuery(query))
+    }
 
     override suspend fun getTasks(): List<TaskInputHandledWithUsers> = inputDao.getTasks()
 
@@ -137,7 +107,7 @@ class InputTaskRepositoryImpl @Inject constructor(
     }
 
     private suspend fun insertUser(userInput: UserInput) {
-        val currentVersionUser = getUser(userInput.id)
+        val currentVersionUser = getUser(userInput.userId)
         if (userInput != currentVersionUser) {
             inputDao.insertUser(userInput)
         }

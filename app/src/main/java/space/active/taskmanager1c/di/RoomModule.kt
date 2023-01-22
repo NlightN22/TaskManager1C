@@ -26,10 +26,6 @@ class RoomModule {
 
     @Provides
     @Singleton
-    fun provideSortedDao(db: TaskWithUsersDatabase): SortedDao = db.sortedDao
-
-    @Provides
-    @Singleton
     fun provideTaskInputDao(db: TaskWithUsersDatabase): TaskInputDao = db.inputDao
 
     @Provides

@@ -8,8 +8,8 @@ data class UserDto(
 ) {
     fun toUserDb(): UserInput {
         return UserInput(
-            id = id,
-            name = name?: ""
+            userId = id,
+            userName = name?: ""
         )
     }
 }

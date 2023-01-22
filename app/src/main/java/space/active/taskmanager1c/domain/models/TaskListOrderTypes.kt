@@ -31,9 +31,9 @@ sealed class TaskListOrderTypes {
             }
         is Performer -> {
             if (this.desc) {
-                SortField.NAME to SortType.DESCENDING // todo replace to Performer
+                SortField.PERFORMER to SortType.DESCENDING // todo replace to Performer
             } else {
-                SortField.NAME to SortType.ASCENDING
+                SortField.PERFORMER to SortType.ASCENDING
             }
         }
         is StartDate -> {
