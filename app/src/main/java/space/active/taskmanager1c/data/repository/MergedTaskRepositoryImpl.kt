@@ -33,30 +33,57 @@ class MergedTaskRepositoryImpl constructor(
     override fun getTasksFiltered(
         filterTypes: Flow<TaskListFilterTypes>,
         orderTypes: Flow<TaskListOrderTypes>,
-        myIdFlow: Flow<String>
+        myId: Flow<String>
+    ): Flow<List<TaskDomain>> = getTasksFromBothRepo(filterTypes,orderTypes,myId)
+
+    // todo delete after tests
+    private fun getTasksFromInputRepo(
+        filterTypes: Flow<TaskListFilterTypes>,
+        orderTypes: Flow<TaskListOrderTypes>,
+        myId: Flow<String>
     ): Flow<List<TaskDomain>> =
         orderTypes
-        .distinctUntilChanged()
-        .flatMapLatest { order ->
-        filterTypes
-            .debounce(300)
+            .flatMapLatest { order ->
+                filterTypes
+                    .flatMapLatest { filter ->
+                        val myId = myId.first()
+                        val sortField = order.getSortFieldAndType().first
+                        val sortType = order.getSortFieldAndType().second
+                        val filterType: FilterType = filter.toFilterType()
+                        inputTaskRepository.sortedQuery(myId,filterType,sortField, sortType)
+                    }
+            }.map { list ->
+                val usersInputList = inputTaskRepository.getUsers()
+                list.map { it.toTaskDomain(usersInputList) }
+            }.flowOn(ioDispatcher)
+
+    private fun getTasksFromBothRepo(
+        filterTypes: Flow<TaskListFilterTypes>,
+        orderTypes: Flow<TaskListOrderTypes>,
+        myId: Flow<String>
+    ): Flow<List<TaskDomain>> =
+        orderTypes
             .distinctUntilChanged()
-            .flatMapLatest { filter ->
-            val myId = myIdFlow.first()
-            val sortField = order.getSortFieldAndType().first
-            val sortType = order.getSortFieldAndType().second
-            val filterType: FilterType = filter.toFilterType()
-            inputTaskRepository.sortedQuery(myId,filterType,sortField, sortType)
-        }
-    }.combine(outputTaskRepository.outputTaskList) { inputList, outputList ->
-        val myId = myIdFlow.first()
-        combineListTasks(inputList, outputList, myId)
-    }.combine(inputTaskRepository.getUnreadIds()) {
-        input, unReadingIds ->
-        // replace reading state
-        input.map { if (unReadingIds.contains(it.id)) {it.copy(unread = true)} else {it} }
-    }
-        .flowOn(ioDispatcher)
+            .flatMapLatest { order ->
+                filterTypes
+                    .debounce(300)
+                    .distinctUntilChanged()
+                    .flatMapLatest { filter ->
+                        val myId = myId.first()
+                        val sortField = order.getSortFieldAndType().first
+                        val sortType = order.getSortFieldAndType().second
+                        val filterType: FilterType = filter.toFilterType()
+                        inputTaskRepository.sortedQuery(myId,filterType,sortField, sortType)
+                    }
+            }.combine(outputTaskRepository.outputTaskList) { inputList, outputList ->
+                val myId = myId.first()
+                combineListTasks(inputList, outputList, myId)
+            }.combine(inputTaskRepository.getUnreadIds()) {
+                    input, unReadingIds ->
+                // replace reading state
+                input.map { if (unReadingIds.contains(it.id)) {it.copy(unread = true)} else {it} }
+            }
+            .flowOn(ioDispatcher)
 
     override val listUsersFlow: Flow<List<UserDomain>> =
         inputTaskRepository.listUsersFlow.map { it.toListUserDomain() }

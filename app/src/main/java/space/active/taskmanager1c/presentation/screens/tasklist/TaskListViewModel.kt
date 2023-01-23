@@ -113,8 +113,6 @@ class TaskListViewModel @Inject constructor(
             _startUpdateJob.value = true
         }
     }
-
-
     // todo set taskDomain as unreadable
     // todo implement
     private fun changeIsSending(list: List<TaskDomain>, taskId: String): List<TaskDomain> {

@@ -11,7 +11,7 @@ interface TasksRepository {
     suspend fun getInputTasksCount(): Int
     fun getTasksFiltered(filterTypes: Flow<TaskListFilterTypes>,
                          orderTypes: Flow<TaskListOrderTypes>,
-                         myIdFlow: Flow<String>
+                         myId: Flow<String>
     ): Flow<List<TaskDomain>>
     val listUsersFlow: Flow<List<UserDomain>>
     fun getTask(taskId: String): Flow<TaskDomain?>

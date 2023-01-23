@@ -16,7 +16,7 @@ interface TaskInputDao {
     @Query("SELECT COUNT(id) FROM TaskInputHandled")
     suspend fun getInputCount(): Int
 
-    @RawQuery
+    @RawQuery(observedEntities = [TaskInputHandled::class, CoPerformersInTask::class, ObserversInTask::class])
     fun getSortedTaskQuery(query: SupportSQLiteQuery): Flow<List<TaskInputHandledWithUsers>>
 
     @Transaction
