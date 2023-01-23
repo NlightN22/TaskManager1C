@@ -134,34 +134,6 @@ class TaskListViewModel @Inject constructor(
         }
     }
 
-    // todo delete no need it
-    fun updateReadingStatus(first: Int, last: Int) {
-        viewModelScope.launch {
-            val currentRequest = _listTaskDomain.first()
-            if (currentRequest is SuccessRequest) {
-                val currentList = currentRequest.data
-                val firstExt =
-                if (first > 0 )  {
-                    first - 1
-                } else {
-                    first
-                }
-                val lastExt =
-                if (last != currentList.lastIndex) {
-                    last + 1
-                } else {
-                    last
-                }
-                val fetchIDs = currentList.subList(firstExt, lastExt).map { it.id }
-                getUnreadListIds(getCredentials(), fetchIDs).collectLatest {
-                    if (it is SuccessRequest) {
-                        logger.log(TAG, "getUnreadListIds: ${it.data}")
-                    }
-                }
-            }
-        }
-    }
-
     fun changeTaskStatus(taskDomainIn: TaskDomain) {
         viewModelScope.launch(ioDispatcher) {
             val curTaskDomain: TaskDomain? = repository.getTask(taskDomainIn.id).first()

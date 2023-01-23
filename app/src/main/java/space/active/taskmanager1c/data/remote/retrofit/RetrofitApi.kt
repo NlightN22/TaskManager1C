@@ -125,5 +125,4 @@ interface RetrofitApi {
      */
     @GET("auth")
     suspend fun authUser(@Header("Authorization") auth: String): UserDto
-
 }

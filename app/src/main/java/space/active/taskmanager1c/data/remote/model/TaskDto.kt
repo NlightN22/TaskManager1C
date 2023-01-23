@@ -58,7 +58,6 @@ data class TaskDto(
             performerId = performerId,
             isAuthor = author,
             isPerformer = performer,
-//        unread =, //not need it
             ok = defineOk(author, performer, status),
             cancel = defineCancel(author, status),
         )

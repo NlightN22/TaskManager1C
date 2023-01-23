@@ -30,13 +30,18 @@ class MergedTaskRepositoryImpl constructor(
 
     override suspend fun getInputTasksCount(): Int = inputTaskRepository.getInputTasksCount()
 
-
     override fun getTasksFiltered(
         filterTypes: Flow<TaskListFilterTypes>,
         orderTypes: Flow<TaskListOrderTypes>,
         myIdFlow: Flow<String>
-    ): Flow<List<TaskDomain>> = orderTypes.flatMapLatest { order ->
-        filterTypes.flatMapLatest { filter ->
+    ): Flow<List<TaskDomain>> =
+        orderTypes
+        .distinctUntilChanged()
+        .flatMapLatest { order ->
+        filterTypes
+            .debounce(300)
+            .distinctUntilChanged()
+            .flatMapLatest { filter ->
             val myId = myIdFlow.first()
             val sortField = order.getSortFieldAndType().first
             val sortType = order.getSortFieldAndType().second

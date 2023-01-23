@@ -8,8 +8,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
@@ -57,29 +55,10 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         )
         binding.listTasksRV.layoutManager = NotifyingLinearLayoutManager(requireContext())
         binding.listTasksRV.adapter = recyclerTasks
-        initUpdateVisibleRVList(binding.listTasksRV)
 
         initOrderMenu()
         observers()
         listeners()
-    }
-
-    private fun initUpdateVisibleRVList(recyclerView: RecyclerView) {
-        recyclerView.getPositionsAfterLoading { first, last ->
-            logger.log(
-                TAG,
-                "getVisibleItem first: $first , last: $last"
-            )
-            viewModel.updateReadingStatus(first, last)
-        }
-
-        recyclerView.getPositionsAfterScroll { first, last ->
-            logger.log(
-                TAG,
-                "getVisibleItem first: $first , last: $last"
-            )
-            viewModel.updateReadingStatus(first, last)
-        }
     }
 
     override fun navigateToLogin() {
@@ -152,9 +131,10 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                     shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, true)
                 }
                 is SuccessRequest -> {
-
                     recyclerTasks.taskDomains = request.data
-                    shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
+                    binding.listTasksRV.post {
+                        shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
+                    }
                 }
                 is ErrorRequest -> {
                     showSnackBar(UiText.Dynamic(request.exception.message.toString()))
