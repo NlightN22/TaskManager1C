@@ -9,6 +9,7 @@ import space.active.taskmanager1c.domain.models.TaskUserIs
 import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.models.Validation
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 class Validate @Inject constructor() {
@@ -27,7 +28,7 @@ class Validate @Inject constructor() {
         )
     }
 
-    fun endDate(date: LocalDateTime?): Validation {
+    fun endDate(date: ZonedDateTime?): Validation {
         val maxDateRange = 3 * 365 // 3 years
         val minDateRange = 0
         date?.let {

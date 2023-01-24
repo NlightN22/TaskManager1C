@@ -2,8 +2,8 @@ package space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.re
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import space.active.taskmanager1c.coreutils.toDateTime
-import space.active.taskmanager1c.coreutils.toDateTimeOrNull
+import space.active.taskmanager1c.coreutils.toZonedDateTime
+import space.active.taskmanager1c.coreutils.toZonedDateTimeOrNull
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.*
 import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.domain.models.TaskDomain
@@ -27,9 +27,9 @@ data class TaskInputHandledWithUsers(
     fun toTaskDomain(listUsersInput: List<UserInput>): TaskDomain {
         with(this.taskInput) {
             return TaskDomain(
-                date = date.toDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                date = date.toZonedDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 description = description,
-                endDate = endDate?.toDateTimeOrNull(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                endDate = endDate?.toZonedDateTimeOrNull(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 id = id,
                 mainTaskId = mainTaskId ?: "",
                 name = name,

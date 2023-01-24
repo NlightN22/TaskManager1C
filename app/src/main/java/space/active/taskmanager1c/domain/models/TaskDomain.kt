@@ -1,10 +1,7 @@
 package space.active.taskmanager1c.domain.models
 
 import space.active.taskmanager1c.R
-import space.active.taskmanager1c.coreutils.TaskHasNotCorrectState
-import space.active.taskmanager1c.coreutils.nowDiffInDays
-import space.active.taskmanager1c.coreutils.toShortDate
-import space.active.taskmanager1c.coreutils.toShortDateTime
+import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInputHandled
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
@@ -12,18 +9,18 @@ import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.domain.models.UserDomain.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskState
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 data class TaskDomain(
-    val date: LocalDateTime,
+    val date: ZonedDateTime,
     val description: String,
-    val endDate: LocalDateTime?,
+    val endDate: ZonedDateTime?,
     val id: String,
     val mainTaskId: String,
     val name: String,
     val number: String,
     val objName: String,
-    val photos: List<String> = emptyList(), // TODO replace
     val priority: String,
     val status: Status,
     val users: UsersInTaskDomain,
@@ -110,9 +107,9 @@ data class TaskDomain(
         return TaskDto(
             authorId = users.author.id,
             coPerformers = users.coPerformers.map { it.id },
-            date = date.toString(),
+            date = date.toDTO(),
             description = description,
-            endDate = endDate.toString(),
+            endDate = endDate.toDTO(),
             id = id,
             mainTaskId = mainTaskId,
             name = name,
@@ -157,8 +154,8 @@ data class TaskDomain(
 
     companion object {
         fun newTask(author: UserDomain) = TaskDomain(
-            date = LocalDateTime.now(),
-            endDate = LocalDateTime.now(),
+            date = ZonedDateTime.now(),
+            endDate = ZonedDateTime.now(),
             users = UsersInTaskDomain(
                 author = author,
                 performer = UserDomain.blankUser(),

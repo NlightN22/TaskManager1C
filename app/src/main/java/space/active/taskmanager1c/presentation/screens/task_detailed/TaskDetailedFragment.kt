@@ -294,7 +294,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         datePicker.addOnPositiveButtonClickListener {
             viewModel.saveEditChanges(
                 TaskChangesEvents.EndDate(
-                    it.millisecToLocalDateTime()
+                    it.millisecToZonedDateTime()
                 )
             )
         }

@@ -172,7 +172,7 @@ class TaskDetailedViewModel @Inject constructor(
         viewModelScope.launch {
             val taskReadingTime = LocalDateTime.now()
             if (messageList.isNotEmpty()) {
-                val lastMessageTime: LocalDateTime = messageList.maxBy { it.dateTime }.dateTime
+                val lastMessageTime: LocalDateTime = messageList.maxBy { it.dateTime }.dateTime.toLocalDateTime()
                 // todo not show like unread if it is my message
                 logger.log(TAG, "lastMessageTime: $lastMessageTime")
                 setTaskAndMessageReadingTime(

@@ -1,6 +1,6 @@
 package space.active.taskmanager1c.domain.models
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 sealed class TaskChangesEvents {
 
@@ -9,7 +9,7 @@ sealed class TaskChangesEvents {
     ) : TaskChangesEvents()
 
     data class EndDate(
-        val date: LocalDateTime
+        val date: ZonedDateTime
     ) : TaskChangesEvents()
 
     data class Performer(
