@@ -21,7 +21,7 @@ data class TaskDomain(
     val name: String,
     val number: String,
     val objName: String,
-    val priority: String,
+    val priority: Priority,
     val status: Status,
     val users: UsersInTaskDomain,
     val isSending: Boolean = false,
@@ -32,6 +32,19 @@ data class TaskDomain(
     val ok: Boolean,
     val cancel: Boolean
 ) {
+
+    enum class Priority {
+        High,
+        Middle,
+        Low;
+        fun toDTO(): String {
+            return when (this) {
+                High -> "high"
+                Middle -> "middle"
+                Low -> "low"
+            }
+        }
+    }
 
     enum class Status {
         New, // не используется Можно использовать при отправке на сервер
@@ -86,7 +99,7 @@ data class TaskDomain(
         name = name,
         number = number,
         objName = objName,
-        priority = priority,
+        priority = priority.toDTO(),
         status = status.toStatusDTO(),
         authorId = users.author.id,
         performerId = users.performer.id,
@@ -117,7 +130,7 @@ data class TaskDomain(
             objName = objName,
             observers = users.observers.map { it.id },
             performerId = users.performer.id,
-            priority = priority,
+            priority = priority.toDTO(),
             status = status.toStatusDTO(),
         )
     }
@@ -168,7 +181,7 @@ data class TaskDomain(
             name = "",
             number = "",
             objName = "",
-            priority = "",
+            priority = Priority.Middle,
             status = Status.New,
             isAuthor = true,
             isPerformer = false,

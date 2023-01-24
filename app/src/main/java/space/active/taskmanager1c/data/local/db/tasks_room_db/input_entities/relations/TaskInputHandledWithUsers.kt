@@ -35,7 +35,7 @@ data class TaskInputHandledWithUsers(
                 name = name,
                 number = number,
                 objName = objName ?: "",
-                priority = priority,
+                priority = priority.toDomainPriority(),
                 status = TaskDomain.toTaskStatus(
                     status
                 ),
@@ -80,4 +80,14 @@ data class TaskInputHandledWithUsers(
     private fun List<UserInput>.toUserDomain(id: String): UserDomain {
         return this.find { it.userId == id }?.toUserDomain() ?: UserDomain(id = id, name = id)
     }
+
+    private fun String.toDomainPriority(): TaskDomain.Priority {
+        return when (this) {
+            "high" -> {TaskDomain.Priority.High}
+            "low" -> {TaskDomain.Priority.Low}
+            else -> {TaskDomain.Priority.Middle}
+        }
+    }
 }
+
+

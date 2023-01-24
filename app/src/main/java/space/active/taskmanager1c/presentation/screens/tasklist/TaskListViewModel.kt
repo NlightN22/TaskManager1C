@@ -22,7 +22,7 @@ private const val TAG = "TaskListViewModel"
 class TaskListViewModel @Inject constructor(
     settings: SettingsRepository,
     private val getCredentials: GetCredentials,
-    private val getUnreadListIds: GetUnreadListIds,
+    private val getUnreadListIds: GetUnreadListIds, //todo delete
     private val repository: TasksRepository,
     private val handleEmptyTaskList: HandleEmptyTaskList,
     private val exceptionHandler: ExceptionHandler,
@@ -80,10 +80,15 @@ class TaskListViewModel @Inject constructor(
             filterBySearch(filterByBottom, searchFilter)
         }
 
+    // todo need to create job handler
+    var collectJob: Job? = null
     fun collectListTasks() {
         logger.log(TAG, "collectListTasks")
-        filteredInput.collectInScope { inputList ->
-            checkForInputListAndTryFetch(inputList)
+        collectJob?.cancel()
+        collectJob = viewModelScope.launch {
+            filteredInput.collectLatest { inputList ->
+                checkForInputListAndTryFetch(inputList)
+            }
         }
     }
 

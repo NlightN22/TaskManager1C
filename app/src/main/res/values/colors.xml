@@ -30,5 +30,7 @@
     <color name="task_list_status_completed">#6AA673</color>
     <color name="task_list_status_not_completed">#FCC9C9</color>
     <color name="shimmer_color">#FCC9C9</color>
-
+    <!-- priority colors -->
+    <color name="high_priority">#FCC9C9</color>
+    <color name="low_priority">#AFABAB</color>
 </resources>

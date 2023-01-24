@@ -10,6 +10,7 @@ import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.MessagesRepository
 import javax.inject.Inject
 
+// todo delete
 class GetUnreadListIds @Inject constructor(
     private val messagesRepository: MessagesRepository,
     private val exceptionHandler: ExceptionHandler,
