@@ -18,6 +18,7 @@ data class ReadingTimesTaskDTO(
 
     fun getUnreadStatus(): Boolean {
         if (lastMessageTime.isNotBlank()) {
+            if (readingTime.isBlank()) return true
             val messageTime = lastMessageTime.toZonedDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             val lastRead = readingTime.toZonedDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 //            if (messageTime > lastRead) {
