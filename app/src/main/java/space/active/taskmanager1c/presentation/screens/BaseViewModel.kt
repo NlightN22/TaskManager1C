@@ -16,6 +16,7 @@ abstract class BaseViewModel(
     val logger: Logger
 ) : ViewModel() {
 
+    // todo add jobs handler and clearer after destroy or by manual fun
 
     override fun onCleared() {
         super.onCleared()

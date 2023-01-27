@@ -3,10 +3,7 @@ package space.active.taskmanager1c.data.local.db.tasks_room_db
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import kotlinx.coroutines.flow.Flow
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.CoPerformersInTask
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.ObserversInTask
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInputHandled
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.*
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 
@@ -16,7 +13,12 @@ interface TaskInputDao {
     @Query("SELECT COUNT(id) FROM TaskInputHandled")
     suspend fun getInputCount(): Int
 
-    @RawQuery(observedEntities = [TaskInputHandled::class, CoPerformersInTask::class, ObserversInTask::class])
+    @RawQuery(observedEntities = [
+        TaskInputHandled::class,
+        CoPerformersInTask::class,
+        ObserversInTask::class,
+        ReadingTimesTaskEntity::class
+    ])
     fun getSortedTaskQuery(query: SupportSQLiteQuery): Flow<List<TaskInputHandledWithUsers>>
 
     @Transaction

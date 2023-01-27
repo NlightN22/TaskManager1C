@@ -27,6 +27,7 @@ data class TaskDomain(
     val isSending: Boolean = false,
     val outputId: Int = 0,
     val unread: Boolean = false,
+    val unreadTag: Boolean,
     val isAuthor: Boolean,
     val isPerformer: Boolean,
     val ok: Boolean,
@@ -80,34 +81,35 @@ data class TaskDomain(
         }
     }
 
-    private fun toTaskInputHandledWithUsers(new: Boolean = false) = TaskInputHandledWithUsers(
-        taskInput = this.toTaskInputHandled(new),
-        coPerformers = users.coPerformers.map { it.toCoPerformer(id) },
-        observers = users.observers.map { it.toObservers(id) }
-    )
-
-    private fun toTaskInputHandled(new: Boolean = false) = TaskInputHandled(
-        date = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-        description = description,
-        endDate = endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
-        id = if (new) {
-            hashCode().toString()
-        } else {
-            id
-        },
-        mainTaskId = mainTaskId,
-        name = name,
-        number = number,
-        objName = objName,
-        priority = priority.toDTO(),
-        status = status.toStatusDTO(),
-        authorId = users.author.id,
-        performerId = users.performer.id,
-        isAuthor = isAuthor,
-        isPerformer = isPerformer,
-        ok = ok,
-        cancel = cancel,
-    )
+    // todo delete
+//    private fun toTaskInputHandledWithUsers(new: Boolean = false) = TaskInputHandledWithUsers(
+//        taskInput = this.toTaskInputHandled(new),
+//        coPerformers = users.coPerformers.map { it.toCoPerformer(id) },
+//        observers = users.observers.map { it.toObservers(id) }
+//    )
+//
+//    private fun toTaskInputHandled(new: Boolean = false) = TaskInputHandled(
+//        date = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+//        description = description,
+//        endDate = endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
+//        id = if (new) {
+//            hashCode().toString()
+//        } else {
+//            id
+//        },
+//        mainTaskId = mainTaskId,
+//        name = name,
+//        number = number,
+//        objName = objName,
+//        priority = priority.toDTO(),
+//        status = status.toStatusDTO(),
+//        authorId = users.author.id,
+//        performerId = users.performer.id,
+//        isAuthor = isAuthor,
+//        isPerformer = isPerformer,
+//        ok = ok,
+//        cancel = cancel,
+//    )
 
     fun toOutputTask(new: Boolean = false): OutputTask {
         return OutputTask(
@@ -132,6 +134,7 @@ data class TaskDomain(
             performerId = users.performer.id,
             priority = priority.toDTO(),
             status = status.toStatusDTO(),
+            unreaded = unreadTag
         )
     }
 
@@ -185,6 +188,7 @@ data class TaskDomain(
             status = Status.New,
             isAuthor = true,
             isPerformer = false,
+            unreadTag = false,
             unread = false,
             ok = true,
             cancel = false

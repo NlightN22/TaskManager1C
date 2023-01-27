@@ -39,6 +39,7 @@ data class TaskInputHandledWithUsers(
                 status = TaskDomain.toTaskStatus(
                     status
                 ),
+                unreadTag = unreadTag,
                 users = toUsersDomain(listUsersInput),
                 isAuthor = isAuthor,
                 isPerformer = isPerformer,
@@ -65,6 +66,7 @@ data class TaskInputHandledWithUsers(
                 performerId = performerId,
                 priority = priority ?: "",
                 status = status,
+                unreaded = unreadTag
             )
         }
     }

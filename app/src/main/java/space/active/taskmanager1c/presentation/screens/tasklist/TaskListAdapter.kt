@@ -63,7 +63,7 @@ class TaskListAdapter(
             taskStatus.isClickable = !taskDomain.isSending // not clickable if is sending
             listItemCard.setPriority(taskDomain.priority)
             taskTitle.text = taskDomain.name
-            taskTitle.typeface = if (taskDomain.unread) { Typeface.DEFAULT_BOLD } else { Typeface.DEFAULT}
+            taskTitle.typeface = if (taskDomain.unread || taskDomain.unreadTag) { Typeface.DEFAULT_BOLD } else { Typeface.DEFAULT}
             taskDate.text = taskDomain.date.toShortDate()
             taskNumber.text = taskDomain.number
             taskAuthor.text = abbreviationName(

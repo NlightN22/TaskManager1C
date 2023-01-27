@@ -19,6 +19,7 @@ data class TaskInputHandled(
     val status: String,
     val authorId: String,
     val performerId: String,
+    val unreadTag: Boolean,
     // extra values
     val isAuthor: Boolean,
     val isPerformer: Boolean,

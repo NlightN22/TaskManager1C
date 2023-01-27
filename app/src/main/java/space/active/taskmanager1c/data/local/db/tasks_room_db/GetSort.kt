@@ -74,7 +74,8 @@ object GetSort {
                     "ON UserInput.userId = TaskInputHandled.performerId " +
                     "LEFT JOIN ReadingTimesTaskEntity " +
                     "ON ReadingTimesTaskEntity.mainTaskId = TaskInputHandled.id " +
-                    "WHERE ReadingTimesTaskEntity.isUnread = 1 "
+                    "WHERE ReadingTimesTaskEntity.isUnread = 1 " +
+                    "OR TaskInputHandled.unreadTag = 1 "
             else -> "SELECT * FROM TaskInputHandled " +
                     "LEFT JOIN UserInput " +
                     "ON UserInput.userId = TaskInputHandled.performerId "
