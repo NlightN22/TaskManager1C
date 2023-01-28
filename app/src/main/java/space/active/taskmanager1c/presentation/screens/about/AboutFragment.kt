@@ -1,6 +1,8 @@
 package space.active.taskmanager1c.presentation.screens.about
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.findNavController
@@ -19,12 +21,16 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
         binding = FragmentAboutBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
-
         observers()
         listeners()
     }
 
     private fun listeners() {
+        binding.aboutAppContactsET.setOnClickListener {
+            logger.log(TAG, "aboutAppContactsET click")
+            sendEmailToAuthor(binding.aboutAppContactsET.text.toString(),
+                "${binding.aboutAppNameET.text} Feedback v.${binding.aboutAppVersionET.text}")
+        }
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.about_ok -> {
@@ -32,6 +38,21 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
                 }
             }
             return@setOnItemSelectedListener true
+        }
+    }
+
+    private fun sendEmailToAuthor(emailTo: String, subject: String) {
+        if (emailTo.isNotBlank() && subject.isNotBlank()) {
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:") // only email apps should handle this
+                putExtra(Intent.EXTRA_EMAIL, emailTo)
+                putExtra(Intent.EXTRA_SUBJECT, subject)
+            }
+            context?.packageManager?.let { packageManager ->
+                intent.resolveActivity(packageManager)?.let {
+                    startActivity(intent)
+                }
+            }
         }
     }
 

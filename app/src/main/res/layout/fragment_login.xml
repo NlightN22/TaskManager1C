@@ -81,6 +81,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
+                android:imeOptions="actionDone"
                 android:textColor="@color/editable_text"
                 android:textSize="@dimen/login_screen_text_size" />
 

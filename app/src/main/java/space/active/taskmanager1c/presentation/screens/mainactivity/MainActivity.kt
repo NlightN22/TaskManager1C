@@ -36,12 +36,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observers() {
-
-
     }
 
     private fun listeners() {
-
     }
 
     override fun onBackPressed() {

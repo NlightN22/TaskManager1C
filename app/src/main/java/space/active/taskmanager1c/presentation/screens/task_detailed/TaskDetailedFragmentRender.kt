@@ -5,7 +5,7 @@ import space.active.taskmanager1c.presentation.utils.setColorState
 import space.active.taskmanager1c.presentation.utils.setState
 
 fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
-    viewModel.taskState.collectOnCreate { taskState ->
+    viewModel.taskState.collectOnCreated { taskState ->
         with(taskState) {
             binding.taskTitleDetailed.setText(title)
             binding.taskNumberDetailed.text = number
@@ -27,7 +27,7 @@ fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
 
 fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
     // Render enabled fields
-    viewModel.enabledFields.collectOnCreate { fieldsState ->
+    viewModel.enabledFields.collectOnCreated { fieldsState ->
         // Title
         binding.taskTitleCardView.setState(enabled = fieldsState.title)
         binding.taskTitleTIL.setState(enabled = fieldsState.title)

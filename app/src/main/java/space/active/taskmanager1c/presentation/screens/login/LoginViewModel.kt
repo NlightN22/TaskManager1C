@@ -1,8 +1,8 @@
 package space.active.taskmanager1c.presentation.screens.login
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -12,7 +12,6 @@ import kotlinx.coroutines.withContext
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
-import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.repository.Authorization
 import space.active.taskmanager1c.domain.repository.SettingsRepository
@@ -82,7 +81,7 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun updateUI(username: String, password: String) {
-            _viewState.value = _viewState.value.copy(username = username, password = password)
+        _viewState.value = _viewState.value.copy(username = username, password = password)
     }
 
     private suspend fun tryToLoadServerAddress() {
@@ -98,19 +97,7 @@ class LoginViewModel @Inject constructor(
         name: String,
         pass: String,
     ) {
-        //validation
-        if (!validate.userName(name)) {
-            _viewState.value =
-                _viewState.value.copy(userError = UiText.Resource(R.string.username_valid_error))
-            return
-        }
-
-        if (!validate.userName(name)) {
-            _viewState.value =
-                _viewState.value.copy(passError = UiText.Resource(R.string.password_valid_error))
-            return
-        }
-        _viewState.value = _viewState.value.copy(userError = null, passError = null)
+        if (!formValidation(name)) return
 
         // authorization
         viewModelScope.launch {
@@ -128,6 +115,23 @@ class LoginViewModel @Inject constructor(
                 exceptionHandler(e)
             }
         }
+    }
+
+    private fun formValidation(name: String): Boolean {
+        //validation
+        if (!validate.userName(name)) {
+            _viewState.value =
+                _viewState.value.copy(userError = UiText.Resource(R.string.username_valid_error))
+            return false
+        }
+
+        if (!validate.userName(name)) {
+            _viewState.value =
+                _viewState.value.copy(passError = UiText.Resource(R.string.password_valid_error))
+            return false
+        }
+        _viewState.value = _viewState.value.copy(userError = null, passError = null)
+        return true
     }
 
     private suspend fun tryToAuth(name: String, pass: String, serverAddress: String) {
@@ -190,10 +194,5 @@ class LoginViewModel @Inject constructor(
             logger.log(TAG, "tryToSaveSettings exceptions: $exceptions")
             _authState.value = Success(true)
         }
-    }
-
-    override fun onCleared() {
-        logger.log(TAG, "clear LoginViewModel")
-        super.onCleared()
     }
 }

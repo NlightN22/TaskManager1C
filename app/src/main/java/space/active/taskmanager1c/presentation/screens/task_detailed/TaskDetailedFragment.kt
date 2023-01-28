@@ -27,7 +27,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     lateinit var messagesAdapter: MessagesAdapter
     private val viewModel by viewModels<TaskDetailedViewModel>()
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskDetailedBinding.bind(view)

@@ -35,8 +35,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         binding = FragmentTaskListBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
-
-
         recyclerTasks = TaskListAdapter(object : TaskActionListener {
             override fun onTaskStatusClick(taskDomain: TaskDomain) {
                 viewModel.changeTaskStatus(taskDomain)
@@ -69,7 +67,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun observers() {
-
 
         // start updateJob in MainVM
         viewModel.startUpdateJob.collectOnStart {

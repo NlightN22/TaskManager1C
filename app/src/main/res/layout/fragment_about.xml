@@ -66,7 +66,7 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/aboutAppContacts"
-        style="@style/CardViewGlobal"
+        style="@style/EditableCardView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -78,16 +78,16 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/aboutAppContactsTIL"
-            style="@style/NotEditableTextInput"
+            style="@style/EditableTextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/about_app_contacts">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/aboutAppContactsET"
-                style="@style/EditTextNotEditable"
+                style="@style/EditTextEditable"
                 android:layout_width="match_parent"
-                android:clickable="true"
+                android:focusable="false"
                 android:inputType="textEmailAddress"
                 tools:text="author@webmail.com" />
         </com.google.android.material.textfield.TextInputLayout>

@@ -188,16 +188,16 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         }
     }
 
-    fun <T> StateFlow<T>.collectOnCreate(listener: (T) -> Unit) {
-        lifecycleScope.launchWhenCreated {
-            this@collectOnCreate.collectLatest {
+    fun <T> StateFlow<T>.collectOnCreated(listener: (T) -> Unit) {
+        viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+            this@collectOnCreated.collectLatest {
                 listener(it)
             }
         }
     }
 
     fun <T> Flow<T>.collectOnStart(listener: (T) -> Unit) {
-        lifecycleScope.launchWhenStarted {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             this@collectOnStart.collectLatest {
                 listener(it)
             }
@@ -205,7 +205,8 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     }
 
     fun <T> StateFlow<T>.collectOnStart(listener: (T) -> Unit) {
-        lifecycleScope.launchWhenStarted {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            val job = this.coroutineContext.job
             this@collectOnStart.collectLatest {
                 listener(it)
             }
@@ -213,7 +214,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     }
 
     fun <T> SharedFlow<T>.collectOnStart(listener: (T) -> Unit) {
-        lifecycleScope.launchWhenStarted {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             this@collectOnStart.collectLatest {
                 listener(it)
             }
