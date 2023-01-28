@@ -12,7 +12,6 @@ import space.active.taskmanager1c.presentation.utils.setState
 
 private const val TAG = "SettingsFragment"
 
-@AndroidEntryPoint
 class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     private val viewModel by viewModels<SettingsViewModel>()

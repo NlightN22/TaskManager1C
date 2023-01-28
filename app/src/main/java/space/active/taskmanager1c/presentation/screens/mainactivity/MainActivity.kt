@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        logger.log(TAG, "MainActivity onBackPressed")
+        logger.log(TAG, "onBackPressed")
         val navController = Navigation.findNavController(binding.fragmentContainerView)
         val backDestination =
             navController.previousBackStackEntry?.destination?.id
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
     private fun handleLoginBack(navController: NavController) {
         val previousState = navController.previousBackStackEntry?.savedStateHandle
         val loginState = previousState?.get<Boolean>(LOGIN_SUCCESSFUL)
-        logger.log(TAG, "loginState: ${loginState}")
+        logger.log(TAG, "previousState loginState: ${loginState}")
         loginState?.let {
             if (it) {
                 super.onBackPressed()

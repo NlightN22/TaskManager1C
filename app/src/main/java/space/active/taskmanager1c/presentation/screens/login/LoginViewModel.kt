@@ -42,6 +42,7 @@ class LoginViewModel @Inject constructor(
     private val validate = ValidateCredentials()
 
     init {
+        logger.log(TAG, "start LoginViewModel")
         viewModelScope.launch {
             val serverAddress = try {
                 settings.getServerAddress()
@@ -81,9 +82,7 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun updateUI(username: String, password: String) {
-        viewModelScope.launch {
             _viewState.value = _viewState.value.copy(username = username, password = password)
-        }
     }
 
     private suspend fun tryToLoadServerAddress() {
@@ -191,5 +190,10 @@ class LoginViewModel @Inject constructor(
             logger.log(TAG, "tryToSaveSettings exceptions: $exceptions")
             _authState.value = Success(true)
         }
+    }
+
+    override fun onCleared() {
+        logger.log(TAG, "clear LoginViewModel")
+        super.onCleared()
     }
 }

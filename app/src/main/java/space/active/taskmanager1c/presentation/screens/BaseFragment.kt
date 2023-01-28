@@ -1,6 +1,5 @@
 package space.active.taskmanager1c.presentation.screens
 
-import android.content.Context
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -16,6 +15,7 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,6 +34,7 @@ import javax.inject.Inject
 private const val TAG = "BaseFragment"
 const val LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL"
 
+@AndroidEntryPoint
 abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     @Inject
@@ -106,11 +107,11 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     private fun showNavigationLog() {
         val backDestination = findNavController().previousBackStackEntry
-        logger.log(TAG, "backDestination: ${backDestination?.destination}")
+        logger.log(TAG, "backDestination: ${backDestination}")
         val currentDestination = findNavController().currentDestination
-        logger.log(TAG, "currentFragment: ${currentDestination?.displayName}")
+        logger.log(TAG, "currentFragment: ${currentDestination}")
         val currentBackStackEntry = findNavController().currentBackStackEntry
-        logger.log(TAG, "currentBackStackEntry: ${currentBackStackEntry?.destination}")
+        logger.log(TAG, "currentBackStackEntry: ${currentBackStackEntry}")
     }
 
     abstract fun successLogin()
@@ -132,14 +133,11 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         bottomMenu.itemIconTintList = null
     }
 
-    fun showOptionsMenu(context: Context?, anchorView: View): PopupMenu? {
-        context?.let {
-            val optionsMenu = PopupMenu(this.context, anchorView)
-            optionsMenu.inflate(R.menu.options_menu)
-            optionsMenu.show()
-            return optionsMenu
-        }
-        return null
+    fun showOptionsMenu(anchorView: View): PopupMenu? {
+        val optionsMenu = PopupMenu(this.context, anchorView)
+        optionsMenu.inflate(R.menu.options_menu)
+        optionsMenu.show()
+        return optionsMenu
     }
 
     fun setOnOptionsMenuClickListener(

@@ -21,7 +21,6 @@ import java.util.*
 
 private const val TAG = "TaskDetailedFragment"
 
-@AndroidEntryPoint
 class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
     lateinit var binding: FragmentTaskDetailedBinding

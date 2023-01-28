@@ -17,6 +17,9 @@
     <string name="menu_save">Save</string>
 
     <string name="task_hint_author">автор</string>
+    <string name="about_app_name">Наименование приложения</string>
+    <string name="about_app_version">Версия приложения</string>
+    <string name="about_app_contacts">По всем вопросам можете писать</string>
     <string name="settings_username">имя пользователя</string>
     <string name="settings_userId">ID пользователя</string>
     <string name="settings_server_address">Адрес сервера</string>

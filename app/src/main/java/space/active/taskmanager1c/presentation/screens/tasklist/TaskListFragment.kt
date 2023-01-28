@@ -21,7 +21,6 @@ import space.active.taskmanager1c.presentation.utils.setIconAZState
 
 private const val TAG = "TaskListFragment"
 
-@AndroidEntryPoint
 class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
     private lateinit var binding: FragmentTaskListBinding
@@ -158,7 +157,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
         // options menu
         binding.optionsMenu.setOnClickListener {
-            val optionsMenu = showOptionsMenu(this.context, binding.optionsMenu)
+            val optionsMenu = showOptionsMenu(binding.optionsMenu)
             optionsMenu?.let {
                 setOnOptionsMenuClickListener(it) {
                     when (it.itemId) {
@@ -168,6 +167,9 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                         R.id.options_logout -> {
                             clearUserCredentialsAndExit()
                             super.onDestroy()
+                        }
+                        R.id.options_about -> {
+                            navigate(TaskListFragmentDirections.actionTaskListFragmentToAboutFragment())
                         }
                     }
                 }

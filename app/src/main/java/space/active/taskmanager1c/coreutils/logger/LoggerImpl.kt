@@ -4,13 +4,13 @@ import android.util.Log
 
 object LoggerImpl: Logger {
 
-    private val mainTAG = Logger.MAIN_TAG
+//    private val mainTAG = Logger.MAIN_TAG
 
     override fun log(localTag: String, message: String) {
-        Log.d("$mainTAG $localTag", message)
+        Log.d("$localTag", message)
     }
 
     override fun error(localTag: String, message: String) {
-        Log.e("$mainTAG $localTag", message)
+        Log.e("$localTag", message)
     }
 }
