@@ -124,7 +124,6 @@ class MainViewModel @Inject constructor(
                             )
                             .catch { e ->
                                 exceptionHandler(e)
-                                //TODO add error counter
                                 delay(5000) // pause after error
                             }
                             .collectLatest {

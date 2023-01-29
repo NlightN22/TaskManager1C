@@ -135,4 +135,8 @@ class InputTaskRepositoryImpl @Inject constructor(
     }
 
     override fun getUnreadIds(): Flow<List<String>> = readingDao.getUnreadIds()
+
+    override suspend fun setUnreadTag(taskId: String, unread: Boolean) {
+        inputDao.updateUnreadTag(taskId, unread)
+    }
 }

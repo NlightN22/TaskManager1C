@@ -1,8 +1,10 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
+import android.content.Context
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import androidx.annotation.MenuRes
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -44,9 +46,17 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                 launchTaskDetailed(taskId = taskDomain.id)
             }
 
-            override fun onTaskLongClick(taskDomain: TaskDomain) {
-                // add popup menu set priority and unread status
-                TODO("Not yet implemented")
+            override fun onTaskLongClick(view: View) {
+                val curMenu = showMenu(requireContext(), view, R.menu.menu_tasklist_task)
+                val taskDomain = view.tag as TaskDomain
+                curMenu.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.taskUnread -> {
+                            viewModel.changeUnreadTag(taskDomain)
+                        }
+                    }
+                    return@setOnMenuItemClickListener false
+                }
             }
         }
         )
@@ -191,6 +201,15 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             onBackClick()
         }
 
+    }
+
+    private fun showMenu(context: Context, view: View, @MenuRes menuRes: Int): PopupMenu {
+        val menu = PopupMenu(context, view)
+        menu.inflate(menuRes)
+        menu.setForceShowIcon(true)
+        menu.gravity = Gravity.END
+        menu.show()
+        return menu
     }
 
     private fun showOrderMenu() {

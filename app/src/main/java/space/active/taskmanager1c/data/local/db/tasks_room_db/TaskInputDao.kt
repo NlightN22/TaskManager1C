@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.*
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
+import space.active.taskmanager1c.domain.use_case.SetTaskUnreadTag
 
 @Dao
 interface TaskInputDao {
@@ -95,4 +96,7 @@ interface TaskInputDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUser(userInput: UserInput)
+
+    @Query("UPDATE TaskInputHandled SET unreadTag = :unreadTag WHERE id = :taskId")
+    suspend fun updateUnreadTag(taskId: String, unreadTag: Boolean)
 }

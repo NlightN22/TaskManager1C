@@ -22,9 +22,9 @@ private const val TAG = "TaskListViewModel"
 class TaskListViewModel @Inject constructor(
     settings: SettingsRepository,
     private val getCredentials: GetCredentials,
-    private val getUnreadListIds: GetUnreadListIds, //todo delete
     private val repository: TasksRepository,
     private val handleEmptyTaskList: HandleEmptyTaskList,
+    private val setTaskUnreadTag: SetTaskUnreadTag,
     private val exceptionHandler: ExceptionHandler,
     private val whoUserInTask: DefineUserInTask,
     private val validate: Validate,
@@ -65,9 +65,8 @@ class TaskListViewModel @Inject constructor(
         _bottomFilter,
         _bottomOrder,
         whoAmI.map { it.id }
-    ).combine(_searchFilter) {
-        input, searchFilter ->
-        search(input,searchFilter)
+    ).combine(_searchFilter) { input, searchFilter ->
+        search(input, searchFilter)
     }
 
     private suspend fun search(
@@ -118,6 +117,7 @@ class TaskListViewModel @Inject constructor(
             _startUpdateJob.value = true
         }
     }
+
     // todo set taskDomain as unreadable
     // todo implement
     private fun changeIsSending(list: List<TaskDomain>, taskId: String): List<TaskDomain> {
@@ -134,6 +134,21 @@ class TaskListViewModel @Inject constructor(
     fun changeIsSending(taskId: String) {
         viewModelScope.launch {
             _incomeSavedId.emit(taskId)
+        }
+    }
+
+    fun changeUnreadTag(taskDomainIn: TaskDomain) {
+        viewModelScope.launch {
+            setTaskUnreadTag(
+                getCredentials(),
+                taskDomainIn.id,
+                !taskDomainIn.unreadTag
+            ).collect { request ->
+                when (request) {
+                    is PendingRequest -> {}
+                    else -> {}
+                }
+            }
         }
     }
 

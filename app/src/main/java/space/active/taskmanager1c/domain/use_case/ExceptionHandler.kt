@@ -54,6 +54,8 @@ class ExceptionHandler @Inject constructor(
             }
             is ParseBackendException -> {
                 showErrorToast(e)
+                e.message?.let { logger.log(TAG, "Message: $it") }
+                e.cause?.let { logger.log(TAG, "Cause: $it") }
                 e.printStackTrace()
 
             }

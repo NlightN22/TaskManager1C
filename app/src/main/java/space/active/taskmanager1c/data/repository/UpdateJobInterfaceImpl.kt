@@ -145,7 +145,7 @@ class UpdateJobInterfaceImpl
                 result?.let { res ->
                     when (res) {
                         is SuccessRequest -> {
-                            // TODO if taskDomain send with delete label
+                            //todo delete debug
 //                        logger.log(TAG, result.data.toString())
                             inputTaskRepository.saveAndDelete(
                                 inputTask = res.data.toTaskInputHandledWithUsers(whoAmI.userId),

@@ -17,4 +17,5 @@ interface TasksRepository {
     fun getTask(taskId: String): Flow<TaskDomain?>
     fun editTask(taskDomain: TaskDomain): Flow<Request<Any>>
     fun createNewTask(taskDomain: TaskDomain): Flow<Request<Any>>
+    suspend fun setTaskUnreadTag(taskId: String, unread: Boolean)
 }

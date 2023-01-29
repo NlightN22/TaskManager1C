@@ -36,7 +36,7 @@ class MergedTaskRepositoryImpl constructor(
         myId: Flow<String>
     ): Flow<List<TaskDomain>> = getTasksFromBothRepo(filterTypes,orderTypes,myId)
 
-    // todo delete after tests
+    // todo delete debug
     private fun getTasksFromInputRepo(
         filterTypes: Flow<TaskListFilterTypes>,
         orderTypes: Flow<TaskListOrderTypes>,
@@ -168,6 +168,10 @@ class MergedTaskRepositoryImpl constructor(
             emit(ErrorRequest(ThisTaskIsNotNew))
         }
     }.flowOn(ioDispatcher)
+
+    override suspend fun setTaskUnreadTag(taskId: String, unread: Boolean) {
+        inputTaskRepository.setUnreadTag(taskId, unread)
+    }
 
     private suspend fun combineListTasks(
         taskInput: List<TaskInputHandledWithUsers>,

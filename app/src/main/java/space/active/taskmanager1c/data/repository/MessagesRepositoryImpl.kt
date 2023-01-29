@@ -7,6 +7,7 @@ import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
+import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.MessagesRepository
@@ -68,9 +69,16 @@ class MessagesRepositoryImpl @Inject constructor(
         credentials: Credentials,
         taskId: String,
         state: Boolean
-    ): Flow<Request<Any>> {
-        TODO("Not yet implemented")
+    ): Flow<Request<TaskUserReadingFlagDTO>> = flow {
+        emit(PendingRequest())
+        emit(
+            SuccessRequest(
+                taskApi.setReadingFlag(
+                    credentials.toAuthBasicDto(),
+                    taskId,
+                    state
+                )
+            )
+        )
     }
-
-
 }

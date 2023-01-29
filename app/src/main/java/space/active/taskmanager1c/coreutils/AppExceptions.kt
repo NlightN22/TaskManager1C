@@ -30,7 +30,7 @@ object TaskHasNotCorrectState :
 class CantShowSnackBar :
     AppExceptions(text = UiText.Resource(R.string.exception_show_snackbar))
 
-class ParseBackendException(val inEx: Throwable) :
+class ParseBackendException(override val message: String?, override val cause:  Throwable?) :
     AppExceptions(text = UiText.Resource(R.string.exception_parse_server_answer))
 
 class BackendException(

@@ -7,7 +7,7 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.data.remote.model.AuthUserDto
 import space.active.taskmanager1c.domain.repository.Authorization
 
-// todo delete
+// todo delete debug
 class AuthMockImpl : Authorization {
 
     // c49a0b62-c192-11e1-8a03-f46d0490adee Михайлов Олег Федорович

@@ -1,10 +1,13 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.MenuRes
+import androidx.appcompat.widget.PopupMenu
 import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -18,13 +21,13 @@ import space.active.taskmanager1c.domain.models.TaskDomain
 interface TaskActionListener {
     fun onTaskStatusClick(taskDomain: TaskDomain)
     fun onTaskClick(taskDomain: TaskDomain)
-    fun onTaskLongClick(taskDomain: TaskDomain)
+    fun onTaskLongClick(view: View)
 }
 
 // TODO implement ListAdapter
 class TaskListAdapter(
     private val actionListener: TaskActionListener
-) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener {
+) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener, View.OnLongClickListener {
     var taskDomains: List<TaskDomain> = emptyList()
         set(newValue) {
             val diffCallback = TasksDiffCallback(field, newValue)
@@ -32,6 +35,11 @@ class TaskListAdapter(
             field = newValue
             diffResult.dispatchUpdatesTo(this)
         }
+
+    override fun onLongClick(v: View?): Boolean {
+        v?.let { actionListener.onTaskLongClick(it)}
+        return true
+    }
 
     override fun onClick(v: View) {
         val taskDomain = v.tag as TaskDomain
@@ -50,6 +58,7 @@ class TaskListAdapter(
         val binding = ItemTaskBinding.inflate(inflater, parent, false)
 
         binding.root.setOnClickListener(this)
+        binding.root.setOnLongClickListener(this)
         binding.taskStatus.setOnClickListener(this)
 
         return TasksViewHolder(binding)
@@ -63,7 +72,11 @@ class TaskListAdapter(
             taskStatus.isClickable = !taskDomain.isSending // not clickable if is sending
             listItemCard.setPriority(taskDomain.priority)
             taskTitle.text = taskDomain.name
-            taskTitle.typeface = if (taskDomain.unread || taskDomain.unreadTag) { Typeface.DEFAULT_BOLD } else { Typeface.DEFAULT}
+            taskTitle.typeface = if (taskDomain.unread || taskDomain.unreadTag) {
+                Typeface.DEFAULT_BOLD
+            } else {
+                Typeface.DEFAULT
+            }
             taskDate.text = taskDomain.date.toShortDate()
             taskNumber.text = taskDomain.number
             taskAuthor.text = abbreviationName(
@@ -108,18 +121,30 @@ class TaskListAdapter(
         return abbName
     }
 
-}
 
-private fun CardView.setPriority(priority: TaskDomain.Priority) {
-    val highBackground: ColorStateList = resources.getColorStateList(R.color.high_priority, resources.newTheme())
-    val lowBackground: ColorStateList = resources.getColorStateList(R.color.low_priority, resources.newTheme())
-    val midBackground: ColorStateList = resources.getColorStateList(R.color.white, resources.newTheme())
-    when (priority) {
-        TaskDomain.Priority.High -> {this.backgroundTintList = highBackground}
-        TaskDomain.Priority.Low -> {this.backgroundTintList = lowBackground}
-        else -> {this.backgroundTintList = midBackground}
+
+    private fun CardView.setPriority(priority: TaskDomain.Priority) {
+        val highBackground: ColorStateList =
+            resources.getColorStateList(R.color.high_priority, resources.newTheme())
+        val lowBackground: ColorStateList =
+            resources.getColorStateList(R.color.low_priority, resources.newTheme())
+        val midBackground: ColorStateList =
+            resources.getColorStateList(R.color.white, resources.newTheme())
+        when (priority) {
+            TaskDomain.Priority.High -> {
+                this.backgroundTintList = highBackground
+            }
+            TaskDomain.Priority.Low -> {
+                this.backgroundTintList = lowBackground
+            }
+            else -> {
+                this.backgroundTintList = midBackground
+            }
+        }
     }
 }
+
+
 
 class TasksViewHolder(
     val binding: ItemTaskBinding

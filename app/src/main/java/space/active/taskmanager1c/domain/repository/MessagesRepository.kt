@@ -3,6 +3,7 @@ package space.active.taskmanager1c.domain.repository
 import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
+import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.domain.models.Credentials
 import java.time.LocalDateTime
@@ -29,5 +30,5 @@ interface MessagesRepository {
         credentials: Credentials,
         taskId: String,
         state: Boolean
-    ): Flow<Request<Any>>
+    ): Flow<Request<TaskUserReadingFlagDTO>>
 }

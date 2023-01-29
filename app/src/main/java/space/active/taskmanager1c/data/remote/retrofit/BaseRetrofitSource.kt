@@ -21,9 +21,9 @@ open class BaseRetrofitSource {
         return try {
             block()
         } catch (e: JsonDataException) {
-            throw ParseBackendException( inEx = e)
+            throw ParseBackendException(message = e.message, cause = e.cause)
         } catch (e: JsonEncodingException) {
-            throw ParseBackendException( inEx = e)
+            throw ParseBackendException(message = e.message, cause = e.cause)
         } catch (e: HttpException) {
             throw transformBackendException(e, query)
         } catch (e: IOException) {
@@ -40,7 +40,7 @@ open class BaseRetrofitSource {
             throw AuthException
         }
         catch (e: Exception) {
-            throw ParseBackendException(inEx = e)
+            throw ParseBackendException(message = e.message, cause = e.cause)
         }
     }
 }
