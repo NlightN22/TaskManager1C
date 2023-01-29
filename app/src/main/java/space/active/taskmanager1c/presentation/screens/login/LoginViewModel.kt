@@ -1,6 +1,5 @@
 package space.active.taskmanager1c.presentation.screens.login
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,7 +134,7 @@ class LoginViewModel @Inject constructor(
     }
 
     private suspend fun tryToAuth(name: String, pass: String, serverAddress: String) {
-        authorization.auth(name, pass, serverAddress)
+        authorization.auth(name, pass)
             .catch {
                 exceptionHandler(it)
                 _authState.value = OnWait()

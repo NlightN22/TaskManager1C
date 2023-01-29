@@ -13,6 +13,10 @@ interface TaskInputDao {
     @Query("SELECT COUNT(id) FROM TaskInputHandled")
     suspend fun getInputCount(): Int
 
+    @Query("SELECT TaskInputHandled.id FROM TaskInputHandled " +
+            "WHERE NOT TaskInputHandled.id IN(:incomingListIds)")
+    suspend fun getIdsNotInList(incomingListIds: List<String>): List<String>
+
     @RawQuery(observedEntities = [
         TaskInputHandled::class,
         CoPerformersInTask::class,
@@ -59,6 +63,22 @@ interface TaskInputDao {
     ) {
         insertTask(inputTask)
         deleteOutputTask(outputTask.outputId)
+    }
+
+    @Query("DELETE FROM TaskInputHandled WHERE id = :taskId")
+    abstract fun deleteTaskInputHandled(taskId: String)
+
+    @Query("DELETE FROM CoPerformersInTask WHERE taskId = :taskId")
+    abstract fun deleteCoPerformersInTask(taskId: String)
+
+    @Query("DELETE FROM ObserversInTask WHERE taskId = :taskId")
+    abstract fun deleteObserversInTask(taskId: String)
+
+    @Transaction
+    suspend fun deleteTask(taskId: String) {
+        deleteTaskInputHandled(taskId)
+        deleteCoPerformersInTask(taskId)
+        deleteObserversInTask(taskId)
     }
 
     @Query("DELETE FROM OutputTask WHERE outputId = :outputId")

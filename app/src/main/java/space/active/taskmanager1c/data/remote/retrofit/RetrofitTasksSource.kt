@@ -31,10 +31,7 @@ class RetrofitTasksSource @Inject constructor
 
     private val retrofitApi = retrofit.create(RetrofitApi::class.java)
 
-    lateinit var baseUrl: String
-
-    override suspend fun authUser(auth: AuthBasicDto, serverAddress: String): UserDto {
-        baseUrl = serverAddress
+    override suspend fun authUser(auth: AuthBasicDto): UserDto {
         return wrapRetrofitExceptions {
             retrofitApi.authUser(auth.toBasic())
         }
@@ -46,7 +43,7 @@ class RetrofitTasksSource @Inject constructor
         }
 
     override suspend fun sendNewTask(auth: AuthBasicDto, task: TaskDto): Request<TaskDto> =
-        wrapRetrofitExceptions {
+        wrapRetrofitExceptions(task) {
             logger.log(TAG, "sendNewTask: $task")
             val res = retrofitApi.sendNew(auth.toBasic(), task).tasks.first()
             logger.log(TAG, "Get from server taskDomain: $res")
@@ -57,7 +54,7 @@ class RetrofitTasksSource @Inject constructor
         auth: AuthBasicDto,
         taskId: String,
         changeMap: Map<String, Any>
-    ) = wrapRetrofitExceptions<TaskDto> {
+    ) = wrapRetrofitExceptions(Pair(taskId, changeMap)) {
         val changes = converters.mapToJson(changeMap)
         logger.log(TAG, "Send changes: $changeMap")
         val res = retrofitApi.saveChanges(taskId, auth.toBasic(), changes)
@@ -65,7 +62,7 @@ class RetrofitTasksSource @Inject constructor
     }
 
     override suspend fun getMessages(auth: AuthBasicDto, taskId: String): TaskMessagesDTO =
-        wrapRetrofitExceptions {
+        wrapRetrofitExceptions(taskId) {
             retrofitApi.getMessages(auth.toBasic(), taskId)
         }
 
@@ -80,7 +77,7 @@ class RetrofitTasksSource @Inject constructor
     override suspend fun getMessagesTimes(
         auth: AuthBasicDto,
         taskIds: List<String>
-    ): List<ReadingTimesTaskDTO> = wrapRetrofitExceptions {
+    ): List<ReadingTimesTaskDTO> = wrapRetrofitExceptions(taskIds) {
         val toServer = FetchReadingTimes(taskIds)
 //        logger.log(TAG, "Send to server: $toServer")
         retrofitApi.getReadingTimes(auth.toBasic(), toServer).Tasks
@@ -91,7 +88,7 @@ class RetrofitTasksSource @Inject constructor
         taskId: String,
         messageTime: LocalDateTime,
         readingTime: LocalDateTime
-    ): ReadingTimesTaskDTO = wrapRetrofitExceptions {
+    ): ReadingTimesTaskDTO = wrapRetrofitExceptions(Triple(taskId, messageTime,readingTime)) {
         retrofitApi.setReadingTime(auth.toBasic(),
             SetReadingTimeDTO(
                 taskId,
@@ -105,7 +102,7 @@ class RetrofitTasksSource @Inject constructor
         auth: AuthBasicDto,
         taskId: String,
         flag: Boolean
-    ): TaskUserReadingFlagDTO = wrapRetrofitExceptions {
+    ): TaskUserReadingFlagDTO = wrapRetrofitExceptions(Pair(taskId, flag)) {
         val toSendMap = mapOf<String, String>("id" to taskId, "flag" to flag.toString())
         retrofitApi.setReadingFlag(auth.toBasic(), toSendMap)
     }

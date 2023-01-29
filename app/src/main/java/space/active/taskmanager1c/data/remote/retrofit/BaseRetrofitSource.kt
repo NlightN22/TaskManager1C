@@ -17,7 +17,7 @@ open class BaseRetrofitSource {
      * @throws ParseBackendException
      * @throws ConnectionException
      */
-    suspend fun <T> wrapRetrofitExceptions(block: suspend () -> T): T {
+    suspend fun <T> wrapRetrofitExceptions(query: Any? = null, block: suspend () -> T): T {
         return try {
             block()
         } catch (e: JsonDataException) {
@@ -25,17 +25,17 @@ open class BaseRetrofitSource {
         } catch (e: JsonEncodingException) {
             throw ParseBackendException( inEx = e)
         } catch (e: HttpException) {
-            throw transformBackendException(e)
+            throw transformBackendException(e, query)
         } catch (e: IOException) {
             throw ConnectionException(e)
         }
     }
 
-    private fun transformBackendException(e: HttpException): Throwable {
+    private fun transformBackendException(e: HttpException, query: Any?): Throwable {
         return try {
             val errorBody = e.response()!!.errorBody()!!.string()
             if (e.code() == 401) { throw AuthException}
-            BackendException(errorBody = errorBody, errorCode = e.code().toString())
+            BackendException(errorBody = errorBody, errorCode = e.code().toString(), query)
         } catch ( e: AuthException) {
             throw AuthException
         }

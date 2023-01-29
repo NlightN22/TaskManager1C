@@ -13,7 +13,6 @@ import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.dto.compareWithAndGetDiffs
 import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.data.remote.model.TaskListDto
-import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.Credentials
 import space.active.taskmanager1c.domain.repository.UpdateJobInterface
@@ -34,13 +33,16 @@ class UpdateJobInterfaceImpl
     override fun updateJob(
         credentials: Credentials,
         updateDelay: Long,
-        whoAmI: UserInput
+        whoAmI: UserInput,
+        skippedExceptions: Flow<List<Throwable>>
     ): Flow<Request<Any>> =
         channelFlow<Request<Any>> {
             var curTime = System.currentTimeMillis()
             logger.log(TAG, "outputSendJob start")
-            outputSendJob(credentials, whoAmI).collect {
-                send(it)
+            wrapToSkipExceptions(skippedExceptions) {
+                outputSendJob(credentials, whoAmI).collect {
+                    send(it)
+                }
             }
             logger.log(TAG, "outputSendJob stop ${System.currentTimeMillis() - curTime}ms")
             curTime = System.currentTimeMillis()
@@ -49,10 +51,15 @@ class UpdateJobInterfaceImpl
                 when (request) {
                     is SuccessRequest -> {
                         send(SuccessRequest(Any()))
-                        logger.log(TAG, "inputFetchJobFlow stop ${System.currentTimeMillis() - curTime}ms")
+                        logger.log(
+                            TAG,
+                            "inputFetchJobFlow stop ${System.currentTimeMillis() - curTime}ms"
+                        )
                         val resultListIDs = request.data
-                        updateReadingState(credentials, resultListIDs).collect {
-                            send(it)
+                        wrapToSkipExceptions(skippedExceptions) {
+                            updateReadingState(credentials, resultListIDs).collect {
+                                send(it)
+                            }
                         }
                     }
                     is PendingRequest -> send(PendingRequest())
@@ -61,6 +68,19 @@ class UpdateJobInterfaceImpl
             }
             delay(updateDelay)
         }.flowOn(ioDispatcher)
+
+    private suspend fun wrapToSkipExceptions(skippedException: Flow<List<Throwable>>, block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: Throwable) {
+            if (skippedException.first().contains(e)) {
+                logger.log(TAG, "skippedException ${e.toString()}")
+                e.printStackTrace()
+            } else {
+                throw e
+            }
+        }
+    }
 
 
     private fun updateReadingState(credentials: Credentials, currentListId: List<String>) =
@@ -147,7 +167,10 @@ class UpdateJobInterfaceImpl
         emit(SuccessRequest(Any()))
     }
 
-    override fun inputFetchJobFlow(credentials: Credentials, whoAmI: UserInput): Flow<Request<List<String>>> =
+    override fun inputFetchJobFlow(
+        credentials: Credentials,
+        whoAmI: UserInput
+    ): Flow<Request<List<String>>> =
         flow {
             emit(PendingRequest())
             val result: TaskListDto = taskApi.getTaskList(credentials.toAuthBasicDto())

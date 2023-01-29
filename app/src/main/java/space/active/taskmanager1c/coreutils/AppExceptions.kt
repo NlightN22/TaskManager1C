@@ -27,21 +27,45 @@ object TaskIsNewAndInSendingState :
 object TaskHasNotCorrectState :
     AppExceptions(text = UiText.Resource(R.string.exception_not_correct_status))
 
-class CantShowSnackBar:
-    AppExceptions(text = UiText.Resource(R.string.exception_show_snackbar, ))
+class CantShowSnackBar :
+    AppExceptions(text = UiText.Resource(R.string.exception_show_snackbar))
 
 class ParseBackendException(val inEx: Throwable) :
     AppExceptions(text = UiText.Resource(R.string.exception_parse_server_answer))
 
-class BackendException(val errorBody: String, val errorCode: String) : AppExceptions(
-    UiText.Resource(
-        R.string.exception_server_answer, errorCode, errorBody
-    )
-)
+class BackendException(
+    val errorBody: String,
+    val errorCode: String,
+    val sendToServerData: Any? = null
+) :
+    AppExceptions(
+        UiText.Resource(
+            R.string.exception_server_answer, errorCode, errorBody
+        )
+    ) {
+    override fun equals(other: Any?): Boolean {
+        if (other is BackendException) {
+            return (this.errorBody == other.errorBody &&
+                    this.errorCode == other.errorCode &&
+                    this.sendToServerData == other.sendToServerData)
+        }
+        return false
+    }
 
-object NotCorrectServerAddress : AppExceptions(text = UiText.Resource(R.string.exception_not_correct_URL))
+    override fun hashCode(): Int {
+        var hash = super.hashCode()
+        hash = 89 * hash + (this.errorCode.hashCode() ?: 0)
+        hash = 89 * hash + (this.errorBody.hashCode() ?: 0)
+        hash = 89 * hash + (this.sendToServerData?.hashCode() ?: 0)
+        return hash
+
+    }
+}
+
+object NotCorrectServerAddress :
+    AppExceptions(text = UiText.Resource(R.string.exception_not_correct_URL))
 
 class ConnectionException(val inEx: Throwable) :
     AppExceptions(UiText.Resource(R.string.exception_connection))
 
-object EncryptionException: AppExceptions(text = UiText.Resource(R.string.exception_encryption))
+object EncryptionException : AppExceptions(text = UiText.Resource(R.string.exception_encryption))

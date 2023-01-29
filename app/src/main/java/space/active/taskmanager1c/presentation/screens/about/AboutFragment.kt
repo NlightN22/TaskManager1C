@@ -28,7 +28,8 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
     private fun listeners() {
         binding.aboutAppContactsET.setOnClickListener {
             logger.log(TAG, "aboutAppContactsET click")
-            sendEmailToAuthor(binding.aboutAppContactsET.text.toString(),
+            sendEmailToAuthor(
+                emailTo = arrayOf(binding.aboutAppContactsET.text.toString()),
                 "${binding.aboutAppNameET.text} Feedback v.${binding.aboutAppVersionET.text}")
         }
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
@@ -41,8 +42,8 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
         }
     }
 
-    private fun sendEmailToAuthor(emailTo: String, subject: String) {
-        if (emailTo.isNotBlank() && subject.isNotBlank()) {
+    private fun sendEmailToAuthor(emailTo: Array<String>, subject: String) {
+        if (emailTo.isNotEmpty() && subject.isNotBlank()) {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:") // only email apps should handle this
                 putExtra(Intent.EXTRA_EMAIL, emailTo)

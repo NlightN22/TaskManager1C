@@ -16,8 +16,8 @@ class AuthorizationImpl @Inject constructor(
     private val taskApi: TaskApi
 ): Authorization {
 
-    override fun auth(username: String, password: String, serverAddress: String): Flow<Request<AuthUserDto>> = flow {
+    override fun auth(username: String, password: String): Flow<Request<AuthUserDto>> = flow {
             emit(PendingRequest())
-            emit(SuccessRequest(taskApi.authUser(AuthBasicDto(username,password),serverAddress).toUserDomain()))
+            emit(SuccessRequest(taskApi.authUser(AuthBasicDto(username,password)).toUserDomain()))
     }
 }

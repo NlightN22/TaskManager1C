@@ -1,5 +1,8 @@
 package space.active.taskmanager1c.presentation.screens
 
+import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.CantShowSnackBar
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.coreutils.logger.Logger
@@ -52,6 +56,11 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // errorEvent observer
+        baseMainVM.showExceptionDialogEvent.collectOnStart {
+            logger.log(TAG, "showExceptionDialogEvent collectLatest ${it.sendToServerData}")
+            showSendErrorDialog(it)
+        }
         // SnackBar observer
         baseMainVM.showSaveSnack.collectOnStart {
             showSaveCancelSnackBar(it.text, it.duration, lifecycleScope) {
@@ -74,6 +83,26 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             checkLoginState(login)
         }
         showNavigationLog()
+    }
+
+    var currentDialog: AlertDialog? = null
+    private fun showSendErrorDialog(backendException: BackendException) {
+        if (currentDialog != null) {
+            if (currentDialog!!.isShowing) return
+        }
+        logger.log(TAG, "showSendErrorDialog")
+        currentDialog = AlertDialog.Builder(context)
+            .setMessage(R.string.error_dialog_message)
+            .setTitle(R.string.error_dialog_title)
+            .setCancelable(true)
+            .setPositiveButton(R.string.error_dialog_ok) { _, _ ->
+                sendBackendException(backendException)
+            }
+            .setNegativeButton(R.string.error_dialog_cancel) { _, _ ->
+                baseMainVM.skipBackendException(backendException)
+            }
+            .create()
+        currentDialog!!.show()
     }
 
     private fun getLoginState(): Boolean {
@@ -277,5 +306,22 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         } catch (e: Throwable) {
             exceptionHandler(CantShowSnackBar())
         }
+    }
+
+    private fun sendBackendException(backendException: BackendException) {
+        val emailTo = arrayOf("admin@komponent-m.ru", "it@komponent-m.ru")
+        val emailSubject = "TaskManager1C backend error report"
+        logger.log(TAG, "sendBackendException ${backendException.sendToServerData}")
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+//            data = Uri.parse("mailto:") // only email apps should handle this
+            putExtra(Intent.EXTRA_EMAIL, emailTo)
+            putExtra(Intent.EXTRA_SUBJECT, emailSubject)
+            putExtra(Intent.EXTRA_TEXT, " To server: ${backendException.sendToServerData.toString()}" +
+                    "\nCode: ${backendException.errorCode}" +
+                    "\nBody ${backendException.errorBody}")
+        }
+        val shareIntent = Intent.createChooser(intent, null)
+        startActivity(shareIntent)
     }
 }

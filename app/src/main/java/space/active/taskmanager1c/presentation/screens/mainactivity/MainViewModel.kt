@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import space.active.taskmanager1c.coreutils.EmptyObject
+import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
@@ -46,6 +46,8 @@ class MainViewModel @Inject constructor(
     private val _exitEvent = MutableSharedFlow<Boolean>()
     val exitEvent = _exitEvent.asSharedFlow()
 
+    val showExceptionDialogEvent: SharedFlow<BackendException> = exceptionHandler.sendExceptionEvent
+
     /**
      *
      * Variable for stoppable job witch regular update data after userDomain login
@@ -56,7 +58,7 @@ class MainViewModel @Inject constructor(
     fun clearAndExit() {
         stopUpdateJob()
         viewModelScope.launch {
-            settings.clearSettings().collect { clearSettings->
+            settings.clearSettings().collect { clearSettings ->
                 when (clearSettings) {
                     is SuccessRequest -> {
                         clearAllTables().collectLatest {
@@ -115,8 +117,11 @@ class MainViewModel @Inject constructor(
                         /**
                         set update work here
                          */
-                        updateJobInterface.updateJob(getCredentials(), 1000L,
-                        settings.getUser()?.toUserInput()?: throw EmptyObject("userDomain"))
+                        updateJobInterface.updateJob(
+                            getCredentials(), 1000L,
+                            settings.getUser().toUserInput(),
+                            exceptionHandler.skipBackendException
+                            )
                             .catch { e ->
                                 exceptionHandler(e)
                                 //TODO add error counter
@@ -149,7 +154,10 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    //
+    fun skipBackendException(backendException: BackendException) {
+        exceptionHandler.skipBackendExceptions(backendException)
+    }
+
     override fun onCleared() {
         stopUpdateJob()
         super.onCleared()

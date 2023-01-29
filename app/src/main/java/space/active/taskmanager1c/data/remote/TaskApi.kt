@@ -11,7 +11,7 @@ import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTa
 import java.time.LocalDateTime
 
 interface TaskApi {
-    suspend fun authUser(auth: AuthBasicDto, serverAddress: String): UserDto
+    suspend fun authUser(auth: AuthBasicDto): UserDto
     suspend fun getTaskList(auth: AuthBasicDto): TaskListDto
     suspend fun sendNewTask(auth: AuthBasicDto, task: TaskDto): Request<TaskDto>
     suspend fun sendEditedTaskMappedChanges(

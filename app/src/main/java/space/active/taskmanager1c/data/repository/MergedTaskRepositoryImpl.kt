@@ -69,15 +69,15 @@ class MergedTaskRepositoryImpl constructor(
                     .debounce(300)
                     .distinctUntilChanged()
                     .flatMapLatest { filter ->
-                        val myId = myId.first()
+                        val myIdCur = myId.first()
                         val sortField = order.getSortFieldAndType().first
                         val sortType = order.getSortFieldAndType().second
                         val filterType: FilterType = filter.toFilterType()
-                        inputTaskRepository.sortedQuery(myId,filterType,sortField, sortType)
+                        inputTaskRepository.sortedQuery(myIdCur,filterType,sortField, sortType)
                     }
             }.combine(outputTaskRepository.outputTaskList) { inputList, outputList ->
-                val myId = myId.first()
-                combineListTasks(inputList, outputList, myId)
+                val myIdCur = myId.first()
+                combineListTasks(inputList, outputList, myIdCur)
             }.combine(inputTaskRepository.getUnreadIds()) {
                     input, unReadingIds ->
                 // replace reading state
@@ -130,7 +130,6 @@ class MergedTaskRepositoryImpl constructor(
             /**
              * return if output taskDomain is null
              */
-            logger.log(TAG, "return inExtraTask")
             logger.log(TAG, "return ${it.toTaskDomain(usersInputList).name}")
             return it.toTaskDomain(usersInputList)
         } ?: kotlin.run {

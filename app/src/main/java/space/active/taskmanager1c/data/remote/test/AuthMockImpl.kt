@@ -19,7 +19,7 @@ class AuthMockImpl : Authorization {
         pass = "test"
     )
 
-    override fun auth(username: String, password: String, serverAddress: String): Flow<Request<AuthUserDto>> = flow {
+    override fun auth(username: String, password: String): Flow<Request<AuthUserDto>> = flow {
         emit(PendingRequest())
         delay(1000)
         emit(

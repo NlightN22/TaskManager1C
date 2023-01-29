@@ -1,18 +1,22 @@
 package space.active.taskmanager1c.presentation.screens.mainactivity
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.ActivityMainBinding
 import space.active.taskmanager1c.presentation.screens.LOGIN_SUCCESSFUL
 import javax.inject.Inject
-import kotlin.system.exitProcess
 
 private const val TAG = "MainActivity"
 
@@ -36,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observers() {
+
     }
 
     private fun listeners() {
@@ -62,6 +67,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+
 
     private fun handleLoginBack(navController: NavController) {
         val previousState = navController.previousBackStackEntry?.savedStateHandle

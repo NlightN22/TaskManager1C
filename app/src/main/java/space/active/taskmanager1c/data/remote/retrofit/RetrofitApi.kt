@@ -12,16 +12,9 @@ import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTa
 import space.active.taskmanager1c.data.remote.model.reading_times.SetReadingTimeDTO
 
 interface RetrofitApi {
-//    tasks: get - получение списка задач
-//    tasks: post - обновление или создание новой задачи
-//    tasks\status: post - получение времени чтения и времени последнего сообщения
-//    tasks\status\time: post - обновление времени чтения
-//    tasks\status\unread: post - установка\снятие флага
-//    tasks\messages: get - получение сообщения по task id
-
     /**
      * GET
-     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks
+     * https://host.name/torg_develop/hs/taskmgr/tasks
      */
     @GET("tasks")
     suspend fun getTasks(
@@ -31,7 +24,7 @@ interface RetrofitApi {
     /**
      * POST
      * save new task
-     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks
+     * https://host.name/torg_develop/hs/taskmgr/tasks
      */
     @POST("tasks")
     suspend fun sendNew(
@@ -42,7 +35,7 @@ interface RetrofitApi {
     /**
      * POST
      * save tasks changes
-     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks/taskId
+     * https://host.name/torg_develop/hs/taskmgr/tasks/taskId
     {
     "id: "dfsdsd",
     "name": "11111Фразы покупателей в магазинах"
@@ -59,7 +52,7 @@ interface RetrofitApi {
     /**
      * GET
      * read messages for task
-     * http://172.16.17.242/torg_develop/hs/tasks/messages?id=4ce6cb44-a3c4-11ea-8d5a-00155d28010b
+     * https://host.name/torg_develop/hs/tasks/messages?id=4ce6cb44-a3c4-11ea-8d5a-00155d28010b
      */
     @GET("tasks/messages")
     suspend fun getMessages(
@@ -70,11 +63,11 @@ interface RetrofitApi {
     /**
      * POST
      * send messages for task
-     * http://172.16.17.242/torg_develop/hs/taskmgr/messages?id=4ce6cb44-a3c4-11ea-8d5a-00155d28010b
-    {
-    "id": "f54c2dfb-59ab-11ed-a023-da2dec3fdf49",
-    "text": "This is a test HTTP-service message for new POST message request!!!"
-    }
+     * https://host.name/torg_develop/hs/taskmgr/messages?id=4ce6cb44-a3c4-11ea-8d5a-00155d28010b
+     *   {
+     *   "id": "f54c2dfb-59ab-11ed-a023-da2dec3fdf49",
+     *   "text": "This is a test HTTP-service message for new POST message request!!!"
+     *   }
      */
     @POST("tasks/messages")
     suspend fun sendMessages(
@@ -85,7 +78,7 @@ interface RetrofitApi {
     /**
      * POST
      * messages read time
-     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks/status
+     * https://host.name/torg_develop/hs/taskmgr/tasks/status
      */
     @POST("tasks/status")
     suspend fun getReadingTimes(
@@ -96,7 +89,7 @@ interface RetrofitApi {
     /**
      * POST
      * update task read time
-     * http://172.16.17.242/torg_develop/hs/taskmgr/tasks/status/time
+     * https://host.name/torg_develop/hs/taskmgr/tasks/status/time
     "id": "f54c2dfb-59ab-11ed-a023-da2dec3fdf49",
     "readTime": "2099-12-31T23:59:59",
     "messageTime" : "2099-12-31T23:59:59"
@@ -110,8 +103,9 @@ interface RetrofitApi {
     /**
      * POST
      * enable/disable unread flag for user
-    "id": "f54c2dfb-59ab-11ed-a023-da2dec3fdf49",
-    "flag": true
+     * "id": "f54c2dfb-59ab-11ed-a023-da2dec3fdf49",
+     * "flag": true
+     * https://host.name/torg_develop/hs/taskmgr/tasks/status/unread
      */
     @POST("tasks/status/unread")
     suspend fun setReadingFlag(
@@ -122,6 +116,7 @@ interface RetrofitApi {
     /**
      * GET
      * user authorization
+     * https://host.name/torg_develop/hs/taskmgr/auth
      */
     @GET("auth")
     suspend fun authUser(@Header("Authorization") auth: String): UserDto

@@ -42,16 +42,26 @@ class InputTaskRepositoryImpl @Inject constructor(
     override suspend fun getTask(taskId: String): TaskInputHandledWithUsers? =
         inputDao.getTask(taskId)
 
-    // todo add delete taskDomains not in input list
     override suspend fun insertTasks(
         taskInputList: List<TaskInputHandledWithUsers>
     ) {
         logger.log(TAG, "Count taskInputList: ${taskInputList.size}")
+        // delete not coming
+        deleteNotComing(taskInputList.map { it.taskInput.id })
         var saveCounter = 0
+        // insert changed
         taskInputList.forEach {
             saveCounter += insertTask(it)
         }
         logger.log(TAG, "Count saved inputTasks: $saveCounter")
+    }
+
+    private suspend fun deleteNotComing(listIds: List<String>) {
+        val notInDbIds = inputDao.getIdsNotInList(listIds)
+        logger.log(TAG, "Count tasks to delete: ${notInDbIds.size}")
+        notInDbIds.forEach {
+            inputDao.deleteTask(it)
+        }
     }
 
     private suspend fun insertTask(taskHandled: TaskInputHandledWithUsers): Int {

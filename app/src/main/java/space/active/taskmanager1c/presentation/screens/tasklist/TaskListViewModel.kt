@@ -86,7 +86,7 @@ class TaskListViewModel @Inject constructor(
         logger.log(TAG, "collectListTasks")
         collectJob?.cancel()
         collectJob = viewModelScope.launch {
-            filteredInput.collectLatest { inputList ->
+            filteredInput.collect { inputList ->
                 checkForInputListAndTryFetch(inputList)
             }
         }
