@@ -17,15 +17,21 @@ import space.active.taskmanager1c.domain.models.UserDomain.Companion.fromDialogI
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.utils.*
 import java.util.*
+import javax.inject.Inject
 
 
 private const val TAG = "TaskDetailedFragment"
 
+@AndroidEntryPoint
 class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
+
+
 
     lateinit var binding: FragmentTaskDetailedBinding
     lateinit var messagesAdapter: MessagesAdapter
     private val viewModel by viewModels<TaskDetailedViewModel>()
+
+    @Inject lateinit var taskStatusDialog: TaskStatusDialog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -49,6 +55,13 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun observers() {
+        //observe status dialog
+        viewModel.statusAlertEvent.collectOnStart {
+            taskStatusDialog.showDialog(it.second,requireContext()) {
+                viewModel.saveEditChanges(it.first)
+            }
+        }
+
 
         //observe save event
         viewModel.validationEvent.collectOnStart {
@@ -102,7 +115,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         showSnackBar(viewModel.showSnackBar)
 
         // Save observer
-        viewModel.saveTaskEvent.collectOnStart {
+        viewModel.saveNewTaskEvent.collectOnStart {
             baseMainVM.saveTask(it)
             if (it is SaveEvents.Breakable) {
                 onBackClick()
@@ -190,10 +203,10 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.detailed_cancel -> {
-                    viewModel.saveEditChanges(TaskChangesEvents.Status(false))
+                    viewModel.checkStatusDialog(TaskChangesEvents.Status(false))
                 }
                 R.id.detailed_ok -> {
-                    viewModel.saveEditChanges(TaskChangesEvents.Status(true))
+                    viewModel.checkStatusDialog(TaskChangesEvents.Status(true))
                 }
                 R.id.menu_save -> {
                     viewModel.saveNewTask()

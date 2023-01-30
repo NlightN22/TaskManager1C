@@ -18,11 +18,14 @@ import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
 import space.active.taskmanager1c.domain.models.TaskListOrderTypes
 import space.active.taskmanager1c.presentation.screens.BaseFragment
+import space.active.taskmanager1c.presentation.utils.TaskStatusDialog
 import space.active.taskmanager1c.presentation.utils.setIcon09State
 import space.active.taskmanager1c.presentation.utils.setIconAZState
+import javax.inject.Inject
 
 private const val TAG = "TaskListFragment"
 
+@AndroidEntryPoint
 class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
     private lateinit var binding: FragmentTaskListBinding
@@ -32,6 +35,9 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     private lateinit var recyclerTasks: TaskListAdapter
     private lateinit var orderMenu: PopupMenu
 
+    @Inject lateinit var taskStatusDialog: TaskStatusDialog
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskListBinding.bind(view)
@@ -39,7 +45,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
         recyclerTasks = TaskListAdapter(object : TaskActionListener {
             override fun onTaskStatusClick(taskDomain: TaskDomain) {
-                viewModel.changeTaskStatus(taskDomain)
+                viewModel.checkStatusDialog(taskDomain)
             }
 
             override fun onTaskClick(taskDomain: TaskDomain) {
@@ -77,6 +83,12 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun observers() {
+        //alert dialog
+        viewModel.statusAlertEvent.collectOnStart {
+            taskStatusDialog.showDialog(it.second, requireContext()) {
+                viewModel.changeTaskStatus(it.first)
+            }
+        }
 
         // start updateJob in MainVM
         viewModel.startUpdateJob.collectOnStart {

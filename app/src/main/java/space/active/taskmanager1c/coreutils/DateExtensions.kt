@@ -75,7 +75,7 @@ fun ZonedDateTime.nowDiffInDays(): Int {
  * sample 2022-04-07T00:52:37
  */
 fun ZonedDateTime?.toDTO(): String {
-    return this?.toLocalDateTime().toString() ?: ""
+    return this?.toLocalDateTime()?.toString() ?: ""
 }
 
 /**

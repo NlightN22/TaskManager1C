@@ -70,18 +70,18 @@ class SettingsRepositoryImpl @Inject constructor(
         } ?: throw EmptyObject("serverAddress")
     }
 
-    override fun saveServerAddress(serverAddress: String): Flow<Request<Any>> = flow {
-        emit(PendingRequest())
+    override suspend fun saveServerAddress(serverAddress: String) {
         settingsDao.getSettings()?.let {
             settingsDao.insert(it.copy(serverAddress = serverAddress.toEncryptedData()))
         } ?: kotlin.run {
             settingsDao.insert(
-            UserSettings(
-                serverAddress = serverAddress.toEncryptedData()
-            ))
+                UserSettings(
+                    serverAddress = serverAddress.toEncryptedData()
+                )
+            )
         }
-        emit(SuccessRequest(Any()))
     }
+
 
     override fun clearSettings(): Flow<Request<Any>> = flow {
         emit(PendingRequest())
@@ -97,4 +97,10 @@ class SettingsRepositoryImpl @Inject constructor(
             emit(cred)
         }?: throw EmptyObject("Credentials")
     }
+
+    override suspend fun saveSkipStatusAlert(state: Boolean) {
+        settingsDao.updateStatusAlert(state)
+    }
+
+    override suspend fun getSkipStatusAlert(): Boolean = settingsDao.getStatusAlert()
 }

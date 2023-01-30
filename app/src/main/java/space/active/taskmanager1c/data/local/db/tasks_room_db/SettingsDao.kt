@@ -18,4 +18,10 @@ interface SettingsDao {
     @Query("DELETE FROM UserSettings")
     suspend fun deleteAll()
 
+    @Query("UPDATE UserSettings SET skipStatusAlert = :status WHERE id = 1")
+    suspend fun updateStatusAlert(status: Boolean)
+
+    @Query("SELECT UserSettings.skipStatusAlert FROM UserSettings WHERE id = 1")
+    suspend fun getStatusAlert(): Boolean
+
 }

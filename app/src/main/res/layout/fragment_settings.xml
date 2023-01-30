@@ -7,6 +7,19 @@
     android:layout_height="match_parent"
     tools:context=".presentation.screens.settings.SettingsFragment">
 
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switchSkipStatusAlert"
+        style="@style/Switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/settings_alert_status_ignore"
+        app:layout_constraintBottom_toTopOf="@+id/settingsUsername"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:checked="true" />
+
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/settingsUsername"
         style="@style/CardViewGlobal"
@@ -100,5 +113,7 @@
         app:menu="@menu/menu_save_cancel"
         style="@style/BottomMenu"
         tools:ignore="MissingConstraints" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

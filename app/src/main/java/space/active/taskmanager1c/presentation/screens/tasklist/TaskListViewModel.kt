@@ -14,6 +14,7 @@ import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
+import space.active.taskmanager1c.presentation.utils.TaskStatusDialog
 import javax.inject.Inject
 
 private const val TAG = "TaskListViewModel"
@@ -38,6 +39,10 @@ class TaskListViewModel @Inject constructor(
 
     private val _saveTaskEvent = MutableSharedFlow<SaveEvents>()
     val saveTaskEvent = _saveTaskEvent.asSharedFlow()
+
+    private val _statusAlertEvent =
+        MutableSharedFlow<Pair<TaskDomain, TaskStatusDialog.DialogParams>>()
+    val statusAlertEvent = _statusAlertEvent.asSharedFlow()
 
     private val _incomeSavedId = MutableSharedFlow<String>() // for block taskDomains in list
 
@@ -148,6 +153,24 @@ class TaskListViewModel @Inject constructor(
                     is PendingRequest -> {}
                     else -> {}
                 }
+            }
+        }
+    }
+
+    fun checkStatusDialog(taskDomainIn: TaskDomain) {
+        viewModelScope.launch(ioDispatcher) {
+            if (settings.getSkipStatusAlert()) {
+                changeTaskStatus(taskDomainIn)
+            } else {
+                val ok = TaskChangesEvents.Status(true)
+                val userIs = whoUserInTask(taskDomainIn, whoAmI.first())
+                val newTaskStatus = GetTaskStatus()(userIs, ok.status)
+                _statusAlertEvent.emit(
+                    Pair(
+                        taskDomainIn,
+                        TaskStatusDialog.DialogParams(taskDomainIn.name, newTaskStatus)
+                    )
+                )
             }
         }
     }

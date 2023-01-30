@@ -10,6 +10,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 private const val BASE_URL = "https://taskmgr.komponent-m.ru/torg_develop/hs/taskmgr/"
@@ -32,6 +33,7 @@ class RetrofitModule {
 
     fun provideOkHttpClient(): OkHttpClient =
         OkHttpClient().newBuilder()
+            .readTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(provideLogginInterceptor())
             .build()
 

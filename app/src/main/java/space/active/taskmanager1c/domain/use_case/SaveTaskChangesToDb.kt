@@ -17,6 +17,7 @@ class SaveTaskChangesToDb @Inject constructor(
     private val exceptionHandler: ExceptionHandler,
     private val logger: Logger
 ) {
+    // todo add update tasks in output db cache if exist
     suspend operator fun invoke(taskDomain: TaskDomain) {
         logger.log(TAG, "SaveTaskChangesToDb: $taskDomain")
         repository.editTask(taskDomain).collectLatest {

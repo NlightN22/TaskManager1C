@@ -87,7 +87,7 @@ class LoginViewModel @Inject constructor(
         val addressAsset: String? = loadFromAsset.invoke()
         addressAsset?.let {
             if (validate.server(it)) {
-                settings.saveServerAddress(it).collect {}
+                settings.saveServerAddress(it)
             }
         }
     }
@@ -174,12 +174,13 @@ class LoginViewModel @Inject constructor(
                     exceptions = true
                 }
                 .collect { }
-            settings.saveServerAddress(serverAddress)
-                .catch {
-                    exceptionHandler(it)
-                    exceptions = true
-                }
-                .collect {}
+            try {
+                settings.saveServerAddress(serverAddress)
+
+            } catch (e: Exception) {
+                exceptionHandler(e)
+                exceptions = true
+            }
             settings.savePassword(pass)
                 .catch {
                     exceptionHandler(it)

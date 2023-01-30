@@ -14,9 +14,8 @@ data class UserSettings (
     val username: EncryptedData? = null,
     val password: EncryptedData? = null,
     val serverAddress: EncryptedData? = null,
+    val skipStatusAlert: Boolean = false,
 ) {
-
-
     fun toUserInput() = UserInput(
         userId = this.userId ?: throw EmptyObject("username"),
         userName = this.username?.getString() ?: throw EmptyObject("password")

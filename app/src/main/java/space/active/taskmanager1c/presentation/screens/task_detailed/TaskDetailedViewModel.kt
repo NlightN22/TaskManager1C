@@ -18,6 +18,7 @@ import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
+import space.active.taskmanager1c.presentation.utils.TaskStatusDialog
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -49,6 +50,10 @@ class TaskDetailedViewModel @Inject constructor(
     private val _validationEvent = MutableSharedFlow<Boolean>()
     val validationEvent = _validationEvent.asSharedFlow()
 
+    private val _statusAlertEvent =
+        MutableSharedFlow<Pair<TaskChangesEvents.Status, TaskStatusDialog.DialogParams>>()
+    val statusAlertEvent = _statusAlertEvent.asSharedFlow()
+
     private val _expandState = MutableStateFlow(TaskDetailedExpandState())
     val expandState = _expandState.asStateFlow()
 
@@ -59,8 +64,8 @@ class TaskDetailedViewModel @Inject constructor(
     private val _showDialogEvent = MutableSharedFlow<TaskDetailedDialogs>()
     val showDialogEvent = _showDialogEvent.asSharedFlow()
 
-    private val _saveTaskEvent = MutableSharedFlow<SaveEvents>()
-    val saveTaskEvent = _saveTaskEvent.asSharedFlow()
+    private val _saveNewTaskEvent = MutableSharedFlow<SaveEvents>()
+    val saveNewTaskEvent = _saveNewTaskEvent.asSharedFlow()
 
     private val _showSnackBar = MutableSharedFlow<UiText>()
     val showSnackBar = _showSnackBar.asSharedFlow()
@@ -266,12 +271,32 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
+    fun checkStatusDialog(saveEvents: TaskChangesEvents.Status) {
+        viewModelScope.launch(ioDispatcher) {
+            if (settings.getSkipStatusAlert()) {
+                saveEditChanges(saveEvents)
+            } else {
+                val curTaskDomain: TaskDomain? = currentTaskDomain.first()
+                curTaskDomain?.let {
+                    val userIs = whoUserInTask(it, whoAmI.first())
+                    val newTaskStatus = GetTaskStatus()(userIs, saveEvents.status)
+                    _statusAlertEvent.emit(
+                        Pair(
+                            saveEvents,
+                            TaskStatusDialog.DialogParams(it.name, newTaskStatus)
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     fun saveEditChanges(saveEvents: TaskChangesEvents) {
         viewModelScope.launch {
             val res = validateChangeEvents(saveEvents)
             if (_taskState.value.id.isNotBlank()) {
                 res?.let {
-                    _saveTaskEvent.emit(res)
+                    _saveNewTaskEvent.emit(res)
                 }
             }
         }
@@ -282,7 +307,7 @@ class TaskDetailedViewModel @Inject constructor(
      */
     private suspend fun validateChangeEvents(event: TaskChangesEvents): SaveEvents? {
         var saveEvent: SaveEvents? = null
-        var curTaskDomain: TaskDomain? = currentTaskDomain.first()
+        val curTaskDomain: TaskDomain? = currentTaskDomain.first()
         val textChangeDelay = 1
         curTaskDomain?.let { task ->
             var changedTaskDomain: TaskDomain = task

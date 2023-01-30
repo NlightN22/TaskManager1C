@@ -105,7 +105,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         currentDialog!!.show()
     }
 
-    private fun getLoginState(): Boolean {
+    fun getLoginState(): Boolean {
         val currentStateHandle = findNavController().currentBackStackEntry?.savedStateHandle
 
         val previousLogin =

@@ -16,6 +16,10 @@
     <string name="menu_new">New</string>
     <string name="menu_save">Save</string>
 
+    <string name="status_dialog_message">для задачи:\n \"%s\"\n\nОтключить оповещение можно в настройках</string>
+    <string name="status_dialog_title">Установить статус \"%s\"?</string>
+    <string name="status_dialog_ok">Да</string>
+    <string name="status_dialog_cancel">Отмена</string>
     <string name="error_dialog_message">Вы хотите отправить отчет об ошибке?</string>
     <string name="error_dialog_title">Ошибки на сервере</string>
     <string name="error_dialog_ok">OK</string>
@@ -96,4 +100,5 @@
     <string name="error_new_task_send_message">Ошибка отправки сообщения. Сохраните новую задачу</string>
     <string name="exception_not_correct_URL">Некорректный адрес сервера</string>
     <string name="exception_encryption">Ошибка шифрования. Сообщите о проблеме разработчику</string>
+    <string name="settings_alert_status_ignore">Отключить уведомления об изменении статуса</string>
 </resources>

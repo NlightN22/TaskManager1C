@@ -11,7 +11,9 @@ interface SettingsRepository {
     fun saveUser(userDomain: UserDomain): Flow<Request<Any>>
     fun savePassword(pass: String): Flow<Request<Any>>
     suspend fun getServerAddress(): String
-    fun saveServerAddress(serverAddress: String): Flow<Request<Any>>
+    suspend fun saveServerAddress(serverAddress: String)
     fun clearSettings(): Flow<Request<Any>>
     fun getCredentials(): Flow<Credentials>
+    suspend fun saveSkipStatusAlert(state: Boolean)
+    suspend fun getSkipStatusAlert(): Boolean
 }

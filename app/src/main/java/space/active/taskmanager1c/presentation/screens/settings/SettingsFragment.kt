@@ -2,9 +2,9 @@ package space.active.taskmanager1c.presentation.screens.settings
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.FragmentSettingsBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
@@ -30,10 +30,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     }
 
     private fun loginStateToViewModel() {
-        val previousDestId = findNavController().previousBackStackEntry?.destination?.id
-        previousDestId?.let {
-            viewModel.setServerAddressEditState(it == R.id.loginFragment)
-        }
+        viewModel.setSettingsViewState(getLoginState())
     }
 
     override fun navigateToLogin() {
@@ -49,7 +46,14 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             if (it) {onBackClick()}
         }
 
-        viewModel.viewState.collectOnStart {
+        viewModel.visibleState.collectOnCreated {
+            binding.settingsUsername.isVisible = it.userName
+            binding.settingsUserId.isVisible = it.userId
+            binding.settingsServerAddressCard.isVisible = it.serverAddress
+            binding.switchSkipStatusAlert.isVisible = it.skipStatusAlert
+        }
+
+        viewModel.viewState.collectOnCreated {
             binding.settingsUsernameET.setText(it.userName)
             binding.settingsUserIdET.setText(it.userId)
             binding.settingsServerAddressET.setText(it.serverAddress)
@@ -57,15 +61,23 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             binding.settingsServerAddressTIL.error = it.addressError?.getString(requireContext())
             binding.settingsServerAddressCard.setState(enabled = it.editServerAddress)
             binding.settingsServerAddressTIL.setState(enabled = it.editServerAddress, editable = it.editServerAddress)
-
+            binding.switchSkipStatusAlert.isChecked = it.skipStatusAlert
         }
     }
 
     private fun listeners() {
+        binding.switchSkipStatusAlert.setOnCheckedChangeListener { buttonView, isChecked ->
+            viewModel.changeStatusAlert(isChecked)
+        }
+
+        binding.settingsServerAddressET.addTextChangedListener {
+            viewModel.changeServerAddressState(it?.toString() ?: "")
+        }
+
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_save -> {
-                    viewModel.saveSettings(binding.settingsServerAddressET.text.toString())
+                    viewModel.saveSettings()
                 }
                 R.id.menu_cancel -> {
                     onBackClick()
