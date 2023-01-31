@@ -57,10 +57,12 @@
     <string name="menu_i_didnt_read">Непрочитано</string>
     <string name="menu_all_tasks">Все</string>
     <string name="menu_task_unread">Не/прочитано</string>
-    <string name="menu_order_name">Наименование</string>
-    <string name="menu_order_performer">Исполнитель</string>
-    <string name="menu_order_start_date">Дата начала</string>
-    <string name="menu_order_end_date">Дата окончания</string>
+    <string name="menu_order_name">Наименование %s</string>
+    <string name="menu_order_performer">Исполнитель %s</string>
+    <string name="menu_order_start_date">Дата начала %s</string>
+    <string name="menu_order_end_date">Дата окончания %s</string>
+    <string name="menu_order_asc">(по воз.)</string>
+    <string name="menu_order_desc">(по уб.)</string>
     <string name="exit_toast">Нажмите назад для выхода</string>
 <!--    TaskDomain statuses-->
     <string name="New">Новая</string>

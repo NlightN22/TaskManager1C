@@ -35,7 +35,6 @@ class SettingsViewModel @Inject constructor(
 
     val validateCredentials = ValidateCredentials()
 
-
     private val _saveEvent = MutableSharedFlow<Boolean>()
     val saveEvent = _saveEvent.asSharedFlow()
 
@@ -46,7 +45,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val user = wrapGetSettings { settings.getUser().name }
             val id = wrapGetSettings { settings.getUser().id }
-            val server = wrapGetSettings { settings.getServerAddress() }
+            val server = wrapGetSettings { settings.getServerAddress() } //todo get from base_url
             _viewState.value = _viewState.value.copy(
                 userId = id,
                 userName = user,

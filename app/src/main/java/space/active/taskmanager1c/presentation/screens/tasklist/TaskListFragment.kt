@@ -1,11 +1,13 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.forEach
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
@@ -18,9 +20,7 @@ import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
 import space.active.taskmanager1c.domain.models.TaskListOrderTypes
 import space.active.taskmanager1c.presentation.screens.BaseFragment
-import space.active.taskmanager1c.presentation.utils.TaskStatusDialog
-import space.active.taskmanager1c.presentation.utils.setIcon09State
-import space.active.taskmanager1c.presentation.utils.setIconAZState
+import space.active.taskmanager1c.presentation.utils.*
 import javax.inject.Inject
 
 private const val TAG = "TaskListFragment"
@@ -35,7 +35,8 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     private lateinit var recyclerTasks: TaskListAdapter
     private lateinit var orderMenu: PopupMenu
 
-    @Inject lateinit var taskStatusDialog: TaskStatusDialog
+    @Inject
+    lateinit var taskStatusDialog: TaskStatusDialog
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -112,25 +113,53 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
         // order sate for order menu
         viewModel.bottomOrder.collectOnStart { type ->
+            val selected: ColorStateList =
+                resources.getColorStateList(
+                    R.color.task_list_status_completed,
+                    resources.newTheme()
+                )
+            val notSelected: ColorStateList =
+                resources.getColorStateList(R.color.bottom_menu_icon, resources.newTheme())
+            orderMenu.menu.forEach {
+                it.iconTintList = notSelected
+            }
             with(orderMenu.menu) {
                 when (type) {
                     is TaskListOrderTypes.Name -> {
-                        findItem(R.id.orderName).setIconAZState(type.desc, requireContext())
+                        findItem(R.id.orderName).apply {
+                            setIconAZState(type.desc, requireContext())
+                            setTitleOrder(type.desc, requireContext(), R.string.menu_order_name)
+                            iconTintList = selected
+                        }
                     }
                     is TaskListOrderTypes.EndDate -> {
-                        findItem(R.id.orderEndDate).setIcon09State(type.desc, requireContext())
+                        findItem(R.id.orderEndDate).apply {
+                            setIcon09State(type.desc, requireContext())
+                            setTitleOrder(type.desc, requireContext(), R.string.menu_order_end_date)
+                            iconTintList = selected
+                        }
                     }
                     is TaskListOrderTypes.StartDate -> {
-                        findItem(R.id.orderStartDate).setIcon09State(
-                            type.desc,
-                            requireContext()
-                        )
+                        findItem(R.id.orderStartDate).apply {
+                            setIcon09State(type.desc, requireContext())
+                            setTitleOrder(
+                                type.desc,
+                                requireContext(),
+                                R.string.menu_order_start_date
+                            )
+                            iconTintList = selected
+                        }
                     }
                     is TaskListOrderTypes.Performer -> {
-                        findItem(R.id.orderPerformer).setIconAZState(
-                            type.desc,
-                            requireContext()
-                        )
+                        findItem(R.id.orderPerformer).apply {
+                            setIconAZState(type.desc, requireContext())
+                            setTitleOrder(
+                                type.desc,
+                                requireContext(),
+                                R.string.menu_order_performer
+                            )
+                            iconTintList = selected
+                        }
                     }
                 }
             }
@@ -167,11 +196,24 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         orderMenu.inflate(R.menu.menu_tasklist_order)
         orderMenu.setForceShowIcon(true)
         orderMenu.gravity = Gravity.START
+        orderMenu.menu.findItem(R.id.orderName)
+            .setTitleOrder(false, requireContext(), R.string.menu_order_name)
+        orderMenu.menu.findItem(R.id.orderPerformer)
+            .setTitleOrder(false, requireContext(), R.string.menu_order_performer)
+        orderMenu.menu.findItem(R.id.orderStartDate)
+            .setTitleOrder(false, requireContext(), R.string.menu_order_start_date)
+        orderMenu.menu.findItem(R.id.orderEndDate)
+            .setTitleOrder(false, requireContext(), R.string.menu_order_end_date)
+
     }
 
     private fun listeners() {
         binding.searchEditText.addTextChangedListener { editable ->
             viewModel.find(editable)
+        }
+
+        binding.searchEditText.setOnItemClickListener { parent, view, position, id ->
+            hideKeyboardFrom(requireContext(), binding.searchEditText)
         }
 
         // options menu

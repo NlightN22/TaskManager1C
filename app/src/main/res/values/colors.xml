@@ -15,6 +15,7 @@
     <color name="editable_text">#1C0000</color>
     <color name="not_editable_text">#E1DCDC</color>
     <color name="expandable_group_background">#342B2B</color>
+    <color name="expandable_area_background">#464242</color>
     <color name="title_not_editable">#FCC9C9</color>
     <color name="title_editable">#1C0000</color>
     <color name="button_not_pressed">#F25149</color>

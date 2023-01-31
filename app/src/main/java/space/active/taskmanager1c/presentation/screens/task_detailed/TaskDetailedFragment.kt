@@ -3,6 +3,8 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
+import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -26,12 +28,12 @@ private const val TAG = "TaskDetailedFragment"
 class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
 
-
     lateinit var binding: FragmentTaskDetailedBinding
     lateinit var messagesAdapter: MessagesAdapter
     private val viewModel by viewModels<TaskDetailedViewModel>()
 
-    @Inject lateinit var taskStatusDialog: TaskStatusDialog
+    @Inject
+    lateinit var taskStatusDialog: TaskStatusDialog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -57,7 +59,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun observers() {
         //observe status dialog
         viewModel.statusAlertEvent.collectOnStart {
-            taskStatusDialog.showDialog(it.second,requireContext()) {
+            taskStatusDialog.showDialog(it.second, requireContext()) {
                 viewModel.saveEditChanges(it.first)
             }
         }
@@ -195,9 +197,12 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     @SuppressLint("ClickableViewAccessibility")
     private fun listeners() {
 
+        binding.detailedScrollView
+
         binding.messageTIL.setEndIconOnClickListener {
             val text: String = binding.messageInput.text?.toString() ?: ""
             viewModel.sendMessage(text)
+            hideKeyboardFrom(requireContext(), binding.messageInput)
         }
 
         binding.bottomMenu.setOnItemSelectedListener { menuItem ->
@@ -320,13 +325,17 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun renderMainDetailed(state: Boolean) {
         binding.taskCoPerformersCard.isVisible = state
         binding.taskObserversCard.isVisible = state
-        binding.expandMainDetailCardImage.setImageResource(
-            if (state) {
-                R.drawable.ic_expandable_up_arrow
-            } else {
-                R.drawable.ic_expandable_down_arrow
+        binding.expandMainDetailCard.forEach {
+            if (it is ImageView) {
+                it.setImageResource(
+                    if (state) {
+                        R.drawable.ic_expandable_up_arrow
+                    } else {
+                        R.drawable.ic_expandable_down_arrow
+                    }
+                )
             }
-        )
+        }
     }
 
     private fun renderDescription(state: Boolean) {
@@ -338,13 +347,17 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         binding.taskBaseObjectCard.isVisible = state
         binding.taskBaseCard.isVisible = state
         binding.taskInnerCardView.isVisible = state
-        binding.expandTaskDescriptionCardImage.setImageResource(
-            if (state) {
-                R.drawable.ic_expandable_up_arrow
-            } else {
-                R.drawable.ic_expandable_down_arrow
+        binding.expandTaskDescriptionCard.forEach {
+            if (it is ImageView) {
+                it.setImageResource(
+                    if (state) {
+                        R.drawable.ic_expandable_up_arrow
+                    } else {
+                        R.drawable.ic_expandable_down_arrow
+                    }
+                )
             }
-        )
+        }
     }
 
     private fun setupMultiChooseDialog() {
@@ -390,8 +403,8 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 )
             }
         }
-        EditTextDialog.setupListener(parentFragmentManager,this, REQUEST_TITLE, listener)
-        EditTextDialog.setupListener(parentFragmentManager,this, REQUEST_DESCRIPTION, listener)
+        EditTextDialog.setupListener(parentFragmentManager, this, REQUEST_TITLE, listener)
+        EditTextDialog.setupListener(parentFragmentManager, this, REQUEST_DESCRIPTION, listener)
     }
 
     companion object {
