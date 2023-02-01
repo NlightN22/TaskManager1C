@@ -15,8 +15,8 @@ class SaveNewTaskToDb @Inject constructor(
     private val exceptionHandler: ExceptionHandler,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    operator fun invoke(taskDomain: TaskDomain): Flow<Request<Any>> =
-        repository.createNewTask(taskDomain)
+    operator fun invoke(taskDomain: TaskDomain, myId:String): Flow<Request<Any>> =
+        repository.createNewTask(taskDomain, myId)
             .catch {
                 exceptionHandler(it)
             }

@@ -33,7 +33,6 @@ class TaskDetailedViewModel @Inject constructor(
     private val saveNewTaskToDb: SaveNewTaskToDb,
     private val validate: Validate,
     private val exceptionHandler: ExceptionHandler,
-    private val getDetailedTask: GetDetailedTask,
     private val getTaskMessages: GetTaskMessages,
     private val sendTaskMessages: SendTaskMessages,
     private val setTaskAndMessageReadingTime: SetTaskAndMessageReadingTime,
@@ -94,10 +93,10 @@ class TaskDetailedViewModel @Inject constructor(
         }
     }
 
-    private val currentTaskDomain: Flow<TaskDomain?> = _inputTaskId.flatMapLatest {
-        if (it.isNotBlank()) {
+    private val currentTaskDomain: Flow<TaskDomain?> = _inputTaskId.flatMapLatest { taskId ->
+        if (taskId.isNotBlank()) {
             logger.log(TAG, "collect from DB")
-            getDetailedTask(it)
+            repository.getTask(taskId)
         } else {
             logger.log(TAG, "collect from mutable")
             _newTaskDomain
@@ -260,7 +259,7 @@ class TaskDetailedViewModel @Inject constructor(
 
                     return@launch
                 }
-                saveNewTaskToDb(task).collect { request ->
+                saveNewTaskToDb(task, whoAmI.first().id).collect { request ->
                     when (request) {
                         is SuccessRequest -> _validationEvent.emit(true)
                         is ErrorRequest -> exceptionHandler(request.exception)

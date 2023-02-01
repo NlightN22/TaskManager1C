@@ -83,7 +83,7 @@ interface TaskInputDao {
     }
 
     @Query("DELETE FROM OutputTask WHERE outputId = :outputId")
-    abstract suspend fun deleteOutputTask(outputId: Int)
+    suspend fun deleteOutputTask(outputId: Int)
 
     @Query("SELECT * FROM UserInput")
     fun getUsersFlow(): Flow<List<UserInput>>
@@ -97,6 +97,6 @@ interface TaskInputDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUser(userInput: UserInput)
 
-    @Query("UPDATE TaskInputHandled SET unreadTag = :unreadTag WHERE id = :taskId")
-    suspend fun updateUnreadTag(taskId: String, unreadTag: Boolean)
+    @Query("UPDATE TaskInputHandled SET unreadTag = :unreadTag, version = :version WHERE id = :taskId")
+    suspend fun updateUnreadTag(taskId: String, version: String, unreadTag: Boolean)
 }

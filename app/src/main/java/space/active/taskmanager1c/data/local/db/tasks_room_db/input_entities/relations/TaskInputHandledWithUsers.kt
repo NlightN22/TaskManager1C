@@ -24,6 +24,8 @@ data class TaskInputHandledWithUsers(
     )
     val observers: List<ObserversInTask>
 ) {
+    fun isNewVersion(old: TaskInputHandledWithUsers): Boolean = this.taskInput.version > old.taskInput.version
+
     fun toTaskDomain(listUsersInput: List<UserInput>): TaskDomain {
         with(this.taskInput) {
             return TaskDomain(
@@ -44,7 +46,8 @@ data class TaskInputHandledWithUsers(
                 isAuthor = isAuthor,
                 isPerformer = isPerformer,
                 ok = ok,
-                cancel = cancel
+                cancel = cancel,
+                version = version
             )
         }
     }
@@ -66,7 +69,8 @@ data class TaskInputHandledWithUsers(
                 performerId = performerId,
                 priority = priority ?: "",
                 status = status,
-                unreaded = unreadTag
+                unreaded = unreadTag,
+                version = version
             )
         }
     }
@@ -76,7 +80,6 @@ data class TaskInputHandledWithUsers(
         performer = listUsers.toUserDomain(this.taskInput.performerId),
         coPerformers = coPerformers.map { listUsers.toUserDomain(it.coPerformerId) },
         observers = observers.map { listUsers.toUserDomain(it.observerId) }
-
     )
 
     private fun List<UserInput>.toUserDomain(id: String): UserDomain {

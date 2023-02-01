@@ -68,8 +68,8 @@ class InputTaskRepositoryImpl @Inject constructor(
         // prepare taskIn
         val taskIn = inputDao.getTask(taskHandled.taskInput.id)
         // compare with current and save if diff
-        taskIn?.let {
-            if (taskHandled != it) {
+        taskIn?.let { current ->
+            if (taskHandled.taskInput.version > current.taskInput.version) {
                 inputDao.insertTask(
                     taskHandled
                 )
@@ -91,10 +91,20 @@ class InputTaskRepositoryImpl @Inject constructor(
         outputTask: OutputTask,
         whoAmI: UserInput
     ) {
-        inputDao.saveAndDelete(
-            inputTask,
-            outputTask,
-        )
+
+        val taskIn = inputDao.getTask(inputTask.taskInput.id)
+        taskIn?.let { current ->
+//            logger.log(TAG, "save new: ${inputTask.taskInput.version} cur: ${current.taskInput.version}")
+            if (inputTask.taskInput.version > current.taskInput.version) {
+                inputDao.saveAndDelete(
+                    inputTask,
+                    outputTask,
+                )
+                return
+//            logger.log(TAG, "update taskInput: ${taskInput.toString().replace(", ", "\n")}")
+            }
+        }
+        inputDao.deleteOutputTask(outputTask.outputId)
     }
 
     override val listUsersFlow: Flow<List<UserInput>> get() = inputDao.getUsersFlow()
@@ -136,7 +146,7 @@ class InputTaskRepositoryImpl @Inject constructor(
 
     override fun getUnreadIds(): Flow<List<String>> = readingDao.getUnreadIds()
 
-    override suspend fun setUnreadTag(taskId: String, unread: Boolean) {
-        inputDao.updateUnreadTag(taskId, unread)
+    override suspend fun setUnreadTag(taskId: String, version: String, unreadTag: Boolean) {
+        inputDao.updateUnreadTag(taskId, version, unreadTag)
     }
 }

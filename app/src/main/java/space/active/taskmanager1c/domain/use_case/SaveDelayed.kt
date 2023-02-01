@@ -1,14 +1,19 @@
 package space.active.taskmanager1c.domain.use_case
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import space.active.taskmanager1c.domain.models.TaskDomain
+import space.active.taskmanager1c.domain.models.UserDomain
+import space.active.taskmanager1c.domain.repository.SettingsRepository
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 class SaveDelayed @Inject constructor(
-    private val saveTaskChangesToDb: SaveTaskChangesToDb
+    private val saveTaskChangesToDb: SaveTaskChangesToDb,
+    private val settings: SettingsRepository
 ) {
 
+    private val whoAmI = settings.getUserFlow()
     private val delayedJobsList: ArrayList<SaveJob> = arrayListOf()
 
     operator fun invoke(coroutineScope: CoroutineScope, key: String, taskDomain: TaskDomain, delay: Int) {
@@ -42,7 +47,7 @@ class SaveDelayed @Inject constructor(
             delayedJobsList.remove(newJob)
 //                    logger.log(TAG, "Removed list: $delayedJobsList")
 //                    logger.log(TAG, "TaskDomain to save: $taskDomain")
-            saveTaskChangesToDb(taskDomain)
+            saveTaskChangesToDb(taskDomain, whoAmI.first().id)
         }
     }
 

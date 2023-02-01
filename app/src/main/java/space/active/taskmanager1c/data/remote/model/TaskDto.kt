@@ -21,7 +21,8 @@ data class TaskDto(
     val performerId: String,
     val priority: String,
     val status: String,
-    val unreaded: Boolean
+    val unreaded: Boolean,
+    val version: String,
 ) {
 
     fun toTaskInputHandledWithUsers(myId: String): TaskInputHandledWithUsers =
@@ -58,6 +59,7 @@ data class TaskDto(
             authorId = authorId,
             performerId = performerId,
             unreadTag = unreaded,
+            version = version,
             isAuthor = author,
             isPerformer = performer,
             ok = defineOk(author, performer, status),

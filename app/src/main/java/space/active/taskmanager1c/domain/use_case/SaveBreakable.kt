@@ -1,8 +1,12 @@
 package space.active.taskmanager1c.domain.use_case
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.domain.models.TaskDomain
+import space.active.taskmanager1c.domain.models.UserDomain
+import space.active.taskmanager1c.domain.repository.SettingsRepository
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -10,8 +14,11 @@ private const val TAG = "SaveBreakable"
 
 class SaveBreakable @Inject constructor(
     private val logger: Logger,
-    private val saveTaskChangesToDb: SaveTaskChangesToDb
+    private val saveTaskChangesToDb: SaveTaskChangesToDb,
+    private val settings: SettingsRepository
 ) {
+
+    private val whoAmI: Flow<UserDomain> = settings.getUserFlow()
 
     var cancelListener: AtomicBoolean = AtomicBoolean(false)
     private var saveJob: Job? = null
@@ -35,7 +42,7 @@ class SaveBreakable @Inject constructor(
                 cancelListener.compareAndSet(true, false)
             } else {
                 // save changes to DB
-                saveTaskChangesToDb(taskDomain)
+                saveTaskChangesToDb(taskDomain, whoAmI.first().id)
             }
         }
     }

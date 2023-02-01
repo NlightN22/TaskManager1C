@@ -13,14 +13,13 @@ private const val TAG = "SaveTaskChangesToDb"
 
 class SaveTaskChangesToDb @Inject constructor(
     private val repository: TasksRepository,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val exceptionHandler: ExceptionHandler,
     private val logger: Logger
 ) {
     // todo add update tasks in output db cache if exist
-    suspend operator fun invoke(taskDomain: TaskDomain) {
+    suspend operator fun invoke(taskDomain: TaskDomain, myId: String) {
         logger.log(TAG, "SaveTaskChangesToDb: $taskDomain")
-        repository.editTask(taskDomain).collectLatest {
+        repository.editTask(taskDomain,myId).collectLatest {
             if (it is ErrorRequest) {
                 exceptionHandler(it.exception)
             }

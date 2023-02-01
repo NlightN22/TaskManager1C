@@ -38,5 +38,5 @@ interface InputTaskRepository {
     // readings
     suspend fun updateReadingStates(readingTimes: List<ReadingTimesTaskEntity>)
     fun getUnreadIds(): Flow<List<String>>
-    suspend fun setUnreadTag(taskId: String, unread: Boolean)
+    suspend fun setUnreadTag(taskId: String, version: String, unreadTag: Boolean)
 }

@@ -31,7 +31,8 @@ data class TaskDomain(
     val isAuthor: Boolean,
     val isPerformer: Boolean,
     val ok: Boolean,
-    val cancel: Boolean
+    val cancel: Boolean,
+    val version: String,
 ) {
 
     enum class Priority {
@@ -81,10 +82,11 @@ data class TaskDomain(
         }
     }
 
-    fun toOutputTask(new: Boolean = false): OutputTask {
+    fun toOutputTask(myId: String, new: Boolean = false): OutputTask {
         return OutputTask(
             newTask = new,
-            taskDto = toTaskDTO()
+            taskDto = toTaskDTO(),
+            myId = myId
         )
     }
 
@@ -104,7 +106,8 @@ data class TaskDomain(
             performerId = users.performer.id,
             priority = priority.toDTO(),
             status = status.toStatusDTO(),
-            unreaded = unreadTag
+            unreaded = unreadTag,
+            version = version
         )
     }
 
@@ -161,7 +164,8 @@ data class TaskDomain(
             unreadTag = false,
             unread = false,
             ok = true,
-            cancel = false
+            cancel = false,
+            version = ""
         )
 
         fun toTaskStatus(status: String): Status {

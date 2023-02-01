@@ -104,21 +104,21 @@ class MergedTaskRepositoryImpl constructor(
         val usersInputList = inputTaskRepository.getUsers()
         outputTask?.let { output ->
             val convertedOutput: TaskDto = output.taskDto
-            inputTask?.let {
+            inputTask?.let { input->
                 val convertedInput: TaskDto = inputTask.toTaskDTO()
                 /**
                  * return if taskDomains are same. It's unbelievable, but still...
                  */
                 if (convertedInput == convertedOutput) {
                     outputTaskRepository.deleteTask(output)
-                    logger.log(TAG, "return convertedInput")
-                    return it.toTaskDomain(usersInputList)
+                    logger.log(TAG, "return equal inputTask")
+                    return input.toTaskDomain(usersInputList)
                 } else {
                     /**
                      * return if taskDomains are different.
                      */
-                    logger.log(TAG, "return convertedOutput")
-                    return it.toTaskDomain(usersInputList)
+                    logger.log(TAG, "return priority outputTask")
+                    return output.taskDto.toTaskInputHandledWithUsers(output.myId).toTaskDomain(usersInputList)
                 }
             } ?: kotlin.run {
                 /**
@@ -126,18 +126,19 @@ class MergedTaskRepositoryImpl constructor(
                  */
                 return null
             }
-        } ?: inputTask?.let {
+        } ?: inputTask?.let { input ->
             /**
              * return if output taskDomain is null
              */
-            logger.log(TAG, "return ${it.toTaskDomain(usersInputList).name}")
-            return it.toTaskDomain(usersInputList)
+            logger.log(TAG, "return only inputTask")
+            return input.toTaskDomain(usersInputList)
         } ?: kotlin.run {
+            logger.log(TAG, "return null")
             return null
         }
     }
 
-    override fun editTask(taskDomain: TaskDomain) = flow<Request<Any>> {
+    override fun editTask(taskDomain: TaskDomain, myId: String) = flow<Request<Any>> {
         emit(PendingRequest())
         /**
          * Check for not new taskDomain
@@ -146,7 +147,7 @@ class MergedTaskRepositoryImpl constructor(
             emit(ErrorRequest(TaskIsNewAndInSendingState))
         } else {
             if (taskDomain.id.isNotEmpty() or taskDomain.id.isNotBlank()) {
-                outputTaskRepository.insertTask(taskDomain.toOutputTask())
+                outputTaskRepository.insertTask(taskDomain.toOutputTask(myId))
                 emit(SuccessRequest(Any()))
             } else {
                 emit(ErrorRequest(ThisTaskIsNotEdited(taskDomain.name)))
@@ -156,22 +157,18 @@ class MergedTaskRepositoryImpl constructor(
         emit(ErrorRequest(e))
     }.flowOn(ioDispatcher)
 
-    override fun createNewTask(taskDomain: TaskDomain) = flow<Request<Any>> {
+    override fun createNewTask(taskDomain: TaskDomain, myId: String) = flow<Request<Any>> {
         emit(PendingRequest())
         /**
          * Check for new taskDomain
          */
         if (taskDomain.id.isEmpty() or taskDomain.id.isBlank()) {
-            outputTaskRepository.insertTask(taskDomain.toOutputTask(new = true))
+            outputTaskRepository.insertTask(taskDomain.toOutputTask(myId, new = true))
             emit(SuccessRequest(Any()))
         } else {
             emit(ErrorRequest(ThisTaskIsNotNew))
         }
     }.flowOn(ioDispatcher)
-
-    override suspend fun setTaskUnreadTag(taskId: String, unread: Boolean) {
-        inputTaskRepository.setUnreadTag(taskId, unread)
-    }
 
     private suspend fun combineListTasks(
         taskInput: List<TaskInputHandledWithUsers>,

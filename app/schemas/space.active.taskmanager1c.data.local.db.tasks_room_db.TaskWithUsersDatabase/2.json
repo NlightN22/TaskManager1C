@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "f6e813b631ee38c8da9752f024d65f24",
+    "identityHash": "a5e56ab990dd19bb1419710520a311f8",
     "entities": [
       {
         "tableName": "TaskInputHandled",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT, `id` TEXT NOT NULL, `mainTaskId` TEXT, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `authorId` TEXT NOT NULL, `performerId` TEXT NOT NULL, `unreadTag` INTEGER NOT NULL, `isAuthor` INTEGER NOT NULL, `isPerformer` INTEGER NOT NULL, `ok` INTEGER NOT NULL, `cancel` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT, `id` TEXT NOT NULL, `mainTaskId` TEXT, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `authorId` TEXT NOT NULL, `performerId` TEXT NOT NULL, `unreadTag` INTEGER NOT NULL, `version` TEXT NOT NULL, `isAuthor` INTEGER NOT NULL, `isPerformer` INTEGER NOT NULL, `ok` INTEGER NOT NULL, `cancel` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "date",
@@ -84,6 +84,12 @@
             "fieldPath": "unreadTag",
             "columnName": "unreadTag",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "version",
+            "columnName": "version",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -246,7 +252,7 @@
       },
       {
         "tableName": "OutputTask",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`outputId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `newTask` INTEGER NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT NOT NULL, `id` TEXT NOT NULL, `mainTaskId` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT NOT NULL, `observers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `unreaded` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`outputId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `newTask` INTEGER NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `endDate` TEXT NOT NULL, `id` TEXT NOT NULL, `mainTaskId` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT NOT NULL, `observers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `unreaded` INTEGER NOT NULL, `version` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "outputId",
@@ -348,6 +354,12 @@
             "fieldPath": "taskDto.unreaded",
             "columnName": "unreaded",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskDto.version",
+            "columnName": "version",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -472,7 +484,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f6e813b631ee38c8da9752f024d65f24')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a5e56ab990dd19bb1419710520a311f8')"
     ]
   }
 }

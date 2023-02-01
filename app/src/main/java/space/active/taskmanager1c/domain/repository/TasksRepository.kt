@@ -15,7 +15,6 @@ interface TasksRepository {
     ): Flow<List<TaskDomain>>
     val listUsersFlow: Flow<List<UserDomain>>
     fun getTask(taskId: String): Flow<TaskDomain?>
-    fun editTask(taskDomain: TaskDomain): Flow<Request<Any>>
-    fun createNewTask(taskDomain: TaskDomain): Flow<Request<Any>>
-    suspend fun setTaskUnreadTag(taskId: String, unread: Boolean)
+    fun editTask(taskDomain: TaskDomain, myId:String): Flow<Request<Any>>
+    fun createNewTask(taskDomain: TaskDomain, myId:String): Flow<Request<Any>>
 }

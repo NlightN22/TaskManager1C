@@ -10,6 +10,7 @@ import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.repository.SettingsRepository
@@ -48,6 +49,8 @@ class MainViewModel @Inject constructor(
 
     val showExceptionDialogEvent: SharedFlow<BackendException> = exceptionHandler.sendExceptionEvent
 
+    private val whoAmI = settings.getUserFlow()
+
     /**
      *
      * Variable for stoppable job witch regular update data after userDomain login
@@ -78,7 +81,7 @@ class MainViewModel @Inject constructor(
         when (saveEvents) {
             is SaveEvents.Simple -> {
                 viewModelScope.launch(SupervisorJob()) {
-                    saveTaskChangesToDb(saveEvents.taskDomain)
+                    saveTaskChangesToDb(saveEvents.taskDomain, whoAmI.first().id)
                 }
             }
             is SaveEvents.Breakable -> {

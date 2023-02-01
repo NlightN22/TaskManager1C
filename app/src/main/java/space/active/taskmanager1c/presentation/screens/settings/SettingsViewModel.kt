@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
 import space.active.taskmanager1c.coreutils.EmptyObject
 import space.active.taskmanager1c.coreutils.NotCorrectServerAddress
 import space.active.taskmanager1c.coreutils.logger.Logger
@@ -24,7 +25,8 @@ private const val TAG = "SettingsViewModel"
 class SettingsViewModel @Inject constructor(
     settings: SettingsRepository,
     logger: Logger,
-    private val exceptionHandler: ExceptionHandler
+    private val exceptionHandler: ExceptionHandler,
+    private val retrofit: Retrofit
 ) : BaseViewModel(settings, logger) {
 
     private val _viewState = MutableStateFlow(SettingsViewState())
@@ -45,7 +47,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val user = wrapGetSettings { settings.getUser().name }
             val id = wrapGetSettings { settings.getUser().id }
-            val server = wrapGetSettings { settings.getServerAddress() } //todo get from base_url
+            val server: String = retrofit.baseUrl().toString()
             _viewState.value = _viewState.value.copy(
                 userId = id,
                 userName = user,

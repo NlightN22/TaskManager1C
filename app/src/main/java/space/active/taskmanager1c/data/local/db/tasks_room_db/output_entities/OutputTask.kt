@@ -10,6 +10,7 @@ data class OutputTask(
     @PrimaryKey(autoGenerate = true)
     val outputId: Int = 0,
     val newTask: Boolean = false,
+    val myId: String,
     @Embedded
     val taskDto: TaskDto,
 )
