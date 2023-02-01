@@ -417,23 +417,28 @@ class TaskDetailedViewModel @Inject constructor(
                 val usersIds: List<String>
                 when (eventType) {
                     is PerformerDialog -> {
+                        if (!_enabledFields.value.performer) { return@launch }
                         val listItems = listUserDomains.toDialogItems(listOf(task.users.performer.id))
                         _showDialogEvent.emit(PerformerDialog(listItems))
                     }
                     is CoPerformersDialog -> {
+                        if (!_enabledFields.value.coPerfomers) { return@launch }
                         usersIds = task.users.coPerformers.map { it.id }
                         val dialogItems = listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(CoPerformersDialog(dialogItems))
                     }
                     is ObserversDialog -> {
+                        if (!_enabledFields.value.observers) { return@launch }
                         usersIds = task.users.observers.map { it.id }
                         val dialogItems = listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(ObserversDialog(dialogItems))
                     }
                     is DatePicker -> {
+                        if (!_enabledFields.value.deadLine) { return@launch }
                         _showDialogEvent.emit(DatePicker)
                     }
                     is EditTitleDialog -> {
+                        if (!_enabledFields.value.title) { return@launch }
                         val currentTitle = curTaskDomain.name
                         _showDialogEvent.emit(
                             EditTitleDialog(
@@ -446,15 +451,16 @@ class TaskDetailedViewModel @Inject constructor(
                         )
                     }
                     is EditDescriptionDialog -> {
+                        if (!_enabledFields.value.description) { return@launch }
                         val currentDescription = curTaskDomain.description
-                        _showDialogEvent.emit(
-                            EditDescriptionDialog(
-                                EditTextDialogStates(
-                                    hint = R.string.description_dialog_hint,
-                                    text = currentDescription,
+                            _showDialogEvent.emit(
+                                EditDescriptionDialog(
+                                    EditTextDialogStates(
+                                        hint = R.string.description_dialog_hint,
+                                        text = currentDescription,
+                                    )
                                 )
                             )
-                        )
                     }
                 }
             }

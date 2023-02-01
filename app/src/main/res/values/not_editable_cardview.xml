@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="NotEditableTextInput">
-        <item name="android:enabled">false</item>
+        <item name="android:enabled">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">false</item>
         <item name="boxStrokeWidth">0dp</item>
         <item name="android:backgroundTint">@color/not_editable_text_background</item>
         <item name="android:textColorHint">@color/title_not_editable</item>

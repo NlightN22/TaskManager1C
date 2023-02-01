@@ -3,7 +3,9 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ScrollView
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -197,7 +199,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     @SuppressLint("ClickableViewAccessibility")
     private fun listeners() {
 
-        binding.detailedScrollView
 
         binding.messageTIL.setEndIconOnClickListener {
             val text: String = binding.messageInput.text?.toString() ?: ""
@@ -223,82 +224,155 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             return@setOnItemSelectedListener true
         }
 
-        binding.taskTitleDetailed.changeListener {
-            viewModel.saveEditChanges(TaskChangesEvents.Title(it))
+        binding.taskTitleDetailed.setOnClickListener {
+            viewModel.showDialog(EditTitleDialog(null))
         }
 
-        binding.taskDescription.changeListener {
-            viewModel.saveEditChanges(TaskChangesEvents.Description(it))
-        }
-
-        binding.mainDetailCard.setOnTouchListener(object :
-            OnSwipeTouchListener(binding.mainDetailCard.context) {
-            override fun onSwipeDown() {
-                super.onSwipeDown()
-                viewModel.expandMainDetailed()
-            }
-
-            override fun onSwipeUp() {
-                super.onSwipeUp()
-                viewModel.closeMainDetailed()
-            }
-        })
-
-        binding.taskDescriptionCard.setOnTouchListener(object :
-            OnSwipeTouchListener(binding.taskDescriptionCard.context) {
-            override fun onSwipeDown() {
-                super.onSwipeDown()
-                viewModel.expandDescription()
-            }
-
-            override fun onSwipeUp() {
-                super.onSwipeUp()
-                viewModel.closeDescription()
-            }
-        }
-        )
-
-        binding.expandMainDetailCard.setOnTouchListener(object :
-            OnSwipeTouchListener(binding.expandMainDetailCard.context) {
-            override fun onSwipeDown() {
-                super.onSwipeDown()
-                viewModel.expandMainDetailed()
-            }
-
-            override fun onSwipeUp() {
-                super.onSwipeUp()
-                viewModel.closeMainDetailed()
-            }
-
-            override fun onClick() {
-                super.onClick()
-                viewModel.expandCloseMainDetailed()
-            }
-        }
-        )
-
-        binding.expandTaskDescriptionCard.setOnTouchListener(object :
-            OnSwipeTouchListener(binding.taskDescriptionCard.context) {
-            override fun onSwipeDown() {
-                super.onSwipeDown()
-                viewModel.expandDescription()
-            }
-
-            override fun onSwipeUp() {
-                super.onSwipeUp()
-                viewModel.closeDescription()
-            }
-
-            override fun onClick() {
-                super.onClick()
-                viewModel.expandCloseDescription()
+        val detailedViewList = binding.mainDetailCard.getAllViews()
+        detailedViewList.forEach {
+            if (it.id == R.id.taskPerformer) {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeMainDetailed() },
+                    actionDown = {
+                        viewModel.expandMainDetailed()
+                    },
+                    actionClick = { viewModel.showDialog(PerformerDialog(null)) },
+                    scrollView = binding.detailedScrollView
+                )
+            } else if (it.id == R.id.taskCoPerformers) {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeMainDetailed() },
+                    actionDown = {
+                        viewModel.expandMainDetailed()
+                    },
+                    actionClick = { viewModel.showDialog(CoPerformersDialog(null)) },
+                    scrollView = binding.detailedScrollView
+                )
+            }else if (it.id == R.id.taskObservers) {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeMainDetailed() },
+                    actionDown = {
+                        viewModel.expandMainDetailed()
+                    },
+                    actionClick = { viewModel.showDialog(ObserversDialog(null)) },
+                    scrollView = binding.detailedScrollView
+                )
+            } else if (it.id == R.id.taskDeadline) {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeMainDetailed() },
+                    actionDown = { viewModel.expandMainDetailed() },
+                    actionClick = { viewModel.showDialog(DatePicker) },
+                    scrollView = binding.detailedScrollView
+                )
+            }else if (it.id == R.id.expandMainDetailCard) {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeMainDetailed() },
+                    actionDown = { viewModel.expandMainDetailed() },
+                    actionClick = { viewModel.expandCloseMainDetailed() },
+                    scrollView = binding.detailedScrollView
+                )
+            } else {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeMainDetailed() },
+                    actionDown = { viewModel.expandMainDetailed() },
+                    scrollView = binding.detailedScrollView
+                )
             }
         }
-        )
+
+        val descriptionViewList = binding.taskDescriptionCard.getAllViews()
+        descriptionViewList.forEach {
+            if (it.id == R.id.taskDescription) {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeDescription() },
+                    actionDown = {
+                        viewModel.expandDescription()
+                    },
+                    actionClick = { viewModel.showDialog(EditDescriptionDialog(null)) },
+                    scrollView = binding.detailedScrollView
+                )
+            } else if (it.id == R.id.expandTaskDescriptionCard) {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeDescription() },
+                    actionDown = { viewModel.expandDescription() },
+                    actionClick = { viewModel.expandCloseDescription() },
+                    scrollView = binding.detailedScrollView
+                )
+            } else {
+                it.setSwipeListener(
+                    actionUp = { viewModel.closeDescription() },
+                    actionDown = { viewModel.expandDescription() },
+                    scrollView = binding.detailedScrollView
+                )
+            }
+        }
 
         binding.backButtonTaskDetailed.setOnClickListener {
             onBackClick()
         }
+    }
+
+    private fun View.getAllViews(): List<View> {
+        return if (this !is ViewGroup || this.childCount == 0) {
+            listOf(this)
+        } else {
+            val listViews = arrayListOf<View>()
+            listViews.add(this)
+            this.forEach {
+                if (it is ViewGroup) {
+                    listViews.addAll(it.getAllViews())
+                } else {
+                    listViews.add(it)
+                }
+            }
+            listViews
+        }
+    }
+
+    private fun View.setSwipeListener(
+        actionUp: () -> Unit, actionDown: () -> Unit,
+        scrollView: ScrollView? = null
+    ) {
+        this.setOnTouchListener(object :
+            OnSwipeTouchListener(this.context, scrollView) {
+            override fun onSwipeUp() {
+                super.onSwipeUp()
+                actionUp()
+            }
+
+            override fun onSwipeDown() {
+                super.onSwipeDown()
+                actionDown()
+            }
+
+        }
+        )
+    }
+
+    private fun View.setSwipeListener(
+        actionUp: () -> Unit,
+        actionDown: () -> Unit,
+        actionClick: () -> Unit,
+        scrollView: ScrollView? = null
+    ) {
+        this.setOnTouchListener(object :
+            OnSwipeTouchListener(this.context, scrollView) {
+            override fun onSwipeUp() {
+                actionUp()
+                super.onSwipeUp()
+            }
+
+            override fun onSwipeDown() {
+                actionDown()
+                super.onSwipeDown()
+            }
+
+            override fun onClick() {
+                actionClick()
+                super.onClick()
+            }
+        }
+        )
     }
 
     private fun showDatePicker() {
