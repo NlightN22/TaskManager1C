@@ -98,5 +98,5 @@ interface TaskInputDao {
     fun insertUser(userInput: UserInput)
 
     @Query("UPDATE TaskInputHandled SET unreadTag = :unreadTag, version = :version WHERE id = :taskId")
-    suspend fun updateUnreadTag(taskId: String, version: String, unreadTag: Boolean)
+    suspend fun updateUnreadTag(taskId: String, version: Int, unreadTag: Boolean)
 }

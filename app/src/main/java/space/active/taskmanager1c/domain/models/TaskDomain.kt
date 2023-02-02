@@ -32,7 +32,7 @@ data class TaskDomain(
     val isPerformer: Boolean,
     val ok: Boolean,
     val cancel: Boolean,
-    val version: String,
+    val version: Int,
 ) {
 
     enum class Priority {
@@ -165,7 +165,7 @@ data class TaskDomain(
             unread = false,
             ok = true,
             cancel = false,
-            version = ""
+            version = 0
         )
 
         fun toTaskStatus(status: String): Status {

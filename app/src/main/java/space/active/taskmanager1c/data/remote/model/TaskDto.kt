@@ -22,7 +22,7 @@ data class TaskDto(
     val priority: String,
     val status: String,
     val unreaded: Boolean,
-    val version: String,
+    val version: Int,
 ) {
 
     fun toTaskInputHandledWithUsers(myId: String): TaskInputHandledWithUsers =

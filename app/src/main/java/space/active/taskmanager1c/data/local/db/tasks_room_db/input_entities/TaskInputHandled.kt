@@ -20,7 +20,7 @@ data class TaskInputHandled(
     val authorId: String,
     val performerId: String,
     val unreadTag: Boolean,
-    val version: String, // Version of data to compare and write newest
+    val version: Int, // Version of data to compare and write newest
     // extra values
     val isAuthor: Boolean,
     val isPerformer: Boolean,

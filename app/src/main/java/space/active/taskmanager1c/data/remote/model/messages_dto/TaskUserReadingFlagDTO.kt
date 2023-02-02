@@ -4,7 +4,7 @@ data class TaskUserReadingFlagDTO(
     val flag: String,
     val id: String,
     val user: String,
-    val version: String,
+    val version: Int,
 )
 {
     fun flagToBoolean() : Boolean {
