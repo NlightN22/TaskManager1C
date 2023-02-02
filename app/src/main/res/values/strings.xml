@@ -64,7 +64,7 @@
     <string name="menu_order_asc">(по воз.)</string>
     <string name="menu_order_desc">(по уб.)</string>
     <string name="exit_toast">Нажмите назад для выхода</string>
-<!--    TaskDomain statuses-->
+    <!--    TaskDomain statuses-->
     <string name="New">Новая</string>
     <string name="Accepted">В работе</string>
     <string name="Performed">На доработке</string>

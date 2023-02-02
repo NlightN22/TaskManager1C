@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
@@ -185,7 +186,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                     recyclerTasks.taskDomains = request.data
                     binding.listTasksRV.post {
                         shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
-                        binding.listTasksRV.scrollToPosition(0)
                     }
                 }
                 is ErrorRequest -> {
@@ -215,16 +215,24 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     private fun listeners() {
 
         binding.listTasksRV.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            var scrollJob: Job? = null
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                lifecycleScope.launch {
-                    if (dy < -10) {
+                // scroll to up - show fab
+                if (dy < 0 && recyclerView.canScrollVertically(-1)) {
+                    scrollJob?.cancel()
+                    scrollJob = lifecycleScope.launch {
                         binding.listUpFAB.show()
-                    } else {
-                        delay(2000)
+                        delay(500)
                         binding.listUpFAB.hide()
                     }
                 }
+                // scroll to down - hide fab
+                if (dy > 0 && recyclerView.canScrollVertically(1)) {
+                    binding.listUpFAB.hide()
+                }
+                // zero position - hide fab
                 if (!recyclerView.canScrollVertically(-1)) {
                     binding.listUpFAB.hide()
                 }

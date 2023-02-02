@@ -23,7 +23,6 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
         binding = FragmentSettingsBinding.bind(view)
         clearBottomMenuItemIconTintList(binding.bottomMenu)
 
-
         loginStateToViewModel()
         observers()
         listeners()
