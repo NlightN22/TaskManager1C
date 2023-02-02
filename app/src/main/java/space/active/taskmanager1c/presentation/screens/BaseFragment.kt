@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
@@ -190,7 +191,16 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
                 TAG,
                 "Nav: $directions  cur: ${currentDestination?.displayName} backdest: ${backDest?.displayName}"
             )
-            findNavController().navigate(directions)
+            findNavController().navigate(directions,
+                navOptions {
+                    anim {
+                        enter = R.anim.enter
+                        exit = R.anim.exit
+                        popEnter = R.anim.pop_enter
+                        popExit = R.anim.pop_exit
+                    }
+                }
+            )
         } catch (e: Throwable) {
             e.printStackTrace()
         }

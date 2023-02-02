@@ -56,6 +56,7 @@
         </com.google.android.material.textfield.TextInputLayout>
     </com.google.android.material.card.MaterialCardView>
 
+<!--    todo add functional -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fastFilterRV"
         android:layout_width="match_parent"
@@ -67,8 +68,26 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:orientation="horizontal"
-
+        android:visibility="gone"
         />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/listUpFAB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/bottomMenu"
+        android:backgroundTint="@color/bottom_menu_background"
+        app:borderWidth="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/ic_baseline_arrow_upward_24"
+        app:tint="@color/button_not_pressed"
+        app:maxImageSize="40dp"
+        android:nestedScrollingEnabled="true"
+        tools:visibility="visible"
+        />
+
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -117,6 +136,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
+        android:layoutAnimation="@anim/layout_animation"
         app:layout_constraintTop_toBottomOf="@id/fastFilterRV"
         app:layout_constraintBottom_toTopOf="@id/bottomMenu"
         app:layout_constraintStart_toStartOf="parent"
@@ -124,6 +144,7 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:visibility="gone"
         tools:listitem="@layout/item_task"
+        tools:layoutAnimation="@null"
         tools:visibility="visible"
         />
 

@@ -10,9 +10,12 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.forEach
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
-import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
@@ -69,6 +72,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         )
         binding.listTasksRV.layoutManager = NotifyingLinearLayoutManager(requireContext())
         binding.listTasksRV.adapter = recyclerTasks
+        binding.listUpFAB.hide()
 
         initOrderMenu()
         observers()
@@ -181,6 +185,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                     recyclerTasks.taskDomains = request.data
                     binding.listTasksRV.post {
                         shimmerShow(binding.shimmerTasksRV, binding.listTasksRV, false)
+                        binding.listTasksRV.scrollToPosition(0)
                     }
                 }
                 is ErrorRequest -> {
@@ -208,6 +213,28 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun listeners() {
+
+        binding.listTasksRV.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                lifecycleScope.launch {
+                    if (dy < -10) {
+                        binding.listUpFAB.show()
+                    } else {
+                        delay(2000)
+                        binding.listUpFAB.hide()
+                    }
+                }
+                if (!recyclerView.canScrollVertically(-1)) {
+                    binding.listUpFAB.hide()
+                }
+            }
+        })
+
+        binding.listUpFAB.setOnClickListener {
+            binding.listTasksRV.scrollToPosition(0)
+        }
+
         binding.searchEditText.addTextChangedListener { editable ->
             viewModel.find(editable)
         }
@@ -325,9 +352,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     private fun launchTaskDetailed(taskId: String) {
         val direction: NavDirections =
             TaskListFragmentDirections.actionTaskListFragmentToTaskDetailedFragment(taskId)
-        findNavController().navigate(
-            direction,
-            // TODO add animations
-        )
+        navigate(direction)
     }
 }

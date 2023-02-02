@@ -6,6 +6,7 @@ import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.PopupMenu
 import androidx.cardview.widget.CardView
@@ -92,6 +93,7 @@ class TaskListAdapter(
             listItemShimmer.setSendingState(taskDomain.isSending)
             taskStatus.isVisible = taskDomain.ok
             taskStatus.isSelected = taskDomain.status == TaskDomain.Status.Reviewed
+            listItemCard.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.fall_down))
         }
     }
 

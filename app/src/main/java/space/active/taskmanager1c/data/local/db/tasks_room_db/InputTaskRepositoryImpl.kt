@@ -20,7 +20,6 @@ class InputTaskRepositoryImpl @Inject constructor(
     private val logger: Logger
 ) : InputTaskRepository {
 
-
     override suspend fun getInputTasksCount(): Int = inputDao.getInputCount()
 
     override fun sortedQuery(
