@@ -90,11 +90,9 @@
 
 
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomMenu"
-            app:menu="@menu/menu_tasklist"
-            style="@style/BottomMenu"
-            tools:ignore="MissingConstraints" />
+    <include layout="@layout/bottom_navigation_menu"
+        android:id="@+id/bottomMenu"
+        />
 
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmerTasksRV"

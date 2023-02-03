@@ -147,7 +147,9 @@ class MergedTaskRepositoryImpl constructor(
             emit(ErrorRequest(TaskIsNewAndInSendingState))
         } else {
             if (taskDomain.id.isNotEmpty() or taskDomain.id.isNotBlank()) {
-                outputTaskRepository.insertTask(taskDomain.toOutputTask(myId))
+                val insertedTask = taskDomain.toOutputTask(myId)
+                logger.log(TAG, "insertTask to DB: $insertedTask")
+                outputTaskRepository.insertTask(insertedTask)
                 emit(SuccessRequest(Any()))
             } else {
                 emit(ErrorRequest(ThisTaskIsNotEdited(taskDomain.name)))

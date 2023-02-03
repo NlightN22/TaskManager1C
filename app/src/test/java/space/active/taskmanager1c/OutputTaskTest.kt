@@ -16,6 +16,18 @@ class OutputTaskTest {
 
 
     @Test
+    fun dateToDTO() {
+        val domainStringDate: String = "2023-01-25T14:12:31+07:00[Asia/Krasnoyarsk]"
+        val domainDate: ZonedDateTime? = ZonedDateTime.parse(domainStringDate)
+        val convertedDate: String =
+            domainDate?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toString() }
+                ?: ""
+        println("convertedDate: $convertedDate")
+
+    }
+
+
+    @Test
     fun compareTwoVersions() {
         // AAAAAE/ljW8= AAAAAE+qB9s= AAAAAEz53N8=
         val version1 = "AAAAAEz53N8="
@@ -46,12 +58,6 @@ class OutputTaskTest {
         val toDTO = final.toLocalDateTime().toString()
         println(toDTO)
 
-
-//        val test = zoneId.rules.getOffset(currentLocal)
-//        println(test.toString())
-//        val localToOffset = currentLocal.atOffset()
-//        val offsetDateTime = OffsetDateTime.parse(dateTime, formatter)
-//        println(offsetDateTime.toString())
     }
 
 

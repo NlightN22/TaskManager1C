@@ -9,6 +9,7 @@ import android.widget.ScrollView
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
@@ -20,6 +21,8 @@ import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.models.UserDomain.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.utils.*
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 import javax.inject.Inject
 
@@ -38,15 +41,20 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     lateinit var taskStatusDialog: TaskStatusDialog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskDetailedBinding.bind(view)
-        clearBottomMenuItemIconTintList(binding.bottomMenu)
+        super.onViewCreated(view, savedInstanceState)
 
         messagesAdapter = MessagesAdapter()
         binding.messagesRV.adapter = messagesAdapter
 
         observers()
         listeners()
+    }
+
+    override fun getBottomMenu() : BottomNavigationView {
+        val bottomNavigationView = binding.bottomMenu.root
+        bottomNavigationView.inflateMenu(R.menu.menu_detailed)
+        return bottomNavigationView
     }
 
     override fun navigateToLogin() {
@@ -206,7 +214,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             hideKeyboardFrom(requireContext(), binding.messageInput)
         }
 
-        binding.bottomMenu.setOnItemSelectedListener { menuItem ->
+        binding.bottomMenu.root.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.detailed_cancel -> {
                     viewModel.checkStatusDialog(TaskChangesEvents.Status(false))
@@ -382,9 +390,13 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             .build()
         datePicker.show(this.childFragmentManager, "DatePicker")
         datePicker.addOnPositiveButtonClickListener {
+            val convertedPickedDate: ZonedDateTime = it.millisecToZonedDateTime()
+            logger.log(TAG, "convertedPickedDate: $convertedPickedDate")
+            val currentZoneId = ZoneId.systemDefault()
+            logger.log(TAG, "currentZoneId: $currentZoneId")
             viewModel.saveEditChanges(
-                TaskChangesEvents.EndDate(
-                    it.millisecToZonedDateTime()
+                TaskChangesEvents.DeadLine(
+                    convertedPickedDate
                 )
             )
         }

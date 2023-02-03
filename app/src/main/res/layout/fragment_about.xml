@@ -94,10 +94,8 @@
     </com.google.android.material.card.MaterialCardView>
 
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <include layout="@layout/bottom_navigation_menu"
         android:id="@+id/bottomMenu"
-        app:menu="@menu/menu_about"
-        style="@style/BottomMenu"
-        tools:ignore="MissingConstraints" />
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

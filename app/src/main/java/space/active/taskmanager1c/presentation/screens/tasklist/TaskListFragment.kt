@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -44,9 +45,8 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         binding = FragmentTaskListBinding.bind(view)
-        clearBottomMenuItemIconTintList(binding.bottomMenu)
+        super.onViewCreated(view, savedInstanceState)
 
         recyclerTasks = TaskListAdapter(object : TaskActionListener {
             override fun onTaskStatusClick(taskDomain: TaskDomain) {
@@ -78,6 +78,12 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         initOrderMenu()
         observers()
         listeners()
+    }
+
+    override fun getBottomMenu() : BottomNavigationView {
+        val bottomNavigationView = binding.bottomMenu.root
+        bottomNavigationView.inflateMenu(R.menu.menu_tasklist)
+        return bottomNavigationView
     }
 
     override fun navigateToLogin() {
@@ -197,7 +203,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun initOrderMenu() {
-        orderMenu = PopupMenu(requireContext(), binding.bottomMenu)
+        orderMenu = PopupMenu(requireContext(), binding.bottomMenu.root)
         orderMenu.inflate(R.menu.menu_tasklist_order)
         orderMenu.setForceShowIcon(true)
         orderMenu.gravity = Gravity.START
@@ -272,10 +278,10 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             }
         }
 
-        binding.bottomMenu.setOnItemSelectedListener { menuItem ->
+        binding.bottomMenu.root.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.tasklist_filter -> {
-                    showFilterMenu(binding.bottomMenu)
+                    showFilterMenu(binding.bottomMenu.root)
                 }
                 R.id.tasklist_newTask -> {
                     launchTaskDetailed("")

@@ -5,6 +5,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.FragmentSettingsBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
@@ -19,9 +20,8 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     lateinit var binding: FragmentSettingsBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         binding = FragmentSettingsBinding.bind(view)
-        clearBottomMenuItemIconTintList(binding.bottomMenu)
+        super.onViewCreated(view, savedInstanceState)
 
         loginStateToViewModel()
         observers()
@@ -30,6 +30,12 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
     private fun loginStateToViewModel() {
         viewModel.setSettingsViewState(getLoginState())
+    }
+
+    override fun getBottomMenu() : BottomNavigationView {
+        val bottomNavigationView = binding.bottomMenu.root
+        bottomNavigationView.inflateMenu(R.menu.menu_save_cancel)
+        return bottomNavigationView
     }
 
     override fun navigateToLogin() {
@@ -73,7 +79,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
             viewModel.changeServerAddressState(it?.toString() ?: "")
         }
 
-        binding.bottomMenu.setOnItemSelectedListener { menuItem ->
+        binding.bottomMenu.root.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_save -> {
                     viewModel.saveSettings()

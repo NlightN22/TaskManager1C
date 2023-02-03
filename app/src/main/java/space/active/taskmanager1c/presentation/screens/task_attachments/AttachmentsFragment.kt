@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.MimeTypeMap
 import androidx.fragment.app.viewModels
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.FragmentAttachmentsBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
@@ -21,10 +22,14 @@ class AttachmentsFragment: BaseFragment(R.layout.fragment_attachments) {
     lateinit var binding: FragmentAttachmentsBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         binding = FragmentAttachmentsBinding.bind(view)
-        clearBottomMenuItemIconTintList(binding.bottomMenu)
+        super.onViewCreated(view, savedInstanceState)
+    }
 
+    override fun getBottomMenu() : BottomNavigationView {
+        val bottomNavigationView = binding.bottomMenu.root
+        bottomNavigationView.inflateMenu(R.menu.menu_attachments)
+        return bottomNavigationView
     }
 
     override fun successLogin() {

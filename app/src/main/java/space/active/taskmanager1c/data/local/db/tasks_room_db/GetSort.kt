@@ -26,7 +26,7 @@ object GetSort {
         return when (sortField) {
             SortField.NAME -> "ORDER BY TaskInputHandled.name "
             SortField.DATE -> "ORDER BY TaskInputHandled.date "
-            SortField.END_DATE -> "ORDER BY TaskInputHandled.endDate "
+            SortField.END_DATE -> "ORDER BY TaskInputHandled.deadline "
             SortField.PERFORMER -> "ORDER BY UserInput.userName "
         }
     }

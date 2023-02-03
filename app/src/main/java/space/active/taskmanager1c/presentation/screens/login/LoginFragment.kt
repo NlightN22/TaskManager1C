@@ -7,6 +7,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.Loading
 import space.active.taskmanager1c.coreutils.OnWait
@@ -24,10 +25,8 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
     private val viewModel: LoginViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "$this Created")
         binding = FragmentLoginBinding.bind(view)
-        clearBottomMenuItemIconTintList(binding.bottomMenu)
+        super.onViewCreated(view, savedInstanceState)
 
         initLoginState()
         observers()
@@ -37,6 +36,12 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
     private fun initLoginState() {
         previousStateHandle = findNavController().previousBackStackEntry!!.savedStateHandle
         previousStateHandle[LOGIN_SUCCESSFUL] = false
+    }
+
+    override fun getBottomMenu() : BottomNavigationView {
+        val bottomNavigationView = binding.bottomMenu.root
+        bottomNavigationView.inflateMenu(R.menu.menu_login)
+        return bottomNavigationView
     }
 
     override fun navigateToLogin() {
@@ -75,7 +80,7 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
     private fun renderLoading(state: Boolean) {
         shimmerShow(binding.loginShimmer, binding.userNameTIL, state)
         shimmerShow(binding.passShimmer, binding.passTIL, state)
-        shimmerShow(binding.bottomShimmer, binding.bottomMenu, state)
+        shimmerShow(binding.bottomShimmer, binding.bottomMenu.root, state)
     }
 
     private fun listeners() {
@@ -87,7 +92,7 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
             false
         }
 
-        binding.bottomMenu.setOnItemSelectedListener { menuItem ->
+        binding.bottomMenu.root.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.login_ok -> {
                     auth()

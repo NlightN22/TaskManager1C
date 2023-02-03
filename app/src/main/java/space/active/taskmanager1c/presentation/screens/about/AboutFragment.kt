@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.FragmentAboutBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
@@ -17,12 +18,17 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
     lateinit var binding: FragmentAboutBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         binding = FragmentAboutBinding.bind(view)
-        clearBottomMenuItemIconTintList(binding.bottomMenu)
+        super.onViewCreated(view, savedInstanceState)
 
         observers()
         listeners()
+    }
+
+    override fun getBottomMenu() : BottomNavigationView {
+        val bottomNavigationView = binding.bottomMenu.root
+        bottomNavigationView.inflateMenu(R.menu.menu_about)
+        return bottomNavigationView
     }
 
     private fun listeners() {
@@ -32,7 +38,7 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
                 emailTo = arrayOf(binding.aboutAppContactsET.text.toString()),
                 "${binding.aboutAppNameET.text} Feedback v.${binding.aboutAppVersionET.text}")
         }
-        binding.bottomMenu.setOnItemSelectedListener { menuItem ->
+        binding.bottomMenu.root.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.about_ok -> {
                     findNavController().popBackStack()

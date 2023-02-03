@@ -108,11 +108,9 @@
     </com.google.android.material.card.MaterialCardView>
 
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <include layout="@layout/bottom_navigation_menu"
         android:id="@+id/bottomMenu"
-        app:menu="@menu/menu_save_cancel"
-        style="@style/BottomMenu"
-        tools:ignore="MissingConstraints" />
+        />
 
 
 

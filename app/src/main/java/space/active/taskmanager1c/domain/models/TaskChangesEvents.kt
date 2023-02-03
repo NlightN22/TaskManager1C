@@ -8,7 +8,7 @@ sealed class TaskChangesEvents {
         val title: String
     ) : TaskChangesEvents()
 
-    data class EndDate(
+    data class DeadLine(
         val date: ZonedDateTime
     ) : TaskChangesEvents()
 

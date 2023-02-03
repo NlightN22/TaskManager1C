@@ -577,10 +577,8 @@
         </com.google.android.material.textfield.TextInputLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <include layout="@layout/bottom_navigation_menu"
         android:id="@+id/bottomMenu"
-        style="@style/BottomMenu"
-        tools:menu="@menu/menu_detailed"
-        tools:ignore="MissingConstraints" />
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

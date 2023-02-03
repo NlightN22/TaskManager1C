@@ -31,7 +31,7 @@ data class TaskInputHandledWithUsers(
             return TaskDomain(
                 date = date.toZonedDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 description = description,
-                endDate = endDate?.toZonedDateTimeOrNull(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                deadline = deadline?.toZonedDateTimeOrNull(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 id = id,
                 mainTaskId = mainTaskId ?: "",
                 name = name,
@@ -59,7 +59,7 @@ data class TaskInputHandledWithUsers(
                 coPerformers =coPerformers.map { it.coPerformerId },
                 date = date,
                 description = description,
-                endDate = endDate ?: "",
+                deadline = deadline ?: "",
                 id = id,
                 mainTaskId = mainTaskId ?: "",
                 name = name,

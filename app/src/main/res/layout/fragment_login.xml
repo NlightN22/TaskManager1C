@@ -148,12 +148,9 @@
 
     </com.facebook.shimmer.ShimmerFrameLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <include layout="@layout/bottom_navigation_menu"
         android:id="@+id/bottomMenu"
-        style="@style/BottomMenu"
-        app:menu="@menu/menu_login"
-        tools:ignore="MissingConstraints"
-        tools:visibility="gone" />
+        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,7 +2,6 @@ package space.active.taskmanager1c.presentation.screens
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -30,6 +29,7 @@ import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.CantShowSnackBar
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.databinding.BottomNavigationMenuBinding
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
@@ -84,26 +84,23 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             checkLoginState(login)
         }
         showNavigationLog()
+        initBottomMenu(getBottomMenu())
     }
 
-    var currentDialog: AlertDialog? = null
-    private fun showSendErrorDialog(backendException: BackendException) {
-        if (currentDialog != null) {
-            if (currentDialog!!.isShowing) return
+    abstract fun getBottomMenu() : BottomNavigationView
+
+    abstract fun successLogin()
+
+    abstract fun navigateToLogin()
+
+    private fun initBottomMenu(bottomMenu: BottomNavigationView) {
+        clearBottomMenuItemIconTintList(bottomMenu)
+        val bindMenu = BottomNavigationMenuBinding.bind(bottomMenu)
+        bindMenu.versionTV.root.text = context?.packageName?.let {
+            context?.packageManager?.getPackageInfo(
+                it, 0
+            )?.versionName
         }
-        logger.log(TAG, "showSendErrorDialog")
-        currentDialog = AlertDialog.Builder(context)
-            .setMessage(R.string.error_dialog_message)
-            .setTitle(R.string.error_dialog_title)
-            .setCancelable(true)
-            .setPositiveButton(R.string.error_dialog_ok) { _, _ ->
-                sendBackendException(backendException)
-            }
-            .setNegativeButton(R.string.error_dialog_cancel) { _, _ ->
-                baseMainVM.skipBackendException(backendException)
-            }
-            .create()
-        currentDialog!!.show()
     }
 
     fun getLoginState(): Boolean {
@@ -119,34 +116,6 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         val currentLogin = currentStateHandle?.get<Boolean>(LOGIN_SUCCESSFUL)
         return currentLogin ?: false
     }
-
-    private fun checkLoginState(login: Boolean) {
-        val currentFragment = findNavController().currentDestination?.id
-        val loginFragment: Int = R.id.loginFragment
-        if (!login) {
-            logger.log(TAG, "Not login")
-            if (currentFragment != loginFragment) {
-                logger.log(TAG, "Navigate to login")
-                navigateToLogin()
-            }
-        } else {
-            logger.log(TAG, "Success login")
-            successLogin()
-        }
-    }
-
-    private fun showNavigationLog() {
-        val backDestination = findNavController().previousBackStackEntry
-        logger.log(TAG, "backDestination: ${backDestination}")
-        val currentDestination = findNavController().currentDestination
-        logger.log(TAG, "currentFragment: ${currentDestination}")
-        val currentBackStackEntry = findNavController().currentBackStackEntry
-        logger.log(TAG, "currentBackStackEntry: ${currentBackStackEntry}")
-    }
-
-    abstract fun successLogin()
-
-    abstract fun navigateToLogin()
 
     var textChangeJob: Job? = null
     fun TextInputEditText.changeListener(block: (String) -> Unit) {
@@ -310,12 +279,57 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         }
     }
 
+    private fun checkLoginState(login: Boolean) {
+        val currentFragment = findNavController().currentDestination?.id
+        val loginFragment: Int = R.id.loginFragment
+        if (!login) {
+            logger.log(TAG, "Not login")
+            if (currentFragment != loginFragment) {
+                logger.log(TAG, "Navigate to login")
+                navigateToLogin()
+            }
+        } else {
+            logger.log(TAG, "Success login")
+            successLogin()
+        }
+    }
+
+    private fun showNavigationLog() {
+        val backDestination = findNavController().previousBackStackEntry
+        logger.log(TAG, "backDestination: ${backDestination}")
+        val currentDestination = findNavController().currentDestination
+        logger.log(TAG, "currentFragment: ${currentDestination}")
+        val currentBackStackEntry = findNavController().currentBackStackEntry
+        logger.log(TAG, "currentBackStackEntry: ${currentBackStackEntry}")
+    }
+
     private fun wrapSnackExceptions(block: () -> Unit) {
         try {
             block()
         } catch (e: Throwable) {
             exceptionHandler(CantShowSnackBar())
         }
+    }
+
+
+    var currentDialog: AlertDialog? = null
+    private fun showSendErrorDialog(backendException: BackendException) {
+        if (currentDialog != null) {
+            if (currentDialog!!.isShowing) return
+        }
+        logger.log(TAG, "showSendErrorDialog")
+        currentDialog = AlertDialog.Builder(context)
+            .setMessage(R.string.error_dialog_message)
+            .setTitle(R.string.error_dialog_title)
+            .setCancelable(true)
+            .setPositiveButton(R.string.error_dialog_ok) { _, _ ->
+                sendBackendException(backendException)
+            }
+            .setNegativeButton(R.string.error_dialog_cancel) { _, _ ->
+                baseMainVM.skipBackendException(backendException)
+            }
+            .create()
+        currentDialog!!.show()
     }
 
     private fun sendBackendException(backendException: BackendException) {

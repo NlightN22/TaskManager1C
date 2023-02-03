@@ -41,12 +41,8 @@ fun ZonedDateTime.toShortDate(): String {
 }
 
 fun Long.millisecToZonedDateTime(): ZonedDateTime {
-    val currentZoneId = ZoneId.systemDefault()
-    return LocalDateTime.ofEpochSecond(
-        this / 1000,
-        0,
-        ZonedDateTime.now().offset
-    ).atZone(currentZoneId)
+    val instant = Instant.ofEpochMilli(this)
+    return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
 }
 
 fun Long.millisecToLocalDateTime(): LocalDateTime {
@@ -75,7 +71,10 @@ fun ZonedDateTime.nowDiffInDays(): Int {
  * sample 2022-04-07T00:52:37
  */
 fun ZonedDateTime?.toDTO(): String {
-    return this?.toLocalDateTime()?.toString() ?: ""
+    return this?.let {
+        LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC)
+        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        } ?: ""
 }
 
 /**

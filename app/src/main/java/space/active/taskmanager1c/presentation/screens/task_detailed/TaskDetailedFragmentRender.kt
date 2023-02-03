@@ -53,15 +53,17 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
         binding.taskDescriptionTIL.setState(enabled = fieldsState.description)
 
         // bottom menu state items
-        binding.bottomMenu.menu.clear()
-        if (fieldsState.bottomNew) {
-            binding.bottomMenu.inflateMenu(R.menu.menu_save_cancel)
-        } else {
-            binding.bottomMenu.inflateMenu(R.menu.menu_detailed)
-            binding.bottomMenu.menu.findItem(R.id.detailed_ok).isVisible =
-                fieldsState.bottomOk
-            binding.bottomMenu.menu.findItem(R.id.detailed_cancel).isVisible =
-                fieldsState.bottomCancel
+        binding.bottomMenu.root.apply {
+            menu.clear()
+            if (fieldsState.bottomNew) {
+                inflateMenu(R.menu.menu_save_cancel)
+            } else {
+                inflateMenu(R.menu.menu_detailed)
+                menu.findItem(R.id.detailed_ok).isVisible =
+                    fieldsState.bottomOk
+                menu.findItem(R.id.detailed_cancel).isVisible =
+                    fieldsState.bottomCancel
+            }
         }
     }
 }

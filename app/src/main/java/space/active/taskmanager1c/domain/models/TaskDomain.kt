@@ -2,20 +2,16 @@ package space.active.taskmanager1c.domain.models
 
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.TaskInputHandled
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
 import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.domain.models.UserDomain.Companion.toText
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskState
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 data class TaskDomain(
     val date: ZonedDateTime,
     val description: String,
-    val endDate: ZonedDateTime?,
+    val deadline: ZonedDateTime?,
     val id: String,
     val mainTaskId: String,
     val name: String,
@@ -96,7 +92,7 @@ data class TaskDomain(
             coPerformers = users.coPerformers.map { it.id },
             date = date.toDTO(),
             description = description,
-            endDate = endDate.toDTO(),
+            deadline = deadline.toDTO(),
             id = id,
             mainTaskId = mainTaskId,
             name = name,
@@ -117,7 +113,7 @@ data class TaskDomain(
         startDate = this.date.toShortDateTime(),
         number = this.number,
         author = this.users.author.name,
-        deadLine = this.endDate?.toShortDate() ?: "",
+        deadLine = this.deadline?.toShortDate() ?: "",
         daysEnd = this.getDeadline(),
         performer = this.users.performer.name,
         coPerfomers = this.users.coPerformers.toText(),
@@ -133,7 +129,7 @@ data class TaskDomain(
      * Return days deadline in string
      */
     private fun getDeadline(): String {
-        this.endDate?.let {
+        this.deadline?.let {
             val difference = it.nowDiffInDays()
             return "$difference дней"
         } ?: kotlin.run {
@@ -144,7 +140,7 @@ data class TaskDomain(
     companion object {
         fun newTask(author: UserDomain) = TaskDomain(
             date = ZonedDateTime.now(),
-            endDate = ZonedDateTime.now(),
+            deadline = ZonedDateTime.now(),
             users = UsersInTaskDomain(
                 author = author,
                 performer = UserDomain.blankUser(),

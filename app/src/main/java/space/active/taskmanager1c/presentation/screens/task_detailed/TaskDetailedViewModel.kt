@@ -239,7 +239,7 @@ class TaskDetailedViewModel @Inject constructor(
             val curTask = currentTaskDomain.first()
             curTask?.let { task ->
                 val titleResult = validate.title(task.name)
-                val endDateResult = validate.endDate(task.endDate)
+                val endDateResult = validate.endDate(task.deadline)
                 val authorResult = validate.author(task.users.author)
                 val performerResult = validate.performer(task.users.performer)
                 val listRes = listOf(
@@ -331,9 +331,9 @@ class TaskDetailedViewModel @Inject constructor(
                         }
                     }
                 }
-                is TaskChangesEvents.EndDate -> {
+                is TaskChangesEvents.DeadLine -> {
                     val changes = event.date
-                    changedTaskDomain = task.copy(endDate = changes)
+                    changedTaskDomain = task.copy(deadline = changes)
                     saveEvent = SaveEvents.Simple(changedTaskDomain)
                 }
                 is TaskChangesEvents.Performer -> {

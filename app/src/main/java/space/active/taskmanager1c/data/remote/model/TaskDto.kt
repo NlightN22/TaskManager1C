@@ -10,8 +10,8 @@ data class TaskDto(
     val authorId: String,
     val coPerformers: List<String>,
     val date: String,
+    val deadline: String,
     val description: String,
-    val endDate: String,
     val id: String,
     val mainTaskId: String,
     val name: String,
@@ -48,7 +48,7 @@ data class TaskDto(
         return TaskInputHandled(
             date = date,
             description = description ?: "",
-            endDate = endDate ?: "",
+            deadline = deadline ?: "",
             id = id,
             mainTaskId = mainTaskId ?: "",
             name = name ?: "",
