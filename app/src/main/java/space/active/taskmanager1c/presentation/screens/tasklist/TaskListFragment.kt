@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.forEach
@@ -43,7 +44,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     @Inject
     lateinit var taskStatusDialog: TaskStatusDialog
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding = FragmentTaskListBinding.bind(view)
         super.onViewCreated(view, savedInstanceState)
@@ -80,7 +80,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         listeners()
     }
 
-    override fun getBottomMenu() : BottomNavigationView {
+    override fun getBottomMenu(): BottomNavigationView? {
         val bottomNavigationView = binding.bottomMenu.root
         bottomNavigationView.inflateMenu(R.menu.menu_tasklist)
         return bottomNavigationView
@@ -199,7 +199,6 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
                 }
             }
         }
-
     }
 
     private fun initOrderMenu() {
@@ -219,6 +218,13 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     private fun listeners() {
+
+        binding.searchEditText.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboardFrom(requireContext(), v)
+            }
+            false
+        }
 
         binding.listTasksRV.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
@@ -292,10 +298,9 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
             }
             return@setOnItemSelectedListener true
         }
-        binding.backButtonTaskList.setOnClickListener {
+        binding.backButtonTaskList.root.setOnClickListener {
             onBackClick()
         }
-
     }
 
     private fun showMenu(context: Context, view: View, @MenuRes menuRes: Int): PopupMenu {

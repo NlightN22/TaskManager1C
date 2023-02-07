@@ -1,7 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.login
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.viewModels
@@ -38,7 +37,7 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         previousStateHandle[LOGIN_SUCCESSFUL] = false
     }
 
-    override fun getBottomMenu() : BottomNavigationView {
+    override fun getBottomMenu(): BottomNavigationView? {
         val bottomNavigationView = binding.bottomMenu.root
         bottomNavigationView.inflateMenu(R.menu.menu_login)
         return bottomNavigationView

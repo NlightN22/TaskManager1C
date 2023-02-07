@@ -36,6 +36,10 @@ class MergedTaskRepositoryImpl constructor(
         myId: Flow<String>
     ): Flow<List<TaskDomain>> = getTasksFromBothRepo(filterTypes,orderTypes,myId)
 
+    override fun getInnerTasks(taskId: String): Flow<List<TaskDomain>> =
+        inputTaskRepository.getInnerTasks(taskId).map { it.map { it.toTaskDomain(inputTaskRepository.getUsers()) } }
+            .flowOn(ioDispatcher)
+
     // todo delete debug
     private fun getTasksFromInputRepo(
         filterTypes: Flow<TaskListFilterTypes>,

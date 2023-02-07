@@ -3,7 +3,6 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
@@ -11,7 +10,6 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.*
-import space.active.taskmanager1c.domain.models.Messages.Companion.toMessages
 import space.active.taskmanager1c.domain.models.UserDomain.Companion.toDialogItems
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
@@ -19,7 +17,6 @@ import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
 import space.active.taskmanager1c.presentation.utils.TaskStatusDialog
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 private const val TAG = "TaskDetailedVM"
@@ -29,13 +26,9 @@ class TaskDetailedViewModel @Inject constructor(
     private val repository: TasksRepository,
     logger: Logger,
     settings: SettingsRepository,
-    private val getCredentials: GetCredentials,
     private val saveNewTaskToDb: SaveNewTaskToDb,
     private val validate: Validate,
     private val exceptionHandler: ExceptionHandler,
-    private val getTaskMessages: GetTaskMessages,
-    private val sendTaskMessages: SendTaskMessages,
-    private val setTaskAndMessageReadingTime: SetTaskAndMessageReadingTime,
     private val whoUserInTask: DefineUserInTask,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel(settings, logger) {
@@ -68,12 +61,6 @@ class TaskDetailedViewModel @Inject constructor(
 
     private val _showSnackBar = MutableSharedFlow<UiText>()
     val showSnackBar = _showSnackBar.asSharedFlow()
-
-    private val _messagesList = MutableStateFlow<Request<List<Messages>>>(PendingRequest())
-    val messageList = _messagesList.asStateFlow()
-
-    private val _sendMessageEvent = MutableSharedFlow<StateProgress<Any>>()
-    val sendMessageEvent = _sendMessageEvent.asSharedFlow()
 
     private val whoAmI: Flow<UserDomain> = settings.getUserFlow()
 
@@ -130,7 +117,6 @@ class TaskDetailedViewModel @Inject constructor(
                     if (oldState.performer != newState.performer || oldState.author != newState.author) {
                         _enabledFields.value = whoUserInTask(newTaskDomain, whoAmI.first()).fields
                     }
-                    showMessages(newTaskDomain.id)
                 }
             } else {
                 val newState = newTaskDomain.toTaskState()
@@ -138,90 +124,7 @@ class TaskDetailedViewModel @Inject constructor(
                     logger.log(TAG, "Update new")
                     _taskState.value = newState
                     _enabledFields.value = TaskUserIs.AuthorInNewTask().fields
-                    _messagesList.value = SuccessRequest(emptyList<Messages>())
                 }
-            }
-        }
-    }
-
-    private fun showMessages(taskId: String) {
-        viewModelScope.launch {
-            getTaskMessages(getCredentials(), taskId).collect { request ->
-                when (request) {
-                    is PendingRequest -> {}
-                    is ErrorRequest -> {
-                        exceptionHandler(request.exception)
-                    }
-                    is SuccessRequest -> {
-                        val messagesList = request.data.messages
-                        val convertedMessages =
-                            messagesList.toMessages(request.data.users, request.data.readingTime)
-                                .sortedByDescending { it.dateTime }
-                        val setMyList: List<Messages> = convertedMessages.map {
-                            if (it.authorId == whoAmI.first().id) {
-                                it.copy(my = true)
-                            } else {
-                                it.copy(my = false)
-                            }
-                        }
-                        sendReadingTime(taskId, setMyList)
-                        _messagesList.value = SuccessRequest(setMyList)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun sendReadingTime(taskId: String, messageList: List<Messages>) {
-        viewModelScope.launch {
-            val taskReadingTime = LocalDateTime.now()
-            if (messageList.isNotEmpty()) {
-                val lastMessageTime: LocalDateTime = messageList.maxBy { it.dateTime }.dateTime.toLocalDateTime()
-                logger.log(TAG, "lastMessageTime: $lastMessageTime")
-                setTaskAndMessageReadingTime(
-                    credentials = getCredentials(),
-                    taskId = taskId,
-                    lastMessageTime,
-                    taskReadingTime
-                ).collect { request ->
-                    when (request) {
-                        is SuccessRequest -> {
-                            delay(1000)
-                            _messagesList.value =
-                                SuccessRequest(messageList.map { it.copy(unread = false) })
-                        }
-                        else -> {}
-                    }
-                }
-            }
-        }
-    }
-
-    fun sendMessage(text: String) {
-        viewModelScope.launch {
-            val curTask = currentTaskDomain.first()
-            curTask?.let { task ->
-                if (task.id.isNotBlank()) {
-                    sendTaskMessages(getCredentials(), task.id, text).collect { res ->
-                        when (res) {
-                            is PendingRequest -> {
-                                _sendMessageEvent.emit(Loading())
-                            }
-                            is SuccessRequest -> {
-//                                logger.log(TAG, res.data.messages.toString())
-                                showMessages(task.id)
-                                _sendMessageEvent.emit(Success(Any()))
-                            }
-                            else -> {
-                                _sendMessageEvent.emit(Success(Any()))
-                            }
-                        }
-                    }
-                } else {
-                    _showSnackBar.emit(UiText.Resource(R.string.error_new_task_send_message))
-                }
-            } ?: kotlin.run {
-                exceptionHandler(EmptyObject("currentTaskDomain"))
             }
         }
     }
@@ -394,17 +297,26 @@ class TaskDetailedViewModel @Inject constructor(
         viewModelScope.launch {
             val mainTaskId = taskDomain.mainTaskId
             if (mainTaskId.isNotBlank()) {
-                val mainTask = repository.getTask(mainTaskId).first()
-                mainTask?.let {
-                    val currentState = _taskState.value
-                    if (currentState.id.isNotBlank()) {
-                        _taskState.value = currentState.copy(mainTask = it.name)
-                    }
-                    logger.log(TAG, "setDependentTasks ${it.name}")
-                    // todo clickable for open
-                }
+                setMainTask(mainTaskId)
             }
-            // todo add inner taskDomains
+            setInnerTasks(taskDomain.id)
+        }
+    }
+
+    private suspend fun setMainTask(mainTaskId: String) {
+        val mainTask = repository.getTask(mainTaskId).first()
+        mainTask?.let {
+            _taskState.value = _taskState.value.copy(mainTask = it.name)
+            // todo clickable for open
+        }
+    }
+
+    private suspend fun setInnerTasks(taskId: String) {
+        repository.getInnerTasks(taskId).collectLatest { innerTasks ->
+            if (innerTasks.isNotEmpty()) {
+                val innerNames = innerTasks.map { it.name }.joinToString("\n")
+                _taskState.value = _taskState.value.copy(innerTasks = innerNames)
+            }
         }
     }
 
@@ -416,28 +328,41 @@ class TaskDetailedViewModel @Inject constructor(
                 val usersIds: List<String>
                 when (eventType) {
                     is PerformerDialog -> {
-                        if (!_enabledFields.value.performer) { return@launch }
-                        val listItems = listUserDomains.toDialogItems(listOf(task.users.performer.id))
+                        if (!_enabledFields.value.performer) {
+                            return@launch
+                        }
+                        val listItems =
+                            listUserDomains.toDialogItems(listOf(task.users.performer.id))
                         _showDialogEvent.emit(PerformerDialog(listItems))
                     }
                     is CoPerformersDialog -> {
-                        if (!_enabledFields.value.coPerfomers) { return@launch }
+                        if (!_enabledFields.value.coPerfomers) {
+                            return@launch
+                        }
                         usersIds = task.users.coPerformers.map { it.id }
-                        val dialogItems = listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
+                        val dialogItems =
+                            listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(CoPerformersDialog(dialogItems))
                     }
                     is ObserversDialog -> {
-                        if (!_enabledFields.value.observers) { return@launch }
+                        if (!_enabledFields.value.observers) {
+                            return@launch
+                        }
                         usersIds = task.users.observers.map { it.id }
-                        val dialogItems = listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
+                        val dialogItems =
+                            listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(ObserversDialog(dialogItems))
                     }
                     is DatePicker -> {
-                        if (!_enabledFields.value.deadLine) { return@launch }
+                        if (!_enabledFields.value.deadLine) {
+                            return@launch
+                        }
                         _showDialogEvent.emit(DatePicker)
                     }
                     is EditTitleDialog -> {
-                        if (!_enabledFields.value.title) { return@launch }
+                        if (!_enabledFields.value.title) {
+                            return@launch
+                        }
                         val currentTitle = curTaskDomain.name
                         _showDialogEvent.emit(
                             EditTitleDialog(
@@ -450,22 +375,25 @@ class TaskDetailedViewModel @Inject constructor(
                         )
                     }
                     is EditDescriptionDialog -> {
-                        if (!_enabledFields.value.description) { return@launch }
+                        if (!_enabledFields.value.description) {
+                            return@launch
+                        }
                         val currentDescription = curTaskDomain.description
-                            _showDialogEvent.emit(
-                                EditDescriptionDialog(
-                                    EditTextDialogStates(
-                                        hint = R.string.description_dialog_hint,
-                                        text = currentDescription,
-                                    )
+                        _showDialogEvent.emit(
+                            EditDescriptionDialog(
+                                EditTextDialogStates(
+                                    hint = R.string.description_dialog_hint,
+                                    text = currentDescription,
                                 )
                             )
+                        )
                     }
                 }
             }
         }
     }
 
+    // todo delete
     // Expand main details
     fun expandCloseMainDetailed() {
         _expandState.value = _expandState.value.copy(main = !_expandState.value.main)

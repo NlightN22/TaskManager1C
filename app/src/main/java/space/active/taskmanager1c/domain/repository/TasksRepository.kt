@@ -13,6 +13,7 @@ interface TasksRepository {
                          orderTypes: Flow<TaskListOrderTypes>,
                          myId: Flow<String>
     ): Flow<List<TaskDomain>>
+    fun getInnerTasks(taskId: String): Flow<List<TaskDomain>>
     val listUsersFlow: Flow<List<UserDomain>>
     fun getTask(taskId: String): Flow<TaskDomain?>
     fun editTask(taskDomain: TaskDomain, myId:String): Flow<Request<Any>>

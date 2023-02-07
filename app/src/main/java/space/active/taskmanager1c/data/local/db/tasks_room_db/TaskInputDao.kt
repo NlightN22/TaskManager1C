@@ -31,6 +31,10 @@ interface TaskInputDao {
     fun getTasksFlow(): Flow<List<TaskInputHandledWithUsers>>
 
     @Transaction
+    @Query("SELECT * FROM TaskInputHandled WHERE mainTaskId = :taskId")
+    fun getInnerTasksFlow(taskId: String): Flow<List<TaskInputHandledWithUsers>>
+
+    @Transaction
     @Query("SELECT * FROM TaskInputHandled")
     suspend fun getTasks(): List<TaskInputHandledWithUsers>
 

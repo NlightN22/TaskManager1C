@@ -38,6 +38,9 @@ class InputTaskRepositoryImpl @Inject constructor(
     override fun getTaskFlow(taskId: String): Flow<TaskInputHandledWithUsers?> =
         inputDao.getTaskFlow(taskId)
 
+    override fun getInnerTasks(taskId: String): Flow<List<TaskInputHandledWithUsers>> =
+        inputDao.getInnerTasksFlow(taskId)
+
     override suspend fun getTask(taskId: String): TaskInputHandledWithUsers? =
         inputDao.getTask(taskId)
 

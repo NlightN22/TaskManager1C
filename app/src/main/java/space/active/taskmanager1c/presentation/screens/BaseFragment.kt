@@ -87,19 +87,21 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         initBottomMenu(getBottomMenu())
     }
 
-    abstract fun getBottomMenu() : BottomNavigationView
+    abstract fun getBottomMenu() : BottomNavigationView?
 
     abstract fun successLogin()
 
     abstract fun navigateToLogin()
 
-    private fun initBottomMenu(bottomMenu: BottomNavigationView) {
-        clearBottomMenuItemIconTintList(bottomMenu)
-        val bindMenu = BottomNavigationMenuBinding.bind(bottomMenu)
-        bindMenu.versionTV.root.text = context?.packageName?.let {
-            context?.packageManager?.getPackageInfo(
-                it, 0
-            )?.versionName
+    private fun initBottomMenu(bottomMenu: BottomNavigationView?) {
+        bottomMenu?.let { menu->
+            clearBottomMenuItemIconTintList(menu)
+            val bindMenu = BottomNavigationMenuBinding.bind(menu)
+            bindMenu.versionTV.root.text = context?.packageName?.let {
+                context?.packageManager?.getPackageInfo(
+                    it, 0
+                )?.versionName
+            }
         }
     }
 

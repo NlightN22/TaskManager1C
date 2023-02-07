@@ -26,7 +26,7 @@ class AttachmentsFragment: BaseFragment(R.layout.fragment_attachments) {
         super.onViewCreated(view, savedInstanceState)
     }
 
-    override fun getBottomMenu() : BottomNavigationView {
+    override fun getBottomMenu(): BottomNavigationView? {
         val bottomNavigationView = binding.bottomMenu.root
         bottomNavigationView.inflateMenu(R.menu.menu_attachments)
         return bottomNavigationView

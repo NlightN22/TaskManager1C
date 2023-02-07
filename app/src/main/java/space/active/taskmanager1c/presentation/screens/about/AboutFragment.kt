@@ -25,7 +25,7 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
         listeners()
     }
 
-    override fun getBottomMenu() : BottomNavigationView {
+    override fun getBottomMenu(): BottomNavigationView? {
         val bottomNavigationView = binding.bottomMenu.root
         bottomNavigationView.inflateMenu(R.menu.menu_about)
         return bottomNavigationView
@@ -45,6 +45,10 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
                 }
             }
             return@setOnItemSelectedListener true
+        }
+
+        binding.backButton.root.setOnClickListener {
+            onBackClick()
         }
     }
 

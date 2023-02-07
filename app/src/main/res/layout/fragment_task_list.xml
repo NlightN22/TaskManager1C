@@ -14,11 +14,8 @@
         style="@style/OptionsMenu"
         tools:ignore="MissingConstraints" />
 
-    <ImageButton
-        android:id="@+id/back_button_task_list"
-        android:layout_marginTop="14dp"
-        style="@style/BackButton"
-        tools:ignore="MissingConstraints" />
+    <include layout="@layout/back_button"
+        android:id="@+id/back_button_task_list" />
 
     <com.google.android.material.card.MaterialCardView
         style="@style/EditableCardView"
@@ -46,9 +43,11 @@
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 style="@style/EditTextEditable"
                 android:id="@+id/searchEditText"
+                android:selectAllOnFocus="true"
                 android:layout_width="match_parent"
                 android:inputType="textShortMessage"
                 android:gravity="top|start"
+                android:imeOptions="actionDone"
                 android:paddingLeft="10dp"
                 tools:text=""
                 android:maxLines="1"

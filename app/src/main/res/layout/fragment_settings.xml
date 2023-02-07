@@ -7,6 +7,10 @@
     android:layout_height="match_parent"
     tools:context=".presentation.screens.settings.SettingsFragment">
 
+    <include layout="@layout/back_button"
+        android:id="@+id/back_button" />
+
+
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switchSkipStatusAlert"
         style="@style/Switch"

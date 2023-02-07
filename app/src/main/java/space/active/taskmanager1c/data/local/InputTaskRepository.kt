@@ -22,6 +22,7 @@ interface InputTaskRepository {
 
     suspend fun getTasks(): List<TaskInputHandledWithUsers>
     fun getTaskFlow(taskId: String): Flow<TaskInputHandledWithUsers?>
+    fun getInnerTasks(taskId: String): Flow<List<TaskInputHandledWithUsers>>
     suspend fun getTask(taskId: String): TaskInputHandledWithUsers?
     suspend fun insertTasks(taskInputList: List<TaskInputHandledWithUsers>)
     suspend fun saveAndDelete(

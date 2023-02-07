@@ -32,7 +32,7 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
         viewModel.setSettingsViewState(getLoginState())
     }
 
-    override fun getBottomMenu() : BottomNavigationView {
+    override fun getBottomMenu(): BottomNavigationView? {
         val bottomNavigationView = binding.bottomMenu.root
         bottomNavigationView.inflateMenu(R.menu.menu_save_cancel)
         return bottomNavigationView
@@ -71,6 +71,10 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     }
 
     private fun listeners() {
+        binding.backButton.root.setOnClickListener {
+            onBackClick()
+        }
+
         binding.switchSkipStatusAlert.setOnCheckedChangeListener { buttonView, isChecked ->
             viewModel.changeStatusAlert(isChecked)
         }

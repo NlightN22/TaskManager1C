@@ -9,5 +9,5 @@ data class EditableFields(
     val description: Boolean = false,
     val bottomNew: Boolean = false,
     val bottomOk: Boolean = false,
-    val bottomCancel: Boolean = false
+    val bottomCancel: Boolean = false,
 )

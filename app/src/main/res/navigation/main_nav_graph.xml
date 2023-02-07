@@ -43,6 +43,9 @@
         <action
             android:id="@+id/action_taskDetailedFragment_to_attachmentsFragment"
             app:destination="@id/attachmentsFragment" />
+        <action
+            android:id="@+id/action_taskDetailedFragment_to_messagesFragment"
+            app:destination="@id/messagesFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -70,6 +73,18 @@
         <action
             android:id="@+id/action_attachmentsFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/messagesFragment"
+        android:name="space.active.taskmanager1c.presentation.screens.messages.MessagesFragment"
+        android:label="fragment_messages"
+        tools:layout="@layout/fragment_messages" >
+        <action
+            android:id="@+id/action_messagesFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <argument
+            android:name="taskId"
+            app:argType="string" />
     </fragment>
 
 </navigation>

@@ -5,26 +5,27 @@
             android:height="42dp"
             android:viewportWidth="40"
             android:viewportHeight="42">
-            <group android:translateY="3"
-                android:translateX="3">
+            <group
+                android:translateX="3"
+                android:translateY="3">
                 <path
                     android:fillColor="@color/bottom_menu_icon_background"
-                    android:pathData="M14.63 33.18L4.53 23.1l4.6-4.6 5.5 5.51L30.68 7.93l4.6 4.6-20.66 20.65Z"/>
+                    android:pathData="M14.63 33.18L4.53 23.1l4.6-4.6 5.5 5.51L30.68 7.93l4.6 4.6-20.66 20.65Z" />
             </group>
         </vector>
     </item>
 
-<item>
-<vector
-    android:width="40dp"
-    android:height="42dp"
-    android:viewportWidth="40"
-    android:viewportHeight="42">
-    <group>
-        <path
-            android:fillColor="@color/bottom_menu_icon"
-            android:pathData="M14.63 33.18L4.53 23.1l4.6-4.6 5.5 5.51L30.68 7.93l4.6 4.6-20.66 20.65Z"/>
-    </group>
-</vector>
-</item>
+    <item>
+        <vector
+            android:width="40dp"
+            android:height="42dp"
+            android:viewportWidth="40"
+            android:viewportHeight="42">
+            <group>
+                <path
+                    android:fillColor="@color/bottom_menu_icon"
+                    android:pathData="M14.63 33.18L4.53 23.1l4.6-4.6 5.5 5.51L30.68 7.93l4.6 4.6-20.66 20.65Z" />
+            </group>
+        </vector>
+    </item>
 </layer-list>
