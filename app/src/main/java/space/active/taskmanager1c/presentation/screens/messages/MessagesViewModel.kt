@@ -111,7 +111,7 @@ class MessagesViewModel @Inject constructor(
                     val messagesList = request.data.messages
                     val convertedMessages =
                         messagesList.toMessages(request.data.users, request.data.readingTime)
-                            .sortedBy { it.dateTime }
+                            .sortedByDescending { it.dateTime }
                     val setMyList: List<Messages> = convertedMessages.map {
                         if (it.authorId == whoAmI.first().id) {
                             it.copy(my = true)
@@ -133,7 +133,7 @@ class MessagesViewModel @Inject constructor(
     }
 
     private fun updateUI(taskId: String, messageList: List<Messages>) {
-        logger.log(TAG, "updateUI")
+        logger.log(TAG, "messageList updateUI")
         sendReadingTime(taskId, messageList)
         _messagesList.value = SuccessRequest(messageList)
     }

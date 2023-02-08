@@ -45,18 +45,27 @@
         </LinearLayout>
     </com.facebook.shimmer.ShimmerFrameLayout>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleConstraint"
+        app:layout_constraintBottom_toTopOf="@+id/messageInputCard">
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/messagesRV"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleConstraint"
-        app:layout_constraintBottom_toTopOf="@+id/messageInputCard"
+        app:stackFromEnd="true"
+        app:reverseLayout="true"
         tools:listitem="@layout/item_message"
         tools:visibility="visible"
         />
+
+    </FrameLayout>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/messageInputCard"

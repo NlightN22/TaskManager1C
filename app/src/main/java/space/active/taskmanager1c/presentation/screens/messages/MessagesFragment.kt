@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.Loading
@@ -32,6 +33,12 @@ class MessagesFragment : BaseFragment(R.layout.fragment_messages) {
         binding = FragmentMessagesBinding.bind(view)
         super.onViewCreated(view, savedInstanceState)
 
+        initRV()
+        observers()
+        listeners()
+    }
+
+    private fun initRV() {
         messagesAdapter = MessagesAdapter { message ->
             val clipboard =
                 requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -40,9 +47,6 @@ class MessagesFragment : BaseFragment(R.layout.fragment_messages) {
             showSnackBar(UiText.Resource(R.string.message_copied_to_clipboard, message.text))
         }
         binding.messagesRV.adapter = messagesAdapter
-
-        observers()
-        listeners()
     }
 
     override fun getBottomMenu(): BottomNavigationView? {
@@ -92,6 +96,7 @@ class MessagesFragment : BaseFragment(R.layout.fragment_messages) {
             when (request) {
                 is SuccessRequest -> {
                     messagesAdapter.submitList(request.data)
+                    binding.messagesRV.scrollToPosition(0)
                     shimmerShow(binding.shimmerMessagesRV, binding.messagesRV, false)
                 }
                 is PendingRequest -> {

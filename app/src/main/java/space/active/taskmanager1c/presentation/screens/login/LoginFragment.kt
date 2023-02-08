@@ -14,10 +14,13 @@ import space.active.taskmanager1c.coreutils.Success
 import space.active.taskmanager1c.databinding.FragmentLoginBinding
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.LOGIN_SUCCESSFUL
+import space.active.taskmanager1c.presentation.utils.hideKeyboardFrom
 
 private const val TAG = "LoginFragment"
 
 class LoginFragment : BaseFragment(R.layout.fragment_login) {
+
+    // todo hide keyboard on ime done
 
     lateinit var binding: FragmentLoginBinding
     lateinit var previousStateHandle: SavedStateHandle
@@ -86,6 +89,7 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
         binding.editTextPassword.setOnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 auth()
+                hideKeyboardFrom(requireContext(),v)
                 return@setOnEditorActionListener true
             }
             false
@@ -95,6 +99,7 @@ class LoginFragment : BaseFragment(R.layout.fragment_login) {
             when (menuItem.itemId) {
                 R.id.login_ok -> {
                     auth()
+                    hideKeyboardFrom(requireContext(),binding.editTextPassword)
                 }
                 R.id.login_camera -> {
                     // todo add scan credentials

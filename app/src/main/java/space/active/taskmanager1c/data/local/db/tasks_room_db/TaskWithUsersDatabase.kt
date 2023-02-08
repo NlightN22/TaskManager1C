@@ -13,6 +13,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
 @Database(
     entities = [
         TaskInputHandled::class,
+        InputTaskId::class,
         CoPerformersInTask::class,
         ObserversInTask::class,
         UserInput::class,
@@ -21,7 +22,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
         UserSettings::class,
         ReadingTimesTaskEntity::class
     ],
-    version = 4,
+    version = 5,
     )
 @TypeConverters(Converters::class)
 abstract class TaskWithUsersDatabase : RoomDatabase() {

@@ -15,8 +15,22 @@ interface TaskInputDao {
     suspend fun getInputCount(): Int
 
     @Query("SELECT TaskInputHandled.id FROM TaskInputHandled " +
-            "WHERE NOT TaskInputHandled.id IN(:incomingListIds)")
-    suspend fun getIdsNotInList(incomingListIds: List<String>): List<String>
+            "LEFT JOIN InputTaskId " +
+            "ON TaskInputHandled.id = InputTaskId.inputId " +
+            "WHERE InputTaskId.inputId IS NULL")
+    suspend fun getIdsNotInList(): List<String>
+
+    @Query("DELETE FROM InputTaskId")
+    suspend fun clearInputTaskId()
+
+    @Insert(entity = InputTaskId::class, onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertInputTaskId(inputIds: List<InputTaskId>)
+
+    @Transaction
+    suspend fun clearAndInsertNewIds(listIds: List<String>) {
+        clearInputTaskId()
+        insertInputTaskId(listIds.map { InputTaskId(inputId = it) })
+    }
 
     @RawQuery(observedEntities = [
         TaskInputHandled::class,

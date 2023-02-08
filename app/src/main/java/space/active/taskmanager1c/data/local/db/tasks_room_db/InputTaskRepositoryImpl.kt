@@ -59,7 +59,9 @@ class InputTaskRepositoryImpl @Inject constructor(
     }
 
     private suspend fun deleteNotComing(listIds: List<String>) {
-        val notInDbIds = inputDao.getIdsNotInList(listIds)
+        //insert new ids to InputTaskId, because hardcoded 999 variable limit for SQLite in Android
+        inputDao.clearAndInsertNewIds(listIds)
+        val notInDbIds = inputDao.getIdsNotInList()
         logger.log(TAG, "Count tasks to delete: ${notInDbIds.size}")
         notInDbIds.forEach {
             inputDao.deleteTask(it)
