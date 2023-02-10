@@ -10,6 +10,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
+
+// todo delete
 class RetrofitProvider @AssistedInject constructor(
     @Assisted private val serverAddress: String
 ) {
@@ -34,7 +36,7 @@ class RetrofitProvider @AssistedInject constructor(
             .build()
 
     private fun provideLogginInterceptor(): HttpLoggingInterceptor = HttpLoggingInterceptor()
-        .setLevel(HttpLoggingInterceptor.Level.NONE)
+        .setLevel(HttpLoggingInterceptor.Level.BODY)
 }
 
 @AssistedFactory

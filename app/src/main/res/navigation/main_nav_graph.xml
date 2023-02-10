@@ -73,6 +73,9 @@
         <action
             android:id="@+id/action_attachmentsFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
+        <argument
+            android:name="taskId"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/messagesFragment"

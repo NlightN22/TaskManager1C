@@ -316,6 +316,7 @@ class TaskDetailedViewModel @Inject constructor(
             if (innerTasks.isNotEmpty()) {
                 val innerNames = innerTasks.map { it.name }.joinToString("\n")
                 _taskState.value = _taskState.value.copy(innerTasks = innerNames)
+                // todo clickable for open
             }
         }
     }

@@ -68,4 +68,6 @@ object NotCorrectServerAddress :
 class ConnectionException(val inEx: Throwable) :
     AppExceptions(UiText.Resource(R.string.exception_connection))
 
+object FileDownloadException : AppExceptions(text = UiText.Resource(R.string.exception_file_download))
+
 object EncryptionException : AppExceptions(text = UiText.Resource(R.string.exception_encryption))

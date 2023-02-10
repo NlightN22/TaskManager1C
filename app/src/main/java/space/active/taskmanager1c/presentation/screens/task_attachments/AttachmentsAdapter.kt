@@ -5,23 +5,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.view.isVisible
-import androidx.core.widget.ContentLoadingProgressBar
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.AttachmentItemBinding
+import space.active.taskmanager1c.domain.models.InternalStorageFile
 
 class AttachmentsAdapter(
-    val onItemClick: (InternalStorageItem) -> Unit
+    val onItemClick: (InternalStorageFile) -> Unit
 ) :
-    ListAdapter<InternalStorageItem, AttachmentsAdapter.AttachmentsViewHolder>(Companion),
+    ListAdapter<InternalStorageFile, AttachmentsAdapter.AttachmentsViewHolder>(Companion),
     View.OnClickListener {
 
     override fun onClick(v: View?) {
         v?.let {
-            val storageItem = it.tag as InternalStorageItem
+            val storageItem = it.tag as InternalStorageFile
             onItemClick(storageItem)
         }
     }
@@ -30,13 +30,10 @@ class AttachmentsAdapter(
         RecyclerView.ViewHolder(itemBind.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AttachmentsViewHolder {
-        return AttachmentsViewHolder(
-            AttachmentItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = AttachmentItemBinding.inflate(inflater, parent, false)
+        binding.root.setOnClickListener(this)
+        return AttachmentsViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: AttachmentsViewHolder, position: Int) {
@@ -50,15 +47,17 @@ class AttachmentsAdapter(
         }
     }
 
-    private fun ImageView.cachedState(state: Boolean, item: InternalStorageItem) {
+    private fun ImageView.cachedState(state: Boolean, item: InternalStorageFile) {
         if (state) {
             try {
-                Picasso.get()
-                    .load(item.uri)
-                    .fit()
-                    .placeholder(R.drawable.ic_baseline_cloud_24)
-                    .error(R.drawable.ic_baseline_image_not_supported_24)
-                    .into(this)
+                item.uri?.let { fileUri ->
+                    Picasso.get()
+                        .load(fileUri)
+                        .fit()
+                        .placeholder(R.drawable.ic_baseline_cloud_24)
+                        .error(R.drawable.ic_baseline_image_not_supported_24)
+                        .into(this)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -67,17 +66,17 @@ class AttachmentsAdapter(
         }
     }
 
-    companion object : DiffUtil.ItemCallback<InternalStorageItem>() {
+    companion object : DiffUtil.ItemCallback<InternalStorageFile>() {
         override fun areItemsTheSame(
-            oldItem: InternalStorageItem,
-            newItem: InternalStorageItem
+            oldItem: InternalStorageFile,
+            newItem: InternalStorageFile
         ): Boolean {
             return newItem.id == oldItem.id
         }
 
         override fun areContentsTheSame(
-            oldItem: InternalStorageItem,
-            newItem: InternalStorageItem
+            oldItem: InternalStorageFile,
+            newItem: InternalStorageFile
         ): Boolean {
             return newItem.id == oldItem.id &&
                     newItem.cached == oldItem.cached &&

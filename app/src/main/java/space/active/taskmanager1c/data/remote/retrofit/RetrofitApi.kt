@@ -1,9 +1,13 @@
 package space.active.taskmanager1c.data.remote.retrofit
 
+import okhttp3.MultipartBody
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.*
 import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.remote.model.UserDto
+import space.active.taskmanager1c.data.remote.model.files.FileListDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
@@ -120,4 +124,25 @@ interface RetrofitApi {
      */
     @GET("auth")
     suspend fun authUser(@Header("Authorization") auth: String): UserDto
+
+    @GET("tasks/{taskId}/file")
+    suspend fun getFileList(
+        @Header("Authorization") auth: String,
+        @Path("taskId") taskId: String
+    ): FileListDTO
+
+    @Streaming
+    @GET("tasks/{taskId}/file/{fileId}")
+    suspend fun downloadFile(
+        @Header("Authorization") auth: String,
+        @Path("taskId") taskId: String,
+        @Path("fileId") fileId: String,
+    ): Response<ResponseBody>
+
+    @POST("tasks/{taskId}/file")
+    suspend fun uploadFile(
+        @Header("Authorization") auth: String,
+        @Path("taskId") taskId: String,
+        @Body multipartBody: MultipartBody
+    )
 }

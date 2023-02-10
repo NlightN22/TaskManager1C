@@ -17,24 +17,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="3"
+        android:orientation="vertical"
         tools:layoutAnimation="@null"
         tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         tools:listitem="@layout/attachment_item"
         tools:itemCount="25"
-        tools:spanCount="3"
-        tools:orientation="vertical"
         tools:scrollbars="vertical"
         />
-
-    <ImageButton
-        android:id="@+id/back_button_attachments"
-        android:layout_marginTop="14dp"
-        style="@style/BackButton"
-        tools:ignore="MissingConstraints" />
 
     <include layout="@layout/bottom_navigation_menu"
         android:id="@+id/bottomMenu"
         />
+
+    <include layout="@layout/back_button"
+        android:id="@+id/back_button" />
 
 
 

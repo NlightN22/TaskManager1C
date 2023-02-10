@@ -17,6 +17,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "SettingsRepositoryImpl"
+
 @Singleton
 class SettingsRepositoryImpl @Inject constructor(
     private val settingsDao: SettingsDao,
@@ -33,13 +34,18 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override fun getUserFlow(): Flow<UserDomain> = flow {
-        emit(getUser())?: throw EmptyObject("getUserFlow")
+        emit(getUser()) ?: throw EmptyObject("getUserFlow")
     }
 
     override fun saveUser(userDomain: UserDomain): Flow<Request<Any>> = flow {
         emit(PendingRequest())
         settingsDao.getSettings()?.let {
-            settingsDao.insert(it.copy(username = userDomain.name.toEncryptedData(), userId = userDomain.id))
+            settingsDao.insert(
+                it.copy(
+                    username = userDomain.name.toEncryptedData(),
+                    userId = userDomain.id
+                )
+            )
         } ?: kotlin.run {
             settingsDao.insert(
                 UserSettings(
@@ -57,9 +63,10 @@ class SettingsRepositoryImpl @Inject constructor(
             settingsDao.insert(it.copy(password = pass.toEncryptedData()))
         } ?: kotlin.run {
             settingsDao.insert(
-            UserSettings(
-                password = pass.toEncryptedData()
-            ))
+                UserSettings(
+                    password = pass.toEncryptedData()
+                )
+            )
         }
         emit(SuccessRequest(Any()))
     }
@@ -91,11 +98,12 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override fun getCredentials(): Flow<Credentials> = flow {
         settingsDao.getSettings()?.let {
-            val cred = Credentials(it.username?: throw EmptyObject("username")
-                , it.password?: throw EmptyObject("password")
+            val cred = Credentials(
+                it.username ?: throw EmptyObject("username"),
+                it.password ?: throw EmptyObject("password")
             )
             emit(cred)
-        }?: throw EmptyObject("Credentials")
+        } ?: throw EmptyObject("Credentials")
     }
 
     override suspend fun saveSkipStatusAlert(state: Boolean) {

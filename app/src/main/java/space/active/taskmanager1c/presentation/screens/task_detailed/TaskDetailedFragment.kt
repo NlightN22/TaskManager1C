@@ -160,13 +160,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             }
         }
 
-        // todo delete
-        //Expand cards observers
-//        viewModel.expandState.collectOnStart { expandState ->
-//            renderMainDetailed(expandState.main)
-//            renderDescription(expandState.description)
-//        }
-
         setupMultiChooseDialog()
         setupSingleChooseDialog()
         setupEditTextListener()
@@ -176,6 +169,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     private fun listeners() {
 
         binding.bottomMenu.root.setOnItemSelectedListener { menuItem ->
+            val taskId = TaskDetailedFragmentArgs.fromBundle(requireArguments()).taskId
             when (menuItem.itemId) {
                 R.id.detailed_cancel -> {
                     viewModel.checkStatusDialog(TaskChangesEvents.Status(false))
@@ -190,8 +184,10 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                     onBackClick()
                 }
                 R.id.detailed_messages -> {
-                    val taskId = TaskDetailedFragmentArgs.fromBundle(requireArguments()).taskId
                     navigate(TaskDetailedFragmentDirections.actionTaskDetailedFragmentToMessagesFragment(taskId))
+                }
+                R.id.detailed_attach -> {
+                    navigate(TaskDetailedFragmentDirections.actionTaskDetailedFragmentToAttachmentsFragment(taskId))
                 }
             }
             return@setOnItemSelectedListener true
@@ -220,86 +216,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         binding.taskDescription.setOnClickListener {
             viewModel.showDialog(EditDescriptionDialog(null))
         }
-
-        // todo delete
-//        val detailedViewList = binding.mainDetailCard.getAllViews()
-//        detailedViewList.forEach {
-//            if (it.id == R.id.taskPerformer) {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeMainDetailed() },
-//                    actionDown = {
-//                        viewModel.expandMainDetailed()
-//                    },
-//                    actionClick = { viewModel.showDialog(PerformerDialog(null)) },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            } else if (it.id == R.id.taskCoPerformers) {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeMainDetailed() },
-//                    actionDown = {
-//                        viewModel.expandMainDetailed()
-//                    },
-//                    actionClick = { viewModel.showDialog(CoPerformersDialog(null)) },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            }else if (it.id == R.id.taskObservers) {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeMainDetailed() },
-//                    actionDown = {
-//                        viewModel.expandMainDetailed()
-//                    },
-//                    actionClick = { viewModel.showDialog(ObserversDialog(null)) },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            } else if (it.id == R.id.taskDeadline) {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeMainDetailed() },
-//                    actionDown = { viewModel.expandMainDetailed() },
-//                    actionClick = { viewModel.showDialog(DatePicker) },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            }else if (it.id == R.id.expandMainDetailCard) {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeMainDetailed() },
-//                    actionDown = { viewModel.expandMainDetailed() },
-//                    actionClick = { viewModel.expandCloseMainDetailed() },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            } else {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeMainDetailed() },
-//                    actionDown = { viewModel.expandMainDetailed() },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            }
-//        }
-//
-//        val descriptionViewList = binding.taskDescriptionCard.getAllViews()
-//        descriptionViewList.forEach {
-//            if (it.id == R.id.taskDescription) {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeDescription() },
-//                    actionDown = {
-//                        viewModel.expandDescription()
-//                    },
-//                    actionClick = { viewModel.showDialog(EditDescriptionDialog(null)) },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            } else if (it.id == R.id.expandTaskDescriptionCard) {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeDescription() },
-//                    actionDown = { viewModel.expandDescription() },
-//                    actionClick = { viewModel.expandCloseDescription() },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            } else {
-//                it.setSwipeListener(
-//                    actionUp = { viewModel.closeDescription() },
-//                    actionDown = { viewModel.expandDescription() },
-//                    scrollView = binding.detailedScrollView
-//                )
-//            }
-//        }
 
         binding.backButtonTaskDetailed.setOnClickListener {
             onBackClick()

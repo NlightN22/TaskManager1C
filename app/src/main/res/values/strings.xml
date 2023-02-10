@@ -105,4 +105,5 @@
     <string name="exception_encryption">Ошибка шифрования. Сообщите о проблеме разработчику</string>
     <string name="settings_alert_status_ignore">Отключить уведомления об изменении статуса</string>
     <string name="message_copied_to_clipboard">Сообщение скопировано: %s</string>
+    <string name="exception_file_download">Ошибка сохранения файла. Повторите загрузку или обратитесь к разработчику</string>
 </resources>
