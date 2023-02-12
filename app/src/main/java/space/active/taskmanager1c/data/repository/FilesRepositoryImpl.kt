@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.data.repository
 
 import android.app.Application
+import android.content.Context
 import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
@@ -41,7 +42,7 @@ class FilesRepositoryImpl @Inject constructor(
     private val filesObserver: TaskFilesObserver by lazy {
         TaskFilesObserver(
             logger,
-            getTaskCacheDir(taskIdObserver)
+            getTaskCacheDir(context, taskIdObserver)
         )
     }
 
@@ -73,7 +74,10 @@ class FilesRepositoryImpl @Inject constructor(
                 wrapOutputStreamExceptions {
                     inputStream?.use { input ->
                         val cacheFile =
-                            File(getTaskCacheDir(taskId), createCachedFilename(fileId, fileName))
+                            File(
+                                getTaskCacheDir(context, taskId),
+                                createCachedFilename(fileId, fileName)
+                            )
                         cacheFile.outputStream().use { output ->
                             input.copyTo(output)
                         }
@@ -112,7 +116,7 @@ class FilesRepositoryImpl @Inject constructor(
             cachedFiles.map { it.toInternalStorageFile() }
         } else {
             val cachedMap = cachedFiles.associateBy { it.getFileId() }
-            return serverFiles.map {
+            val serverConverted = serverFiles.map {
                 val file = cachedMap[it.fileID]
                 if (file != null) {
                     InternalStorageFile(
@@ -125,6 +129,18 @@ class FilesRepositoryImpl @Inject constructor(
                     it.toInternalStorageFile()
                 }
             }
+            // handle not uploaded files task in folder
+            val serverIds = serverFiles.map { it.fileID }
+            val notUploadedList = cachedMap.filterNot { serverIds.contains(it.key) }.values.map { file->
+                InternalStorageFile(
+                    uri = file.toUri(),
+                    id = file.getFileId(),
+                    filename = file.getFileName(),
+                    cached = true,
+                    notUploaded = true
+                )
+            }
+            return serverConverted.plus(notUploadedList)
         }
     }
 
@@ -169,17 +185,17 @@ class FilesRepositoryImpl @Inject constructor(
         return filesObserver.getFlow()
     }
 
-    private fun getTaskCacheDir(taskId: String): File {
-        val cacheDir: File = context.cacheDir
-        val subfolder = File(cacheDir, taskId)
-        if (!subfolder.exists()) subfolder.mkdir()
-        return subfolder
-    }
-
     private fun AuthBasicDto.toBasic(): String =
         Credentials.basic(this.name, this.pass, StandardCharsets.UTF_8)
 
     companion object {
         private const val UPDATE_FROM_SERVER_DELAY = 2000L
+
+        fun getTaskCacheDir(context: Context, taskId: String): File {
+            val cacheDir: File = context.cacheDir
+            val subfolder = File(cacheDir, taskId)
+            if (!subfolder.exists()) subfolder.mkdir()
+            return subfolder
+        }
     }
 }

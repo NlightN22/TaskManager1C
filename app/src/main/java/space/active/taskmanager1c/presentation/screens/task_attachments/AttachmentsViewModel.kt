@@ -34,6 +34,9 @@ class AttachmentsViewModel @Inject constructor(
     private val _openFileEvent = MutableSharedFlow<InternalStorageFile>()
     val openFileEvent = _openFileEvent.asSharedFlow()
 
+    private val _deleteFileEvent = MutableSharedFlow<InternalStorageFile>()
+    val deleteFileEvent = _deleteFileEvent.asSharedFlow()
+
     private val _currentTaskId = MutableStateFlow("")
 
     fun collectStorageItems(taskId: String) {
@@ -52,25 +55,50 @@ class AttachmentsViewModel @Inject constructor(
         if (internalStorageFile.cached) {
             // open in default app
             logger.log(TAG, "cached item clicked")
-            viewModelScope.launch {
-                _openFileEvent.emit(internalStorageFile)
+            if (!internalStorageFile.notUploaded) {
+                // if uploaded - open in android app
+                openCachedFile(internalStorageFile)
+            } else if (internalStorageFile.notUploaded && !internalStorageFile.loading) {
+                // if not uploaded and has error - start uploading
+                uploadFileToServer(internalStorageFile)
             }
         } else {
-
+            downloadFileFromServer(internalStorageFile)
             logger.log(TAG, "not cached item clicked")
-            viewModelScope.launch {
-                internalStorageFile.id?.let { fileId ->
-                    filesRepository.downloadFileToCache(
-                        getCredentials().toAuthBasicDto(),
-                        _currentTaskId.value,
-                        fileId,
-                        internalStorageFile.filename
-                    )
-                        .catch { exceptionHandler(it) }
-                        .collect { request ->
+        }
+    }
+
+    fun uploadFileToServer(internalStorageFile: InternalStorageFile) {
+        logger.log(TAG, "not implemented uploading")
+    }
+
+    fun openCachedFile(internalStorageFile: InternalStorageFile) {
+        viewModelScope.launch {
+            _openFileEvent.emit(internalStorageFile)
+        }
+    }
+
+    fun deleteCachedFile(internalStorageFile: InternalStorageFile){
+        viewModelScope.launch {
+            _deleteFileEvent.emit(internalStorageFile)
+        }
+    }
+
+    fun downloadFileFromServer(internalStorageFile: InternalStorageFile) {
+        viewModelScope.launch {
+            internalStorageFile.id?.let { fileId ->
+                filesRepository.downloadFileToCache(
+                    getCredentials().toAuthBasicDto(),
+                    _currentTaskId.value,
+                    fileId,
+                    internalStorageFile.filename
+                )
+                    .catch { exceptionHandler(it) }
+                    .collect { request ->
                         when (request) {
                             is PendingRequest -> {
                                 logger.log(TAG, "Start download ${internalStorageFile.filename}")
+                                // todo update list item
 //                                _listItems.value = _listItems.value.map {
 //                                    if (it.id == fileId) {
 //                                        it.copy(loading = true)
@@ -87,7 +115,6 @@ class AttachmentsViewModel @Inject constructor(
                             }
                         }
                     }
-                }
             }
         }
     }

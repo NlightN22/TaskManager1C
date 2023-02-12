@@ -19,7 +19,7 @@ import space.active.taskmanager1c.databinding.ListItemBinding
 
 class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
-    lateinit var binding: DialogSingleMultiChooseBinding
+    private lateinit var binding: DialogSingleMultiChooseBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

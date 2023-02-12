@@ -151,9 +151,7 @@ class MultiChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
         private const val CANCEL_TAG = "CANCEL"
         private const val PARCE_TAG = "DIALOG_ITEMS"
         private const val ARG_REQUEST_KEY = "ARG_REQUEST_KEY"
-
-        @JvmStatic
-        private val RESPONSE_TAG = "RESPONSE"
+        private const val RESPONSE_TAG = "RESPONSE"
 
 
         fun show(

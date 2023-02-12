@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="open_item">Открыть файл</string>
+    <string name="delete_item">Удалить файл</string>
+    <string name="upload_item">Отправить файл на сервер</string>
+    <string name="download_item">Загрузить файл с сервера</string>
+</resources>

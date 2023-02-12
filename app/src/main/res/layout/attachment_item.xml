@@ -14,18 +14,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-        <androidx.core.widget.ContentLoadingProgressBar
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progressAttach"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/fileName"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintDimensionRatio="1"
+            app:indicatorColor="@color/button_not_pressed"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            style="?android:attr/progressBarStyleLarge"
             android:visibility="gone"
-            tools:visibility="gone"
+            tools:visibility="visible"
             />
 
         <ImageView
@@ -60,6 +59,64 @@
             android:maxLines="2"
             android:textSize="14sp"
             android:fontFamily="@font/poppins"
+            />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupNotUploaded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="
+            imageViewNotUploadedRepeat,
+            textViewNotUploadedRepeat
+            "
+            android:visibility="gone"
+            tools:visibility="visible"
+            />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/horizontalUploadRepeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.4"/>
+
+        <ImageView
+            android:id="@+id/imageViewNotUploadedRepeat"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/horizontalUploadRepeat"
+            app:layout_constraintWidth_percent="0.3"
+            app:layout_constraintHeight_percent="0.3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_baseline_replay_24"
+            android:layout_gravity="center"
+            />
+
+        <TextView
+            android:id="@+id/textViewNotUploadedRepeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/imageViewNotUploadedRepeat"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:text="@string/attach_error_not_uploaded"
+            />
+
+        <ImageView
+            android:id="@+id/attachmentOptions"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintWidth_percent="0.25"
+            app:layout_constraintHeight_percent="0.25"
+            android:layout_alignParentTop="true"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_baseline_more_vert_24"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

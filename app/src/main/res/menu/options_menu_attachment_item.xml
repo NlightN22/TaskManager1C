@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/attachmentItemOpen"
+        android:title="@string/open_item"
+        android:tooltipText="@string/open_item"
+        />
+    <item
+        android:id="@+id/attachmentItemDelete"
+        android:title="@string/delete_item"
+        android:tooltipText="@string/delete_item"
+        />
+    <item
+        android:id="@+id/attachmentItemUpload"
+        android:title="@string/upload_item"
+        android:tooltipText="@string/upload_item"
+        />
+    <item
+        android:id="@+id/attachmentItemDownload"
+        android:title="@string/download_item"
+        android:tooltipText="@string/download_item"
+        />
+</menu>
