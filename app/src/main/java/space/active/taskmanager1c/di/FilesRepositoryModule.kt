@@ -6,11 +6,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import retrofit2.Retrofit
 import space.active.taskmanager1c.coreutils.logger.Logger
-import space.active.taskmanager1c.data.repository.FilesRepositoryImpl
-import space.active.taskmanager1c.domain.repository.FilesRepository
+import space.active.taskmanager1c.data.local.cache_storage.CachedFilesRepository
+import space.active.taskmanager1c.data.local.cache_storage.CachedFilesRepositoryImpl
+import javax.inject.Singleton
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -23,5 +25,5 @@ class FilesRepositoryModule {
         retrofit: Retrofit,
         logger: Logger,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
-    ): FilesRepository = FilesRepositoryImpl(context, retrofit, logger, ioDispatcher)
+    ): CachedFilesRepository = CachedFilesRepositoryImpl(context, retrofit, logger, ioDispatcher)
 }

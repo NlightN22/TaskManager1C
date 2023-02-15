@@ -8,10 +8,11 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.FileProvider
 import androidx.core.net.toFile
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.FragmentAttachmentsBinding
-import space.active.taskmanager1c.domain.models.InternalStorageFile
+import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.bottom_sheet_dialog.AttachmentBottomDialog
 import space.active.taskmanager1c.presentation.screens.bottom_sheet_dialog.AttachmentDialogListener
@@ -39,15 +40,15 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
 
     private fun initRV() {
         attachmentsAdapter = AttachmentsAdapter(object : AttachmentsAdapter.ClickViews {
-            override fun onItemClick(view: View, item: InternalStorageFile) {
+            override fun onItemClick(view: View, item: CachedFile) {
                 viewModel.clickItem(item)
             }
 
-            override fun onOptionsMenuClick(view: View, item: InternalStorageFile) {
+            override fun onOptionsMenuClick(view: View, item: CachedFile) {
                 showOptionsMenu(item, view)
             }
 
-            override fun onLongClick(view: View, item: InternalStorageFile) {
+            override fun onLongClick(view: View, item: CachedFile) {
                 showOptionsMenu(item, view)
             }
         })
@@ -56,10 +57,6 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
     }
 
     private fun observers() {
-        viewModel.deleteFileEvent.collectOnStart {
-            deleteFile(it)
-        }
-
         viewModel.openFileEvent.collectOnStart {
             openFile(it)
         }
@@ -70,6 +67,25 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
     }
 
     private fun listeners() {
+
+        attachmentsAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                viewModel.startAutoUploadingAll()
+            }
+        })
+
+//        binding.listAttachmentsRV.addOnChildAttachStateChangeListener( object : RecyclerView.OnChildAttachStateChangeListener {
+//            override fun onChildViewAttachedToWindow(view: View) {
+//                val item = view.tag as CachedFile
+//                viewModel.startAutoUploadingAll(item)
+//            }
+//
+//            override fun onChildViewDetachedFromWindow(view: View) {
+//            }
+//        }
+//        )
+
         val sheetListener: AttachmentDialogListener = { requestKey, buttonString ->
             logger.log(TAG, "result from sheet dialog: $buttonString")
         }
@@ -95,7 +111,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
         }
     }
 
-    private fun showOptionsMenu(item: InternalStorageFile, view: View) {
+    private fun showOptionsMenu(item: CachedFile, view: View) {
         val renderedMenu = renderOptionsMenu(view, item)
         renderedMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
@@ -121,7 +137,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
         renderedMenu.show()
     }
 
-    private fun renderOptionsMenu(view: View, item: InternalStorageFile): PopupMenu {
+    private fun renderOptionsMenu(view: View, item: CachedFile): PopupMenu {
         val popupMenu = PopupMenu(requireContext(), view)
         if (item.cached) {
             popupMenu.menu.apply {
@@ -158,24 +174,16 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
         return popupMenu
     }
 
-    private fun deleteFile(internalStorageFile: InternalStorageFile) {
-        internalStorageFile.uri?.toFile()?.let { file ->
-            if (file.exists()) {
-                file.delete()
-            }
-        }
-    }
-
-    private fun openFile(internalStorageFile: InternalStorageFile) {
+    private fun openFile(cachedFile: CachedFile) {
         val intent = Intent(Intent.ACTION_VIEW)
-        internalStorageFile.uri?.let { uri ->
+        cachedFile.uri?.let { uri ->
             try {
-                val mimeType = internalStorageFile.filename.getMimeType()
+                val mimeType = cachedFile.filename.getMimeType()
                 val uriProvider = FileProvider.getUriForFile(
                     requireContext(),
                     "space.active.taskmanager1c.fileprovider",
                     uri.toFile(),
-                    internalStorageFile.filename
+                    cachedFile.filename
                 )
                 logger.log(TAG, "uriProvider: $uriProvider\nmimeType: $mimeType")
                 intent.setDataAndType(uriProvider, mimeType)

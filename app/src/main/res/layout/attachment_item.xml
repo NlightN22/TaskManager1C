@@ -14,18 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/progressAttach"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/fileName"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:indicatorColor="@color/button_not_pressed"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone"
-            tools:visibility="visible"
-            />
 
         <ImageView
             android:id="@+id/imageViewItem"
@@ -33,7 +21,7 @@
             app:layout_constraintBottom_toTopOf="@id/fileName"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintDimensionRatio="1:1"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:layout_width="0dp"
@@ -117,6 +105,19 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:src="@drawable/ic_baseline_more_vert_24"
+            />
+
+        <ProgressBar
+            android:id="@+id/progressAttach"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/fileName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/button_not_pressed"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            tools:visibility="visible"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

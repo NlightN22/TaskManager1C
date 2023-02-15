@@ -12,30 +12,30 @@ import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.BlurTransformation
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.AttachmentItemBinding
-import space.active.taskmanager1c.domain.models.InternalStorageFile
+import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
 
 class AttachmentsAdapter(
     private val clickViews: AttachmentsAdapter.ClickViews
 ) :
-    ListAdapter<InternalStorageFile, AttachmentsAdapter.AttachmentsViewHolder>(Companion),
+    ListAdapter<CachedFile, AttachmentsAdapter.AttachmentsViewHolder>(Companion),
     View.OnClickListener, View.OnLongClickListener {
 
     interface ClickViews {
-        fun onItemClick(view: View, item: InternalStorageFile)
-        fun onOptionsMenuClick(view: View, item: InternalStorageFile)
-        fun onLongClick(view: View, item: InternalStorageFile)
+        fun onItemClick(view: View, item: CachedFile)
+        fun onOptionsMenuClick(view: View, item: CachedFile)
+        fun onLongClick(view: View, item: CachedFile)
     }
 
     override fun onClick(v: View?) {
         v?.let {
-            val storageItem = it.tag as InternalStorageFile
+            val storageItem = it.tag as CachedFile
             clickViews.onItemClick(it, storageItem)
         }
     }
 
     override fun onLongClick(v: View?): Boolean {
         v?.let {
-            val storageItem = it.tag as InternalStorageFile
+            val storageItem = it.tag as CachedFile
             clickViews.onLongClick(it,storageItem)
         }
         return true
@@ -57,21 +57,21 @@ class AttachmentsAdapter(
         val item = currentList[position]
         holder.itemView.tag = item
         holder.itemBind.apply {
-            imageViewItem.isVisible = !item.loading
             progressAttach.isVisible = item.loading
+            imageViewItem.visibility = if (item.loading) {View.INVISIBLE} else {View.VISIBLE}
             imageViewItem.cachedState(item.cached, item, item.notUploaded)
-            groupNotUploaded.isVisible = item.notUploaded
+            groupNotUploaded.isVisible = item.notUploaded && !item.loading
             fileName.text = item.filename
             attachmentOptions.setOnClickListener { clickViews.onOptionsMenuClick(it, item) }
         }
     }
 
     private fun ImageView.cachedState(
-        state: Boolean,
-        item: InternalStorageFile,
+        cached: Boolean,
+        item: CachedFile,
         notUploaded: Boolean
     ) {
-        if (state) {
+        if (cached) {
             try {
                 item.uri?.let { fileUri ->
                     val picassoPreview = Picasso.get()
@@ -93,22 +93,19 @@ class AttachmentsAdapter(
     }
 
 
-    companion object : DiffUtil.ItemCallback<InternalStorageFile>() {
+    companion object : DiffUtil.ItemCallback<CachedFile>() {
         override fun areItemsTheSame(
-            oldItem: InternalStorageFile,
-            newItem: InternalStorageFile
+            oldItem: CachedFile,
+            newItem: CachedFile
         ): Boolean {
             return newItem.id == oldItem.id
         }
 
         override fun areContentsTheSame(
-            oldItem: InternalStorageFile,
-            newItem: InternalStorageFile
+            oldItem: CachedFile,
+            newItem: CachedFile
         ): Boolean {
-            return newItem.id == oldItem.id &&
-                    newItem.cached == oldItem.cached &&
-                    newItem.filename == oldItem.filename &&
-                    newItem.uri == oldItem.uri
+            return newItem == oldItem
         }
     }
 }

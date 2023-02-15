@@ -1,20 +1,16 @@
 package space.active.taskmanager1c.di
 
-import android.app.Application
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
-import retrofit2.Retrofit
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.InputTaskRepository
 import space.active.taskmanager1c.data.local.OutputTaskRepository
 import space.active.taskmanager1c.data.local.db.tasks_room_db.*
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.repository.*
-import space.active.taskmanager1c.domain.repository.FilesRepository
 import space.active.taskmanager1c.domain.repository.MessagesRepository
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository

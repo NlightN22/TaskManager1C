@@ -109,4 +109,9 @@
     <string name="attach_bottom_sheet_gallery_text">Фото</string>
     <string name="attach_bottom_sheet_file_text">Файл</string>
     <string name="attach_error_not_uploaded">Ошибка выгрузки на сервер</string>
+    <string name="bottom_sheet_error_save_file">Ошибка сохранения файла</string>
+    <string name="attachments_delete_error">Ошибка удаления файла</string>
+    <string name="attachments_start_loading">Загрузка файла: %s</string>
+    <string name="attachments_end_loading">Файл загружен: %s</string>
+    <string name="attachments_error_loading">Ошибка загрузки: %s</string>
 </resources>

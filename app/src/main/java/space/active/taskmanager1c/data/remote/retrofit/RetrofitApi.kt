@@ -7,6 +7,7 @@ import retrofit2.http.*
 import space.active.taskmanager1c.data.remote.model.TaskDto
 import space.active.taskmanager1c.data.remote.model.TaskListDto
 import space.active.taskmanager1c.data.remote.model.UserDto
+import space.active.taskmanager1c.data.remote.model.files.FileDTO
 import space.active.taskmanager1c.data.remote.model.files.FileListDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskMessagesDTO
 import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReadingFlagDTO
@@ -144,5 +145,5 @@ interface RetrofitApi {
         @Header("Authorization") auth: String,
         @Path("taskId") taskId: String,
         @Body multipartBody: MultipartBody
-    )
+    ): FileDTO
 }
