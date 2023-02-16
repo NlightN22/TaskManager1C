@@ -11,6 +11,9 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.ErrorRequest
+import space.active.taskmanager1c.coreutils.PendingRequest
+import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.databinding.FragmentAttachmentsBinding
 import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
 import space.active.taskmanager1c.presentation.screens.BaseFragment
@@ -61,8 +64,19 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
             openFile(it)
         }
 
-        viewModel.listItems.collectOnStart {
-            attachmentsAdapter.submitList(it)
+        viewModel.listItems.collectOnStart { request ->
+            when (request) {
+                is PendingRequest -> {
+                    shimmerShow(binding.shimmerAttachmentsRV,binding.listAttachmentsRV, true)
+                }
+                is SuccessRequest -> {
+                    attachmentsAdapter.submitList(request.data)
+                    shimmerShow(binding.shimmerAttachmentsRV,binding.listAttachmentsRV, false)
+                }
+                is ErrorRequest -> {
+                    shimmerShow(binding.shimmerAttachmentsRV,binding.listAttachmentsRV, false)
+                }
+            }
         }
     }
 
@@ -75,6 +89,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
             }
         })
 
+        // todo delete
 //        binding.listAttachmentsRV.addOnChildAttachStateChangeListener( object : RecyclerView.OnChildAttachStateChangeListener {
 //            override fun onChildViewAttachedToWindow(view: View) {
 //                val item = view.tag as CachedFile

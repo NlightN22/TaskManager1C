@@ -35,7 +35,7 @@ class AttachmentsViewModel @Inject constructor(
 
     private val _currentTaskId = MutableStateFlow("")
 
-    private val _listItems = MutableStateFlow(emptyList<CachedFile>())
+    private val _listItems = MutableStateFlow<Request<List<CachedFile>>>(PendingRequest())
     val listItems = _listItems.asStateFlow()
 
     fun collectStorageItems(taskId: String) {
@@ -45,11 +45,14 @@ class AttachmentsViewModel @Inject constructor(
                 getCredentials().toAuthBasicDto(),
                 _currentTaskId.value
             )
-                .catch { exceptionHandler(it) }
+                .catch {
+                    exceptionHandler(it)
+                    _listItems.value = ErrorRequest(it)
+                }
                 .collect { inputList ->
                     if (inputList != _listItems.value) {
 //                        logger.log(TAG, "inputList:\n${inputList.joinToString("\n")}")
-                        _listItems.value = inputList
+                        _listItems.value = SuccessRequest(inputList)
                     }
                 }
         }
@@ -85,7 +88,8 @@ class AttachmentsViewModel @Inject constructor(
                 .catch {
                     if (it is BackendException &&
                         it.errorCode == "500" &&
-                        it.errorBody.contains("Уже есть файл с таким наименованием")) {
+                        it.errorBody.contains("Уже есть файл с таким наименованием")
+                    ) {
                         showErrorToast(it)
                     } else {
                         exceptionHandler(it)
@@ -179,6 +183,7 @@ class AttachmentsViewModel @Inject constructor(
     }
 
     fun startAutoUploadingAll() {
+        // todo delete
 //        logger.log(TAG, "startAutoUploadingAll:\n${_listItems.value.joinToString("\n")}")
 //        if (cachedFile.notUploaded) {
 //            viewModelScope.launch {
@@ -187,16 +192,28 @@ class AttachmentsViewModel @Inject constructor(
 //            }
 //        }
         viewModelScope.launch {
-            _listItems.value
-                .filter { it.notUploaded }
-                .filterNot { it.loading }
-                .forEach {
-                    logger.log(TAG, "startAutoUploading: $it")
-                    uploadFileToServer(it)
-                    delay(1000)
-                }
+            _listItems.getSuccess()?.let { list ->
+                list.filter { it.notUploaded }
+                    .filterNot { it.loading }
+                    .forEach {
+                        logger.log(TAG, "startAutoUploading: $it")
+                        uploadFileToServer(it)
+                        delay(1000)
+                    }
+            }
         }
     }
 
+    private fun <T> StateFlow<Request<T>>.getSuccess(): T? {
+        when (this.value) {
+            is SuccessRequest -> {
+                val value = this.value as SuccessRequest
+                return value.data
+            }
+            else -> {
+                return null
+            }
+        }
+    }
 
 }
