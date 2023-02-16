@@ -40,27 +40,6 @@ class MergedTaskRepositoryImpl constructor(
         inputTaskRepository.getInnerTasks(taskId).map { it.map { it.toTaskDomain(inputTaskRepository.getUsers()) } }
             .flowOn(ioDispatcher)
 
-    // todo delete debug
-    private fun getTasksFromInputRepo(
-        filterTypes: Flow<TaskListFilterTypes>,
-        orderTypes: Flow<TaskListOrderTypes>,
-        myId: Flow<String>
-    ): Flow<List<TaskDomain>> =
-        orderTypes
-            .flatMapLatest { order ->
-                filterTypes
-                    .flatMapLatest { filter ->
-                        val myId = myId.first()
-                        val sortField = order.getSortFieldAndType().first
-                        val sortType = order.getSortFieldAndType().second
-                        val filterType: FilterType = filter.toFilterType()
-                        inputTaskRepository.sortedQuery(myId,filterType,sortField, sortType)
-                    }
-            }.map { list ->
-                val usersInputList = inputTaskRepository.getUsers()
-                list.map { it.toTaskDomain(usersInputList) }
-            }.flowOn(ioDispatcher)
-
     private fun getTasksFromBothRepo(
         filterTypes: Flow<TaskListFilterTypes>,
         orderTypes: Flow<TaskListOrderTypes>,

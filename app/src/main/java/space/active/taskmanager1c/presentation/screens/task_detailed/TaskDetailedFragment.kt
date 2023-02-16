@@ -3,11 +3,6 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ScrollView
-import androidx.core.view.forEach
-import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -68,7 +63,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             }
         }
 
-
         //observe save event
         viewModel.validationEvent.collectOnStart {
             if (it) {
@@ -83,7 +77,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             binding.taskPerformerTIL.error = state.performer?.getString(requireContext())
             binding.taskAuthorTIL.error = state.author?.getString(requireContext())
         }
-
 
         renderState(viewModel)
 
@@ -184,10 +177,18 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                     onBackClick()
                 }
                 R.id.detailed_messages -> {
-                    navigate(TaskDetailedFragmentDirections.actionTaskDetailedFragmentToMessagesFragment(taskId))
+                    navigate(
+                        TaskDetailedFragmentDirections.actionTaskDetailedFragmentToMessagesFragment(
+                            taskId
+                        )
+                    )
                 }
                 R.id.detailed_attach -> {
-                    navigate(TaskDetailedFragmentDirections.actionTaskDetailedFragmentToAttachmentsFragment(taskId))
+                    navigate(
+                        TaskDetailedFragmentDirections.actionTaskDetailedFragmentToAttachmentsFragment(
+                            taskId
+                        )
+                    )
                 }
             }
             return@setOnItemSelectedListener true
@@ -222,69 +223,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         }
     }
 
-    private fun View.getAllViews(): List<View> {
-        return if (this !is ViewGroup || this.childCount == 0) {
-            listOf(this)
-        } else {
-            val listViews = arrayListOf<View>()
-            listViews.add(this)
-            this.forEach {
-                if (it is ViewGroup) {
-                    listViews.addAll(it.getAllViews())
-                } else {
-                    listViews.add(it)
-                }
-            }
-            listViews
-        }
-    }
-
-    private fun View.setSwipeListener(
-        actionUp: () -> Unit, actionDown: () -> Unit,
-        scrollView: ScrollView? = null
-    ) {
-        this.setOnTouchListener(object :
-            OnSwipeTouchListener(this.context, scrollView) {
-            override fun onSwipeUp() {
-                super.onSwipeUp()
-                actionUp()
-            }
-
-            override fun onSwipeDown() {
-                super.onSwipeDown()
-                actionDown()
-            }
-
-        }
-        )
-    }
-
-    private fun View.setSwipeListener(
-        actionUp: () -> Unit,
-        actionDown: () -> Unit,
-        actionClick: () -> Unit,
-        scrollView: ScrollView? = null
-    ) {
-        this.setOnTouchListener(object :
-            OnSwipeTouchListener(this.context, scrollView) {
-            override fun onSwipeUp() {
-                actionUp()
-                super.onSwipeUp()
-            }
-
-            override fun onSwipeDown() {
-                actionDown()
-                super.onSwipeDown()
-            }
-
-            override fun onClick() {
-                actionClick()
-                super.onClick()
-            }
-        }
-        )
-    }
-
     private fun showDatePicker() {
         val datePicker = MaterialDatePicker.Builder
             .datePicker()
@@ -309,48 +247,6 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             showSnackBar(UiText.Resource(R.string.toast_date_not_selected))
         }
     }
-
-
-    // todo delete
-//    private fun renderMainDetailed(state: Boolean) {
-//        binding.taskCoPerformersCard.isVisible = state
-//        binding.taskObserversCard.isVisible = state
-//        binding.expandMainDetailCard.forEach {
-//            if (it is ImageView) {
-//                it.setImageResource(
-//                    if (state) {
-//                        R.drawable.ic_expandable_up_arrow
-//                    } else {
-//                        R.drawable.ic_expandable_down_arrow
-//                    }
-//                )
-//            }
-//        }
-//    }
-
-
-    // todo delete
-//    private fun renderDescription(state: Boolean) {
-//        binding.taskDescription.maxLines = if (state) {
-//            100
-//        } else {
-//            3
-//        }
-//        binding.taskBaseObjectCard.isVisible = state
-//        binding.taskBaseCard.isVisible = state
-//        binding.taskInnerCardView.isVisible = state
-//        binding.expandTaskDescriptionCard.forEach {
-//            if (it is ImageView) {
-//                it.setImageResource(
-//                    if (state) {
-//                        R.drawable.ic_expandable_up_arrow
-//                    } else {
-//                        R.drawable.ic_expandable_down_arrow
-//                    }
-//                )
-//            }
-//        }
-//    }
 
     private fun setupMultiChooseDialog() {
         val listener: CustomInputDialogListener = { requestKey, listItems ->

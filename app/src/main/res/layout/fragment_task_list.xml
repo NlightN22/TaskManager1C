@@ -56,19 +56,19 @@
     </com.google.android.material.card.MaterialCardView>
 
 <!--    todo add functional -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fastFilterRV"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:backgroundTint="@color/bottom_menu_background"
-        app:layout_constraintTop_toBottomOf="@id/taskListSearchCard"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        />
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/fastFilterRV"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:backgroundTint="@color/bottom_menu_background"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/taskListSearchCard"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:visibility="gone"-->
+<!--        />-->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/listUpFAB"
@@ -98,7 +98,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/fastFilterRV"
+        app:layout_constraintTop_toBottomOf="@id/taskListSearchCard"
         app:layout_constraintBottom_toTopOf="@id/bottomMenu"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -134,7 +134,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
         android:layoutAnimation="@anim/layout_animation"
-        app:layout_constraintTop_toBottomOf="@id/fastFilterRV"
+        app:layout_constraintTop_toBottomOf="@id/taskListSearchCard"
         app:layout_constraintBottom_toTopOf="@id/bottomMenu"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

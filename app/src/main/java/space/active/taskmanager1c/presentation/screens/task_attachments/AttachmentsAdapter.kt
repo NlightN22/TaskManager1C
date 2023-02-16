@@ -11,11 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.BlurTransformation
 import space.active.taskmanager1c.R
-import space.active.taskmanager1c.databinding.AttachmentItemBinding
 import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
+import space.active.taskmanager1c.databinding.AttachmentItemBinding
 
 class AttachmentsAdapter(
-    private val clickViews: AttachmentsAdapter.ClickViews
+    private val clickViews: ClickViews
 ) :
     ListAdapter<CachedFile, AttachmentsAdapter.AttachmentsViewHolder>(Companion),
     View.OnClickListener, View.OnLongClickListener {
@@ -36,7 +36,7 @@ class AttachmentsAdapter(
     override fun onLongClick(v: View?): Boolean {
         v?.let {
             val storageItem = it.tag as CachedFile
-            clickViews.onLongClick(it,storageItem)
+            clickViews.onLongClick(it, storageItem)
         }
         return true
     }
@@ -58,7 +58,11 @@ class AttachmentsAdapter(
         holder.itemView.tag = item
         holder.itemBind.apply {
             progressAttach.isVisible = item.loading
-            imageViewItem.visibility = if (item.loading) {View.INVISIBLE} else {View.VISIBLE}
+            imageViewItem.visibility = if (item.loading) {
+                View.INVISIBLE
+            } else {
+                View.VISIBLE
+            }
             imageViewItem.cachedState(item.cached, item, item.notUploaded)
             groupNotUploaded.isVisible = item.notUploaded && !item.loading
             fileName.text = item.filename
@@ -91,7 +95,6 @@ class AttachmentsAdapter(
             this.setImageResource(R.drawable.ic_baseline_cloud_24)
         }
     }
-
 
     companion object : DiffUtil.ItemCallback<CachedFile>() {
         override fun areItemsTheSame(

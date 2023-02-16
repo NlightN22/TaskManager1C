@@ -84,7 +84,6 @@ class TaskListViewModel @Inject constructor(
             filterBySearch(filterByBottom, searchFilter)
         }
 
-    // todo need to create job handler
     var collectJob: Job? = null
     fun collectListTasks() {
         logger.log(TAG, "collectListTasks")

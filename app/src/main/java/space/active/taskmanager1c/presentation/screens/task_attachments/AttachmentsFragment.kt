@@ -89,18 +89,6 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
             }
         })
 
-        // todo delete
-//        binding.listAttachmentsRV.addOnChildAttachStateChangeListener( object : RecyclerView.OnChildAttachStateChangeListener {
-//            override fun onChildViewAttachedToWindow(view: View) {
-//                val item = view.tag as CachedFile
-//                viewModel.startAutoUploadingAll(item)
-//            }
-//
-//            override fun onChildViewDetachedFromWindow(view: View) {
-//            }
-//        }
-//        )
-
         val sheetListener: AttachmentDialogListener = { requestKey, buttonString ->
             logger.log(TAG, "result from sheet dialog: $buttonString")
         }
@@ -203,8 +191,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                 logger.log(TAG, "uriProvider: $uriProvider\nmimeType: $mimeType")
                 intent.setDataAndType(uriProvider, mimeType)
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                val shareIntent = Intent.createChooser(intent, null)
-                startActivity(shareIntent)
+                startActivity(intent)
             } catch (e: Exception) {
                 exceptionHandler(e)
             }

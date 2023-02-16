@@ -36,7 +36,8 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
             logger.log(TAG, "aboutAppContactsET click")
             sendEmailToAuthor(
                 emailTo = arrayOf(binding.aboutAppContactsET.text.toString()),
-                "${binding.aboutAppNameET.text} Feedback v.${binding.aboutAppVersionET.text}")
+                "${binding.aboutAppNameET.text} Feedback v.${binding.aboutAppVersionET.text}"
+            )
         }
         binding.bottomMenu.root.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -59,11 +60,7 @@ class AboutFragment : BaseFragment(R.layout.fragment_about) {
                 putExtra(Intent.EXTRA_EMAIL, emailTo)
                 putExtra(Intent.EXTRA_SUBJECT, subject)
             }
-            context?.packageManager?.let { packageManager ->
-                intent.resolveActivity(packageManager)?.let {
-                    startActivity(intent)
-                }
-            }
+            startActivity(intent)
         }
     }
 

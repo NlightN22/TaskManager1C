@@ -20,8 +20,6 @@ private const val TAG = "LoginFragment"
 
 class LoginFragment : BaseFragment(R.layout.fragment_login) {
 
-    // todo hide keyboard on ime done
-
     lateinit var binding: FragmentLoginBinding
     lateinit var previousStateHandle: SavedStateHandle
     private val viewModel: LoginViewModel by viewModels()

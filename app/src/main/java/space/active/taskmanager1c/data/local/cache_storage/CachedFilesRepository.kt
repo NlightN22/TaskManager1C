@@ -3,10 +3,9 @@ package space.active.taskmanager1c.data.local.cache_storage
 import android.net.Uri
 import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.coreutils.Request
-import space.active.taskmanager1c.data.remote.model.AuthBasicDto
 import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
+import space.active.taskmanager1c.data.remote.model.AuthBasicDto
 import java.io.File
-import java.io.InputStream
 
 interface CachedFilesRepository {
     fun getFileList(auth: AuthBasicDto, cacheDirPath: String): Flow<List<CachedFile>>
@@ -32,12 +31,11 @@ interface CachedFilesRepository {
     /**
      * file must include fileId and filename in the name at that format: "fileid@filename"
      */
-    fun uploadFileToServer(auth: AuthBasicDto, cachedFile: CachedFile, cacheDirPath: String): Flow<Request<CachedFile>>
-    /**
-     * file must include fileId and filename in the name at that format: "fileid@filename"
-     */
-    fun uploadFileToServer(auth: AuthBasicDto, inputStream: InputStream, cacheDirPath: String): Flow<Request<CachedFile>>
-    fun uploadFileToServer(auth: AuthBasicDto, cacheDirPath: Uri, cachePathName: String): Flow<Request<CachedFile>>
+    fun uploadFileToServer(
+        auth: AuthBasicDto,
+        cachedFile: CachedFile,
+        cacheDirPath: String
+    ): Flow<Request<CachedFile>>
 
     fun deleteCachedFile(cachedFile: CachedFile): Flow<Boolean>
     fun deleteFileFromServer(auth: AuthBasicDto, cachedFile: CachedFile, cacheDirPath: String)

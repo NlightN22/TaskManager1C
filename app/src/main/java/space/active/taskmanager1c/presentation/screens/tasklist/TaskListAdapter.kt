@@ -1,14 +1,11 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import androidx.annotation.MenuRes
-import androidx.appcompat.widget.PopupMenu
 import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -25,7 +22,6 @@ interface TaskActionListener {
     fun onTaskLongClick(view: View)
 }
 
-// TODO implement ListAdapter
 class TaskListAdapter(
     private val actionListener: TaskActionListener
 ) : RecyclerView.Adapter<TasksViewHolder>(), View.OnClickListener, View.OnLongClickListener {
@@ -38,7 +34,7 @@ class TaskListAdapter(
         }
 
     override fun onLongClick(v: View?): Boolean {
-        v?.let { actionListener.onTaskLongClick(it)}
+        v?.let { actionListener.onTaskLongClick(it) }
         return true
     }
 
@@ -93,7 +89,12 @@ class TaskListAdapter(
             listItemShimmer.setSendingState(taskDomain.isSending)
             taskStatus.isVisible = taskDomain.ok
             taskStatus.isSelected = taskDomain.status == TaskDomain.Status.Reviewed
-            listItemCard.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.fall_down))
+            listItemCard.startAnimation(
+                AnimationUtils.loadAnimation(
+                    holder.itemView.context,
+                    R.anim.fall_down
+                )
+            )
         }
     }
 
@@ -124,7 +125,6 @@ class TaskListAdapter(
     }
 
 
-
     private fun CardView.setPriority(priority: TaskDomain.Priority) {
         val highBackground: ColorStateList =
             resources.getColorStateList(R.color.high_priority, resources.newTheme())
@@ -145,8 +145,6 @@ class TaskListAdapter(
         }
     }
 }
-
-
 
 class TasksViewHolder(
     val binding: ItemTaskBinding

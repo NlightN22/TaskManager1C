@@ -46,9 +46,6 @@ class TaskDetailedViewModel @Inject constructor(
         MutableSharedFlow<Pair<TaskChangesEvents.Status, TaskStatusDialog.DialogParams>>()
     val statusAlertEvent = _statusAlertEvent.asSharedFlow()
 
-    private val _expandState = MutableStateFlow(TaskDetailedExpandState())
-    val expandState = _expandState.asStateFlow()
-
     private val _enabledFields: MutableStateFlow<EditableFields> =
         MutableStateFlow(EditableFields())
     val enabledFields = _enabledFields.asStateFlow()
@@ -392,32 +389,5 @@ class TaskDetailedViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    // todo delete
-    // Expand main details
-    fun expandCloseMainDetailed() {
-        _expandState.value = _expandState.value.copy(main = !_expandState.value.main)
-    }
-
-    fun expandMainDetailed() {
-        _expandState.value = _expandState.value.copy(main = true)
-    }
-
-    fun closeMainDetailed() {
-        _expandState.value = _expandState.value.copy(main = false)
-    }
-
-    // Expand description
-    fun expandCloseDescription() {
-        _expandState.value = _expandState.value.copy(description = !_expandState.value.description)
-    }
-
-    fun expandDescription() {
-        _expandState.value = _expandState.value.copy(description = true)
-    }
-
-    fun closeDescription() {
-        _expandState.value = _expandState.value.copy(description = false)
     }
 }

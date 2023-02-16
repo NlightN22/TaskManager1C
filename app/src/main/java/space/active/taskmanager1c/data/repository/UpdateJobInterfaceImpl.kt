@@ -30,6 +30,8 @@ class UpdateJobInterfaceImpl
     private val logger: Logger,
 ) : UpdateJobInterface {
 
+    private val enabledJobLog: Boolean = false
+
     override fun updateJob(
         credentials: Credentials,
         updateDelay: Long,
@@ -38,20 +40,20 @@ class UpdateJobInterfaceImpl
     ): Flow<Request<Any>> =
         channelFlow<Request<Any>> {
             var curTime = System.currentTimeMillis()
-            logger.log(TAG, "outputSendJob start")
+            if (enabledJobLog) logger.log(TAG, "outputSendJob start")
             wrapToSkipExceptions(skippedExceptions) {
                 outputSendJob(credentials, whoAmI).collect {
                     send(it)
                 }
             }
-            logger.log(TAG, "outputSendJob stop ${System.currentTimeMillis() - curTime}ms")
+            if (enabledJobLog) logger.log(TAG, "outputSendJob stop ${System.currentTimeMillis() - curTime}ms")
             curTime = System.currentTimeMillis()
-            logger.log(TAG, "inputFetchJobFlow start")
+            if (enabledJobLog) logger.log(TAG, "inputFetchJobFlow start")
             inputFetchJobFlow(credentials, whoAmI).collect { request ->
                 when (request) {
                     is SuccessRequest -> {
                         send(SuccessRequest(Any()))
-                        logger.log(
+                        if (enabledJobLog) logger.log(
                             TAG,
                             "inputFetchJobFlow stop ${System.currentTimeMillis() - curTime}ms"
                         )
@@ -86,15 +88,18 @@ class UpdateJobInterfaceImpl
     private fun updateReadingState(credentials: Credentials, currentListId: List<String>) =
         flow<Request<Any>> {
             val curTime = System.currentTimeMillis()
-            logger.log(TAG, "updateReadingState start")
+            if (enabledJobLog) logger.log(TAG, "updateReadingState start")
             emit(PendingRequest())
             val result = taskApi.getMessagesTimes(
                 credentials.toAuthBasicDto(),
                 currentListId
             )
-            inputTaskRepository.updateReadingStates(result.map { it.toReadingTimesTaskEntity() })
+            val readingTimes = result.map { it.toReadingTimesTaskEntity() }
+            if (enabledJobLog) logger.log(TAG, "Count ReadingStates: ${readingTimes.size}")
+            val saveCounter = inputTaskRepository.updateReadingStates(readingTimes)
+            if (enabledJobLog) logger.log(TAG, "Count saved ReadingStates: $saveCounter")
             emit(SuccessRequest(Any()))
-            logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
+            if (enabledJobLog) logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
         }
 
     private fun outputSendJob(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
@@ -126,8 +131,6 @@ class UpdateJobInterfaceImpl
                                 existingInput.compareWithAndGetDiffs(outToDTO.copy(id = ""))
                             )
                         )
-//                         todo delete mock
-//                        result = SuccessRequest(inputDTO)
                     }
                 } ?: kotlin.run {
                     // if taskDomain is not new
@@ -137,16 +140,11 @@ class UpdateJobInterfaceImpl
                         val withoutId = outToDTO.copy(id = "")
                         // send all params
                         result = taskApi.sendNewTask(credentials.toAuthBasicDto(), withoutId)
-                        // todo delete mock
-//                        delay(6000)
-//                        result = SuccessRequest(withoutId)
                     }
                 }
                 result?.let { res ->
                     when (res) {
                         is SuccessRequest -> {
-                            //todo delete debug
-//                        logger.log(TAG, result.data.toString())
                             inputTaskRepository.saveAndDelete(
                                 inputTask = res.data.toTaskInputHandledWithUsers(whoAmI.userId),
                                 outputTask = outputTask,
@@ -175,14 +173,20 @@ class UpdateJobInterfaceImpl
             emit(PendingRequest())
             val result: TaskListDto = taskApi.getTaskList(credentials.toAuthBasicDto())
             var curTime = System.currentTimeMillis()
-            logger.log(TAG, "insertUsers")
+            if (enabledJobLog) logger.log(TAG, "insertUsers")
             inputTaskRepository.insertUsers(result.toUserInputList())
-            logger.log(TAG, "insertUsers ${System.currentTimeMillis() - curTime}ms")
+            if (enabledJobLog) logger.log(TAG, "insertUsers ${System.currentTimeMillis() - curTime}ms")
 
             curTime = System.currentTimeMillis()
-            logger.log(TAG, "insertTasks")
-            inputTaskRepository.insertTasks(result.toTaskInputList(whoAmI.userId))
-            logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
+            if (enabledJobLog) logger.log(TAG, "insertTasks")
+            val taskInputList = result.toTaskInputList(whoAmI.userId)
+            if (enabledJobLog) logger.log(TAG, "Count taskInputList: ${taskInputList.size}")
+            val pairCounter = inputTaskRepository.insertTasks(taskInputList)
+            val deletedTasks = pairCounter.second
+            val saveCounter = pairCounter.first
+            if (enabledJobLog) logger.log(TAG, "Count tasks to delete: ${deletedTasks}")
+            if (enabledJobLog) logger.log(TAG, "Count saved inputTasks: $saveCounter")
+            if (enabledJobLog) logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
             emit(SuccessRequest(result.tasks.map { it.id }))
         }.flowOn(ioDispatcher)
 

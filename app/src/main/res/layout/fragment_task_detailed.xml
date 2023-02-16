@@ -87,7 +87,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-<!--    TODO add extreme positions to get swipe element-->
     <ScrollView
         android:id="@+id/detailedScrollView"
         android:layout_width="match_parent"

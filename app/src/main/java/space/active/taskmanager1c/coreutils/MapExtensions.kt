@@ -29,12 +29,9 @@ fun <T,R> Map<T,R>.diff(incomingMapToCompare: Map<T,R>): Map<T,R> {
     // compare values in all keys and return different
     this.forEach { (key, value) ->
         if (incomingMapToCompare[key] != value) {
-            // todo delete debug
-//            if (key == "endDate") { Log.d("Map.diff", "endDate: $value -- ${incomingMapToCompare[key]}" )}
             diff += Pair(key,value)
         }
     }
-    // todo delete debug
     Log.d("Map.diff", diff.toString())
     return diff
 }

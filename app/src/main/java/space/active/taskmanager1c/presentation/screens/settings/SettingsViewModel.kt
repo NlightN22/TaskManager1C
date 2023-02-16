@@ -59,9 +59,6 @@ class SettingsViewModel @Inject constructor(
                     _viewState.value.copy(skipStatusAlert = settings.getSkipStatusAlert())
             }
         }
-        //todo delete or implement
-//        logger.log(TAG, "setSettingsViewState: $editable")
-//        _viewState.value = _viewState.value.copy(editServerAddress = editable)
     }
 
     var changeJob: Job? = null

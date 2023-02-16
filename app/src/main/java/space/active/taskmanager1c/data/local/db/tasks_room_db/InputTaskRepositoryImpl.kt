@@ -46,26 +46,25 @@ class InputTaskRepositoryImpl @Inject constructor(
 
     override suspend fun insertTasks(
         taskInputList: List<TaskInputHandledWithUsers>
-    ) {
-        logger.log(TAG, "Count taskInputList: ${taskInputList.size}")
+    ): Pair<Int,Int> {
         // delete not coming
-        deleteNotComing(taskInputList.map { it.taskInput.id })
+        val deletedCount = deleteNotComing(taskInputList.map { it.taskInput.id })
         var saveCounter = 0
         // insert changed
         taskInputList.forEach {
             saveCounter += insertTask(it)
         }
-        logger.log(TAG, "Count saved inputTasks: $saveCounter")
+        return Pair(saveCounter, deletedCount)
     }
 
-    private suspend fun deleteNotComing(listIds: List<String>) {
+    private suspend fun deleteNotComing(listIds: List<String>): Int {
         //insert new ids to InputTaskId, because hardcoded 999 variable limit for SQLite in Android
         inputDao.clearAndInsertNewIds(listIds)
         val notInDbIds = inputDao.getIdsNotInList()
-        logger.log(TAG, "Count tasks to delete: ${notInDbIds.size}")
         notInDbIds.forEach {
             inputDao.deleteTask(it)
         }
+        return notInDbIds.size
     }
 
     private suspend fun insertTask(taskHandled: TaskInputHandledWithUsers): Int {
@@ -130,8 +129,7 @@ class InputTaskRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateReadingStates(readingTimes: List<ReadingTimesTaskEntity>) {
-        logger.log(TAG, "Count ReadingStates: ${readingTimes.size}")
+    override suspend fun updateReadingStates(readingTimes: List<ReadingTimesTaskEntity>): Int {
         var saveCounter = 0
         readingTimes.forEach { item ->
             val current = readingDao.getReading(item.mainTaskId)
@@ -145,7 +143,7 @@ class InputTaskRepositoryImpl @Inject constructor(
                 saveCounter += 1
             }
         }
-        logger.log(TAG, "Count saved ReadingStates: $saveCounter")
+        return saveCounter
     }
 
     override fun getUnreadIds(): Flow<List<String>> = readingDao.getUnreadIds()

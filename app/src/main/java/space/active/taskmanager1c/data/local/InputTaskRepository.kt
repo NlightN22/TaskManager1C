@@ -24,7 +24,10 @@ interface InputTaskRepository {
     fun getTaskFlow(taskId: String): Flow<TaskInputHandledWithUsers?>
     fun getInnerTasks(taskId: String): Flow<List<TaskInputHandledWithUsers>>
     suspend fun getTask(taskId: String): TaskInputHandledWithUsers?
-    suspend fun insertTasks(taskInputList: List<TaskInputHandledWithUsers>)
+    /**
+     * return count of insert tasks and deleted tasks
+     */
+    suspend fun insertTasks(taskInputList: List<TaskInputHandledWithUsers>) : Pair<Int,Int>
     suspend fun saveAndDelete(
         inputTask: TaskInputHandledWithUsers,
         outputTask: OutputTask,
@@ -37,7 +40,10 @@ interface InputTaskRepository {
     suspend fun getUsers(): List<UserInput>
     suspend fun insertUsers(userInputList: List<UserInput>)
     // readings
-    suspend fun updateReadingStates(readingTimes: List<ReadingTimesTaskEntity>)
+    /**
+     * return count of reading state
+     */
+    suspend fun updateReadingStates(readingTimes: List<ReadingTimesTaskEntity>): Int
     fun getUnreadIds(): Flow<List<String>>
     suspend fun setUnreadTag(taskId: String, version: Int, unreadTag: Boolean)
 }

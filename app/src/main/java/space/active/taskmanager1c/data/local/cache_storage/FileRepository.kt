@@ -105,7 +105,6 @@ class FileRepository(
     }
 
     fun getFilenameForUploadedFile(fileName: String, fileId: String, cacheDirPath: String): File {
-        // todo add exceptions handler to external fun
         val finalName = "$fileId@$fileName"
         val cacheDir = getCurrentCacheDir(cacheDirPath)
         return File(cacheDir, finalName)

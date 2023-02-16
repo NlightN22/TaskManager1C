@@ -10,7 +10,6 @@ import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.ErrorRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
-import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
 import space.active.taskmanager1c.di.IoDispatcher
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.repository.SettingsRepository
@@ -116,7 +115,7 @@ class MainViewModel @Inject constructor(
 
                 try {
                     while (true) {
-                        logger.log(TAG, "updateJob start")
+//                        logger.log(TAG, "updateJob start")
                         /**
                         set update work here
                          */
@@ -124,7 +123,7 @@ class MainViewModel @Inject constructor(
                             getCredentials(), 1000L,
                             settings.getUser().toUserInput(),
                             exceptionHandler.skipBackendException
-                            )
+                        )
                             .catch { e ->
                                 exceptionHandler(e)
                                 delay(5000) // pause after error

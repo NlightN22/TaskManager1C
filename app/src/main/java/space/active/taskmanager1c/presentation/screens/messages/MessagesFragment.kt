@@ -6,7 +6,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.Loading
@@ -20,8 +19,6 @@ import space.active.taskmanager1c.presentation.utils.hideKeyboardFrom
 private const val TAG = "AboutFragment"
 
 class MessagesFragment : BaseFragment(R.layout.fragment_messages) {
-
-    //todo copy message or reply
 
     lateinit var binding: FragmentMessagesBinding
     lateinit var messagesAdapter: MessagesAdapter

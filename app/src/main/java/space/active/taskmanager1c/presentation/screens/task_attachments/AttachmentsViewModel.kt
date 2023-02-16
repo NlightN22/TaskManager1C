@@ -106,12 +106,6 @@ class AttachmentsViewModel @Inject constructor(
                             )
                         }
                         is PendingRequest -> {
-//                            showErrorToast(
-//                                UiText.Resource(
-//                                    R.string.attachments_start_loading,
-//                                    cachedFile.filename
-//                                )
-//                            )
                         }
                         is ErrorRequest -> {
                             showErrorToast(
@@ -154,12 +148,6 @@ class AttachmentsViewModel @Inject constructor(
                 .collect { request ->
                     when (request) {
                         is PendingRequest -> {
-//                            showErrorToast(
-//                                UiText.Resource(
-//                                    R.string.attachments_start_loading,
-//                                    cachedFile.filename
-//                                )
-//                            )
                         }
                         is ErrorRequest -> {
                             showErrorToast(
@@ -183,14 +171,6 @@ class AttachmentsViewModel @Inject constructor(
     }
 
     fun startAutoUploadingAll() {
-        // todo delete
-//        logger.log(TAG, "startAutoUploadingAll:\n${_listItems.value.joinToString("\n")}")
-//        if (cachedFile.notUploaded) {
-//            viewModelScope.launch {
-//                logger.log(TAG, "startAutoUploading: $cachedFile")
-//                uploadFileToServer(cachedFile)
-//            }
-//        }
         viewModelScope.launch {
             _listItems.getSuccess()?.let { list ->
                 list.filter { it.notUploaded }
