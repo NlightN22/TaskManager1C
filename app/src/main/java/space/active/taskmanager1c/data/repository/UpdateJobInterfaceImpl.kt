@@ -179,13 +179,17 @@ class UpdateJobInterfaceImpl
 
             curTime = System.currentTimeMillis()
             if (enabledJobLog) logger.log(TAG, "insertTasks")
-            val taskInputList = result.toTaskInputList(whoAmI.userId)
-            if (enabledJobLog) logger.log(TAG, "Count taskInputList: ${taskInputList.size}")
-            val pairCounter = inputTaskRepository.insertTasks(taskInputList)
-            val deletedTasks = pairCounter.second
-            val saveCounter = pairCounter.first
-            if (enabledJobLog) logger.log(TAG, "Count tasks to delete: ${deletedTasks}")
-            if (enabledJobLog) logger.log(TAG, "Count saved inputTasks: $saveCounter")
+            try {
+                val taskInputList = result.toTaskInputList(whoAmI.userId)
+                if (enabledJobLog) logger.log(TAG, "Count taskInputList: ${taskInputList.size}")
+                val pairCounter = inputTaskRepository.insertTasks(taskInputList)
+                val deletedTasks = pairCounter.second
+                val saveCounter = pairCounter.first
+                if (enabledJobLog) logger.log(TAG, "Count tasks to delete: ${deletedTasks}")
+                if (enabledJobLog) logger.log(TAG, "Count saved inputTasks: $saveCounter")
+            } catch (e: NullPointerException) {
+                throw BackendException(errorBody = e.message?.toString() ?: "", errorCode = "")
+            }
             if (enabledJobLog) logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
             emit(SuccessRequest(result.tasks.map { it.id }))
         }.flowOn(ioDispatcher)

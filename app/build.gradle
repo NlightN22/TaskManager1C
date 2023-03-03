@@ -17,8 +17,8 @@ android {
         applicationId "space.active.taskmanager1c"
         minSdk 29
         targetSdk 33
-        versionCode 7
-        versionName "0.7-alpha"
+        versionCode 8
+        versionName "0.8-alpha"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
