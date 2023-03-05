@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.di
 
+import com.google.gson.Gson
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -39,5 +40,8 @@ class RetrofitModule {
 
     fun provideLogginInterceptor(): HttpLoggingInterceptor = HttpLoggingInterceptor()
         .setLevel(HttpLoggingInterceptor.Level.NONE)
+
+    @Provides
+    fun provideGson(): Gson = Gson()
 
 }

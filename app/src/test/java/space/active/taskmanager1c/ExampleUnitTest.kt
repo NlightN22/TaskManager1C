@@ -2,6 +2,7 @@ package space.active.taskmanager1c
 
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Test
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField

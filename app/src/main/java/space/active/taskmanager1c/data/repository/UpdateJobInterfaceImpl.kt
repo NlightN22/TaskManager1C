@@ -30,7 +30,7 @@ class UpdateJobInterfaceImpl
     private val logger: Logger,
 ) : UpdateJobInterface {
 
-    private val enabledJobLog: Boolean = false
+    private val enabledJobLog: Boolean = true
 
     override fun updateJob(
         credentials: Credentials,
@@ -46,7 +46,10 @@ class UpdateJobInterfaceImpl
                     send(it)
                 }
             }
-            if (enabledJobLog) logger.log(TAG, "outputSendJob stop ${System.currentTimeMillis() - curTime}ms")
+            if (enabledJobLog) logger.log(
+                TAG,
+                "outputSendJob stop ${System.currentTimeMillis() - curTime}ms"
+            )
             curTime = System.currentTimeMillis()
             if (enabledJobLog) logger.log(TAG, "inputFetchJobFlow start")
             inputFetchJobFlow(credentials, whoAmI).collect { request ->
@@ -71,7 +74,10 @@ class UpdateJobInterfaceImpl
             delay(updateDelay)
         }.flowOn(ioDispatcher)
 
-    private suspend fun wrapToSkipExceptions(skippedException: Flow<List<Throwable>>, block: suspend () -> Unit) {
+    private suspend fun wrapToSkipExceptions(
+        skippedException: Flow<List<Throwable>>,
+        block: suspend () -> Unit
+    ) {
         try {
             block()
         } catch (e: Throwable) {
@@ -94,12 +100,23 @@ class UpdateJobInterfaceImpl
                 credentials.toAuthBasicDto(),
                 currentListId
             )
-            val readingTimes = result.map { it.toReadingTimesTaskEntity() }
-            if (enabledJobLog) logger.log(TAG, "Count ReadingStates: ${readingTimes.size}")
-            val saveCounter = inputTaskRepository.updateReadingStates(readingTimes)
-            if (enabledJobLog) logger.log(TAG, "Count saved ReadingStates: $saveCounter")
-            emit(SuccessRequest(Any()))
-            if (enabledJobLog) logger.log(TAG, "updateReadingState stop ${System.currentTimeMillis() - curTime}ms")
+            try {
+                val readingTimes = result.map { it.toReadingTimesTaskEntity() }
+                if (enabledJobLog) logger.log(TAG, "Count ReadingStates: ${readingTimes.size}")
+                val saveCounter = inputTaskRepository.updateReadingStates(readingTimes)
+                if (enabledJobLog) logger.log(TAG, "Count saved ReadingStates: $saveCounter")
+                emit(SuccessRequest(Any()))
+                if (enabledJobLog) logger.log(
+                    TAG,
+                    "updateReadingState stop ${System.currentTimeMillis() - curTime}ms"
+                )
+            } catch (e: NullPointerException) {
+                throw BackendException(
+                    errorBody = "${e.message?.toString()} ${result.toString()}",
+                    errorCode = "",
+                    sendToServerData = Pair(credentials.toAuthBasicDto().name, currentListId)
+                )
+            }
         }
 
     private fun outputSendJob(credentials: Credentials, whoAmI: UserInput) = flow<Request<Any>> {
@@ -175,7 +192,10 @@ class UpdateJobInterfaceImpl
             var curTime = System.currentTimeMillis()
             if (enabledJobLog) logger.log(TAG, "insertUsers")
             inputTaskRepository.insertUsers(result.toUserInputList())
-            if (enabledJobLog) logger.log(TAG, "insertUsers ${System.currentTimeMillis() - curTime}ms")
+            if (enabledJobLog) logger.log(
+                TAG,
+                "insertUsers ${System.currentTimeMillis() - curTime}ms"
+            )
 
             curTime = System.currentTimeMillis()
             if (enabledJobLog) logger.log(TAG, "insertTasks")
@@ -190,7 +210,10 @@ class UpdateJobInterfaceImpl
             } catch (e: NullPointerException) {
                 throw BackendException(errorBody = e.message?.toString() ?: "", errorCode = "")
             }
-            if (enabledJobLog) logger.log(TAG, "insertTasks ${System.currentTimeMillis() - curTime}ms")
+            if (enabledJobLog) logger.log(
+                TAG,
+                "insertTasks ${System.currentTimeMillis() - curTime}ms"
+            )
             emit(SuccessRequest(result.tasks.map { it.id }))
         }.flowOn(ioDispatcher)
 

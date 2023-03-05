@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.di
 
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,8 +21,8 @@ class RemoteModule {
     @Singleton
     fun provideTaskApi(
         logger: Logger,
-        converters: Converters,
+        gson: Gson,
         retrofit: Retrofit
-    ): TaskApi = RetrofitTasksSource(logger, converters, retrofit)
+    ): TaskApi = RetrofitTasksSource(logger, gson, retrofit)
 
 }

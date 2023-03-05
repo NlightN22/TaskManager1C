@@ -1,11 +1,11 @@
 package space.active.taskmanager1c.data.remote.retrofit
 
-import okhttp3.Credentials
+import com.google.gson.Gson
 import retrofit2.Retrofit
+import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.Request
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.logger.Logger
-import space.active.taskmanager1c.data.local.db.Converters
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.model.AuthBasicDto
 import space.active.taskmanager1c.data.remote.model.TaskDto
@@ -16,7 +16,6 @@ import space.active.taskmanager1c.data.remote.model.messages_dto.TaskUserReading
 import space.active.taskmanager1c.data.remote.model.reading_times.FetchReadingTimes
 import space.active.taskmanager1c.data.remote.model.reading_times.ReadingTimesTaskDTO
 import space.active.taskmanager1c.data.remote.model.reading_times.SetReadingTimeDTO
-import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -25,8 +24,8 @@ private const val TAG = "RetrofitTasksSource"
 class RetrofitTasksSource @Inject constructor
     (
     private val logger: Logger,
-    private val converters: Converters,
-    private val retrofit: Retrofit
+    private val gson: Gson,
+    private val retrofit: Retrofit,
 ) : BaseRetrofitSource(), TaskApi {
 
     private val retrofitApi = retrofit.create(RetrofitApi::class.java)
@@ -45,9 +44,17 @@ class RetrofitTasksSource @Inject constructor
     override suspend fun sendNewTask(auth: AuthBasicDto, task: TaskDto): Request<TaskDto> =
         wrapRetrofitExceptions(task) {
             logger.log(TAG, "sendNewTask: $task")
-            val res = retrofitApi.sendNew(auth.toBasic(), task).tasks.first()
-            logger.log(TAG, "Get from server taskDomain: $res")
-            SuccessRequest(res)
+            try {
+                val res = retrofitApi.sendNew(auth.toBasic(), task).tasks.first()
+                logger.log(TAG, "Get from server taskDomain: $res")
+                SuccessRequest(res)
+            } catch (e: NoSuchElementException) {
+                throw BackendException(
+                    errorBody = "Empty response from server when sending new task",
+                    errorCode = "",
+                    sendToServerData = task
+                )
+            }
         }
 
     override suspend fun sendEditedTaskMappedChanges(
@@ -55,10 +62,18 @@ class RetrofitTasksSource @Inject constructor
         taskId: String,
         changeMap: Map<String, Any>
     ) = wrapRetrofitExceptions(Pair(taskId, changeMap)) {
-        val changes = converters.mapToJson(changeMap)
-        logger.log(TAG, "Send changes: $changeMap")
-        val res = retrofitApi.saveChanges(taskId, auth.toBasic(), changes)
-        res.tasks.first()
+        val changes = gson.toJson(changeMap)
+        try {
+            logger.log(TAG, "Send changes: $changeMap")
+            val res = retrofitApi.saveChanges(taskId, auth.toBasic(), changes)
+            res.tasks.first()
+        } catch (e: NoSuchElementException) {
+            throw BackendException(
+                errorBody = "Empty response from server when sending new task",
+                errorCode = "",
+                sendToServerData = changes
+            )
+        }
     }
 
     override suspend fun getMessages(auth: AuthBasicDto, taskId: String): TaskMessagesDTO =
@@ -88,14 +103,15 @@ class RetrofitTasksSource @Inject constructor
         taskId: String,
         messageTime: LocalDateTime,
         readingTime: LocalDateTime
-    ): ReadingTimesTaskDTO = wrapRetrofitExceptions(Triple(taskId, messageTime,readingTime)) {
-        retrofitApi.setReadingTime(auth.toBasic(),
+    ): ReadingTimesTaskDTO = wrapRetrofitExceptions(Triple(taskId, messageTime, readingTime)) {
+        retrofitApi.setReadingTime(
+            auth.toBasic(),
             SetReadingTimeDTO(
                 taskId,
                 messageTime.toString(),
                 readingTime.toString()
             )
-            )
+        )
     }
 
     override suspend fun setReadingFlag(
@@ -106,7 +122,4 @@ class RetrofitTasksSource @Inject constructor
         val toSendMap = mapOf<String, String>("id" to taskId, "flag" to flag.toString())
         retrofitApi.setReadingFlag(auth.toBasic(), toSendMap)
     }
-
-    private fun AuthBasicDto.toBasic(): String =
-        Credentials.basic(this.name, this.pass, StandardCharsets.UTF_8)
 }

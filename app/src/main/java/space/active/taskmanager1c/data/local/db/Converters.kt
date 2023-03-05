@@ -44,6 +44,7 @@ class Converters(
             Json.decodeFromString(EncryptedData.serializer(), json)
         }
 
+    // todo delete
     fun <T, R> mapToJson(map: Map<T, R>): String {
         return jsonParser.toJsonSimple(map) ?: ""
     }
