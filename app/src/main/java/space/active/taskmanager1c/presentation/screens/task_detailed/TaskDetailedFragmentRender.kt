@@ -63,7 +63,8 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
                     fieldsState.bottomOk
                 menu.findItem(R.id.detailed_cancel).isVisible =
                     fieldsState.bottomCancel
-                menu.findItem(R.id.detailed_messages).isVisible = true
+                menu.findItem(R.id.detailed_messages).isVisible = fieldsState.bottomMessage
+                menu.findItem(R.id.detailed_attach).isVisible = fieldsState.bottomAttach
             }
         }
     }

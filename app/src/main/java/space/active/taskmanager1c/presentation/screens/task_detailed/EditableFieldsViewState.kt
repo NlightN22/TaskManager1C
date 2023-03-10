@@ -10,4 +10,6 @@ data class EditableFields(
     val bottomNew: Boolean = false,
     val bottomOk: Boolean = false,
     val bottomCancel: Boolean = false,
+    val bottomAttach: Boolean = false,
+    val bottomMessage: Boolean = false
 )

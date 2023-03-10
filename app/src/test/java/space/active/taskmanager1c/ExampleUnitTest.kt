@@ -1,6 +1,8 @@
 package space.active.taskmanager1c
 
 
+import android.content.UriMatcher
+import android.net.Uri
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test

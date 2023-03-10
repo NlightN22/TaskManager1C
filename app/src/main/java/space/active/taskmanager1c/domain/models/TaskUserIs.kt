@@ -14,6 +14,8 @@ sealed class TaskUserIs(
             observers = true,
             description = true,
             bottomOk = true,
+            bottomMessage = true,
+            bottomAttach = true
         )
     ) : TaskUserIs(fields)
 
@@ -26,7 +28,9 @@ sealed class TaskUserIs(
             observers = true,
             description = true,
             bottomOk = true,
-            bottomCancel = true
+            bottomCancel = true,
+            bottomMessage = true,
+            bottomAttach = true
         )
     ) : TaskUserIs(fields)
 
@@ -35,23 +39,27 @@ sealed class TaskUserIs(
     ) : TaskUserIs(fields)
 
     data class NotAuthorOrPerformer(
-        override val fields: EditableFields = EditableFields()
+        override val fields: EditableFields = EditableFields(
+            bottomMessage = true,
+            bottomAttach = true
+        )
     ) : TaskUserIs(fields)
 
     data class Performer(
         override val fields: EditableFields = EditableFields(
             bottomOk = true,
+            bottomMessage = true,
+            bottomAttach = true
         )
     ) : TaskUserIs(fields)
 
     data class PerformerInReviewed(
         override val fields: EditableFields = EditableFields(
-            bottomCancel = true
+            bottomCancel = true,
+            bottomMessage = true,
+            bottomAttach = true
         )
     ) : TaskUserIs(fields)
 
-
-
     object Observer : TaskUserIs()
-
 }

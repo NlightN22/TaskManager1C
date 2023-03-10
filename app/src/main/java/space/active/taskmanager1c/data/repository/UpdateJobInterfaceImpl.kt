@@ -30,7 +30,7 @@ class UpdateJobInterfaceImpl
     private val logger: Logger,
 ) : UpdateJobInterface {
 
-    private val enabledJobLog: Boolean = true
+    private val enabledJobLog: Boolean = false
 
     override fun updateJob(
         credentials: Credentials,

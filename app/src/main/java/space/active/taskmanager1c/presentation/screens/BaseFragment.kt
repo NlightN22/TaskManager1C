@@ -34,6 +34,7 @@ import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.Toasts
+import space.active.taskmanager1c.presentation.utils.navigateWithAnim
 import javax.inject.Inject
 
 private const val TAG = "BaseFragment"
@@ -81,10 +82,18 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
         val isLoginFragment: Boolean = currentDestination?.id == R.id.loginFragment
         if (!isLoginFragment) {
             val login = getLoginState()
+            saveLoginStateToPreviousBackStack(login)
             checkLoginState(login)
         }
         showNavigationLog()
         initBottomMenu(getBottomMenu())
+    }
+
+    private fun saveLoginStateToPreviousBackStack(login: Boolean) {
+        if (login) {
+            val previousStateHandle = findNavController().previousBackStackEntry?.savedStateHandle
+            previousStateHandle?.set(LOGIN_SUCCESSFUL, true)
+        }
     }
 
     abstract fun getBottomMenu() : BottomNavigationView?
@@ -112,10 +121,12 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             findNavController().previousBackStackEntry?.savedStateHandle?.get<Boolean>(
                 LOGIN_SUCCESSFUL
             )
+        logger.log(TAG, "getLoginState previous login state: $previousLogin")
         previousLogin?.let {
             currentStateHandle?.set(LOGIN_SUCCESSFUL, it)
         }
         val currentLogin = currentStateHandle?.get<Boolean>(LOGIN_SUCCESSFUL)
+        logger.log(TAG, "getLoginState current login state: $currentLogin")
         return currentLogin ?: false
     }
 
@@ -160,18 +171,11 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             val backDest = findNavController().previousBackStackEntry?.destination
             logger.log(
                 TAG,
-                "Nav: $directions  cur: ${currentDestination?.displayName} backdest: ${backDest?.displayName}"
+                "Navigate to: $directions" +
+                        "\ncurrent fragment: ${currentDestination?.displayName}" +
+                        "\nprevious fragment: ${backDest?.displayName}"
             )
-            findNavController().navigate(directions,
-                navOptions {
-                    anim {
-                        enter = R.anim.enter
-                        exit = R.anim.exit
-                        popEnter = R.anim.pop_enter
-                        popExit = R.anim.pop_exit
-                    }
-                }
-            )
+            findNavController().navigateWithAnim(directions)
         } catch (e: Throwable) {
             e.printStackTrace()
         }
@@ -183,7 +187,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             val backDest = findNavController().previousBackStackEntry?.destination
             logger.log(
                 TAG,
-                "Nav back: ${backDest?.displayName} cur: ${currentDestination?.displayName} "
+                "Navigation back. Previous fragment:${backDest?.displayName}\ncurrent fragment: ${currentDestination?.displayName} "
             )
             destination?.let {
                 if (it.id == currentDestination?.id) {
