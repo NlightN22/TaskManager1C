@@ -145,9 +145,11 @@ class TaskDetailedViewModel @Inject constructor(
     }
 
     private fun setTaskUnreadStatus(taskId: String) {
-        viewModelScope.launch {
-            getTaskUnreadStatus(taskId).collect{
-                _taskUnreadStatus.value = it
+        if (taskId.isNotBlank()) {
+            viewModelScope.launch {
+                getTaskUnreadStatus(taskId).collect {
+                    _taskUnreadStatus.value = it
+                }
             }
         }
     }

@@ -55,7 +55,7 @@
         </com.google.android.material.textfield.TextInputLayout>
     </com.google.android.material.card.MaterialCardView>
 
-<!--    todo add functional -->
+<!--    todo add fast filter and label functional -->
 <!--    <androidx.recyclerview.widget.RecyclerView-->
 <!--        android:id="@+id/fastFilterRV"-->
 <!--        android:layout_width="match_parent"-->

@@ -50,7 +50,7 @@ data class TaskDomain(
         Performed, // на доработке - ставит автор только для Reviewed
         Reviewed, // условно завершена - ставит исполнитель
         Finished, // принята - ставит автор только для Reviewed
-        Deferred, // отложена используется редко - испольнитель todo иконка для испольнителя bottom menu in Accepted status
+        Deferred, // отложена используется редко - испольнитель
         Cancelled; // отклоненная - не используется
 
         fun getResId(): Int {

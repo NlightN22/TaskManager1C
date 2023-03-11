@@ -99,22 +99,4 @@ class SettingsViewModel @Inject constructor(
             ""
         }
     }
-
-    // todo delete or implement
-    private suspend fun saveServerAddress(): Boolean {
-        // validation
-        val curAddress = _viewState.value.serverAddress
-        val validateRes = validateCredentials.server(curAddress)
-
-        if (!validateRes) {
-            exceptionHandler(NotCorrectServerAddress)
-            return false
-        }
-        // save to Settings
-        wrapSaveExceptions {
-            settings.saveServerAddress(curAddress)
-            return@wrapSaveExceptions true
-        }
-        return false
-    }
 }
