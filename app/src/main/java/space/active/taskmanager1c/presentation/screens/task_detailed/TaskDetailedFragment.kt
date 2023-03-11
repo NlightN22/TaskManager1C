@@ -10,6 +10,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
+import space.active.taskmanager1c.domain.models.FragmentDeepLinks
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.models.TaskChangesEvents
 import space.active.taskmanager1c.domain.models.UserDomain
@@ -56,6 +57,10 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun observers() {
+
+        viewModel.shareTaskEvent.collectOnStart {
+            shareUri(it)
+        }
 
         viewModel.openClickableTask.collectOnStart {
             navigate(it)
@@ -204,6 +209,13 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
         binding.title.taskNameET.setOnClickListener {
             viewModel.showDialog(EditTitleDialog(null))
         }
+        binding.title.shareButton.setOnClickListener {
+            viewModel.shareTaskClick()
+        }
+
+        binding.title.backButton.setOnClickListener {
+            onBackClick()
+        }
 
         binding.taskDeadline.setOnClickListener {
             viewModel.showDialog(DatePicker)
@@ -233,9 +245,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             viewModel.clickOnInnerTasks(binding.taskInner.text.toString())
         }
 
-        binding.title.backButton.setOnClickListener {
-            onBackClick()
-        }
+
     }
 
     private fun showDatePicker() {

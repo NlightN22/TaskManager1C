@@ -13,6 +13,7 @@ import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.databinding.FragmentMessagesBinding
+import space.active.taskmanager1c.domain.models.FragmentDeepLinks
 import space.active.taskmanager1c.domain.use_case.setState
 import space.active.taskmanager1c.domain.use_case.setText
 import space.active.taskmanager1c.presentation.screens.BaseFragment
@@ -65,9 +66,15 @@ class MessagesFragment : BaseFragment(R.layout.fragment_messages) {
             hideKeyboardFrom(requireContext(), binding.messageInput)
         }
 
+        binding.titleMessages.shareButton.setOnClickListener {
+            val taskId = MessagesFragmentArgs.fromBundle(requireArguments()).taskId
+            shareUri(FragmentDeepLinks.Messages(taskId).toUri())
+        }
+
         binding.titleMessages.backButton.setOnClickListener {
             onBackClick()
         }
+
     }
 
     private fun observers() {

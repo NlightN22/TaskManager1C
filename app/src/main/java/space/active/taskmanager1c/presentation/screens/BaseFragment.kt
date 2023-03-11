@@ -1,7 +1,9 @@
 package space.active.taskmanager1c.presentation.screens
 
 import android.app.AlertDialog
+import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -371,6 +373,15 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             putExtra(Intent.EXTRA_TEXT, " To server: ${backendException.sendToServerData.toString()}" +
                     "\nCode: ${backendException.errorCode}" +
                     "\nBody ${backendException.errorBody}")
+        }
+        val shareIntent = Intent.createChooser(intent, null)
+        startActivity(shareIntent)
+    }
+
+    fun shareUri(uri: Uri) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, "$uri")
         }
         val shareIntent = Intent.createChooser(intent, null)
         startActivity(shareIntent)

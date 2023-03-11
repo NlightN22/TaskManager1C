@@ -1,5 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -62,6 +63,9 @@ class TaskDetailedViewModel @Inject constructor(
 
     private val _saveNewTaskEvent = MutableSharedFlow<SaveEvents>()
     val saveNewTaskEvent = _saveNewTaskEvent.asSharedFlow()
+
+    private val _shareTaskEvent = MutableSharedFlow<Uri>()
+    val shareTaskEvent = _shareTaskEvent.asSharedFlow()
 
     private val _showSnackBar = MutableSharedFlow<UiText>()
     val showSnackBar = _showSnackBar.asSharedFlow()
@@ -429,6 +433,13 @@ class TaskDetailedViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun shareTaskClick() {
+        viewModelScope.launch {
+            val uri = FragmentDeepLinks.Detailed(_taskState.value.id).toUri()
+            _shareTaskEvent.emit(uri)
         }
     }
 }

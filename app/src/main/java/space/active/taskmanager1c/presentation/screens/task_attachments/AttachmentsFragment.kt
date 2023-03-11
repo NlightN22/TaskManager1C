@@ -16,6 +16,7 @@ import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.databinding.FragmentAttachmentsBinding
 import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
+import space.active.taskmanager1c.domain.models.FragmentDeepLinks
 import space.active.taskmanager1c.domain.use_case.setState
 import space.active.taskmanager1c.domain.use_case.setText
 import space.active.taskmanager1c.presentation.screens.BaseFragment
@@ -118,6 +119,11 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                 }
             }
             return@setOnItemSelectedListener true
+        }
+
+        binding.titleAttachments.shareButton.setOnClickListener {
+            val taskId = AttachmentsFragmentArgs.fromBundle(requireArguments()).taskId
+            shareUri(FragmentDeepLinks.Attachments(taskId).toUri())
         }
 
         binding.titleAttachments.backButton.setOnClickListener {
