@@ -28,7 +28,8 @@
         <item name="android:gravity">center</item>
         <item name="android:textStyle">bold</item>
         <item name="android:maxLength">150</item>
-        <item name="android:maxLines">3</item>
+        <item name="android:layout_marginStart">15dp</item>
+        <item name="android:layout_marginEnd">15dp</item>
     </style>
 
 </resources>

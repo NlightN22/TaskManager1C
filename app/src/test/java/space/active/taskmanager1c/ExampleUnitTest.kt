@@ -1,10 +1,7 @@
 package space.active.taskmanager1c
 
 
-import android.content.UriMatcher
-import android.net.Uri
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertSame
 import org.junit.Test
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
@@ -15,6 +12,7 @@ import kotlin.reflect.jvm.javaGetter
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
+
 
 class ExampleUnitTest {
 
@@ -40,7 +38,7 @@ class ExampleUnitTest {
 
     @Test
     fun printValues() {
-        data class A(val a: String ="A", val b:String = "B")
+        data class A(val a: String = "A", val b: String = "B")
         val (valA, valB) = A()
         println("valA: $valA")
         println("valB: $valB")
@@ -111,7 +109,8 @@ class ExampleUnitTest {
         }
         // после этого находим по уникальному параметру заменяемое значение в базовом списке
         val replacedList = classList1.map { list1Item ->
-            itemsFromList2NotInList1.find { list2Item -> (list1Item.id == list2Item.id) } ?: list1Item
+            itemsFromList2NotInList1.find { list2Item -> (list1Item.id == list2Item.id) }
+                ?: list1Item
         }
 
         // далее заменяем в базовом списке заменяемое значение
@@ -149,27 +148,32 @@ class ExampleUnitTest {
             val name = member.name
             val value = member.get(instance) as String
 
-            mapProp += Pair(name,value)
+            mapProp += Pair(name, value)
         }
         val string = "wait"
 
     }
 
 
-
 }
 
 
-data class DataClassTest2(val a: String, val b: String, val c: String, val d: String, val e: String): BaseData()
+data class DataClassTest2(
+    val a: String,
+    val b: String,
+    val c: String,
+    val d: String,
+    val e: String
+) : BaseData()
 
 data class ForGetParameters(
     val id: String = "id1",
-    val strList: List<String> = listOf("val1","val2","val3")
+    val strList: List<String> = listOf("val1", "val2", "val3")
 )
 
 open class BaseData {
 
-    fun getProperties(data: Any):  MutableMap<String, String> {
+    fun getProperties(data: Any): MutableMap<String, String> {
         val mapProperties: MutableMap<String, String> = mutableMapOf()
         Any::class.memberProperties.forEach { member ->
             val name = member.name
@@ -179,10 +183,6 @@ open class BaseData {
         return mapProperties
     }
 }
-
-
-
-
 
 
 private fun <T> List<T>.addNotContained(inputList: List<T>): List<T> {

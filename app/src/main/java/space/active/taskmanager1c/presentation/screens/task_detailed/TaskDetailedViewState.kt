@@ -1,6 +1,8 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
+import space.active.taskmanager1c.domain.models.ClickableTask
 import space.active.taskmanager1c.domain.models.TaskDomain
+import space.active.taskmanager1c.domain.models.TaskTitleViewState
 import space.active.taskmanager1c.presentation.utils.DialogItem
 import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
 
@@ -17,15 +19,21 @@ data class TaskState(
     val observers: String = "",
     val description: String = "",
     val taskObject: String = "",
-    val mainTask: String = "",
-    val innerTasks: String = "",
+    val mainTask: ClickableTask = ClickableTask(),
+    val innerTasks: List<ClickableTask> = emptyList(),
     val status: TaskDomain.Status = TaskDomain.Status.New,
-)
+) {
+    fun toTaskTitleViewState() = TaskTitleViewState(
+        title = title,
+        date = startDate,
+        number = number,
+        status = status.getResId()
+    )
 
-data class TaskDetailedExpandState(
-    val main: Boolean = false,
-    val description: Boolean = false
-)
+    fun List<ClickableTask>.toText(): String {
+        return this.map{ it.name }.joinToString("\n")
+    }
+}
 
 sealed class TaskDetailedDialogs
 data class CoPerformersDialog(

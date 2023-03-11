@@ -86,6 +86,11 @@ data class TaskDomain(
         )
     }
 
+    fun toClickableTask(): ClickableTask = ClickableTask(
+        name = name,
+        id = id
+    )
+
     fun toTaskDTO(): TaskDto {
         return TaskDto(
             authorId = users.author.id,
@@ -120,10 +125,8 @@ data class TaskDomain(
         observers = this.users.observers.toText(),
         description = this.description,
         taskObject = this.objName,
-        mainTask = this.mainTaskId, // todo add inner taskDomain
         status = this.status
     )
-
 
     /**
      * Return days deadline in string

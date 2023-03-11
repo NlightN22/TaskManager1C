@@ -13,6 +13,8 @@ import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.databinding.FragmentMessagesBinding
+import space.active.taskmanager1c.domain.use_case.setState
+import space.active.taskmanager1c.domain.use_case.setText
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.utils.hideKeyboardFrom
 
@@ -31,8 +33,13 @@ class MessagesFragment : BaseFragment(R.layout.fragment_messages) {
         super.onViewCreated(view, savedInstanceState)
 
         initRV()
+        initTitle()
         observers()
         listeners()
+    }
+
+    private fun initTitle() {
+        binding.titleMessages.setState(false)
     }
 
     private fun initRV() {
@@ -58,18 +65,15 @@ class MessagesFragment : BaseFragment(R.layout.fragment_messages) {
             hideKeyboardFrom(requireContext(), binding.messageInput)
         }
 
-        binding.backButton.setOnClickListener {
+        binding.titleMessages.backButton.setOnClickListener {
             onBackClick()
         }
     }
 
     private fun observers() {
         // title observer
-        viewModel.messagesViewState.collectOnStart { state ->
-            binding.taskTitleDetailed.setText(state.title)
-            binding.taskNumberDetailed.setText(state.number)
-            binding.taskDateDetailed.setText(state.date)
-            state.status?.let { binding.taskStatus.setText(it) }
+        viewModel.taskTitleViewState.collectOnStart { state ->
+            binding.titleMessages.setText(state)
         }
 
         // SnackBar observer

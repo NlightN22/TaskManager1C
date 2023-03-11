@@ -14,7 +14,10 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-private const val BASE_URL = "https://taskmgr.komponent-m.ru/taskmgr/hs/taskmgr/"
+/**
+ * Used in MyUriMatcher too
+ */
+const val BASE_URL = "https://taskmgr.komponent-m.ru/taskmgr/hs/taskmgr/"
 
 @Module
 @InstallIn(SingletonComponent::class)

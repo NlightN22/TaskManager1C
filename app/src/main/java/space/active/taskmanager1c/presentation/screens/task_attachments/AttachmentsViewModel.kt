@@ -10,7 +10,10 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.cache_storage.CachedFilesRepository
 import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
+import space.active.taskmanager1c.domain.models.TaskTitleViewState
+import space.active.taskmanager1c.domain.models.TaskTitleViewState.Companion.setTitleState
 import space.active.taskmanager1c.domain.repository.SettingsRepository
+import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.domain.use_case.GetCredentials
 import space.active.taskmanager1c.domain.use_case.ShowErrorToast
@@ -26,9 +29,13 @@ class AttachmentsViewModel @Inject constructor(
     logger: Logger,
     private val exceptionHandler: ExceptionHandler,
     private val cachedFilesRepository: CachedFilesRepository,
+    private val tasksRepository: TasksRepository,
     private val getCredentials: GetCredentials,
     private val showErrorToast: ShowErrorToast
 ) : BaseViewModel(settings, logger) {
+
+    private val _taskTitleViewState = MutableStateFlow(TaskTitleViewState())
+    val taskTitleViewState = _taskTitleViewState.asStateFlow()
 
     private val _openFileEvent = MutableSharedFlow<CachedFile>()
     val openFileEvent = _openFileEvent.asSharedFlow()
@@ -55,6 +62,9 @@ class AttachmentsViewModel @Inject constructor(
                         _listItems.value = SuccessRequest(inputList)
                     }
                 }
+        }
+        viewModelScope.launch {
+            _taskTitleViewState.setTitleState(tasksRepository, taskId)
         }
     }
 

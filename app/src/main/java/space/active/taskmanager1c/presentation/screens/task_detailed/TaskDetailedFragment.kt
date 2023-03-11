@@ -1,7 +1,6 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
@@ -57,6 +56,11 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun observers() {
+
+        viewModel.openClickableTask.collectOnStart {
+            navigate(it)
+        }
+
         //observe status dialog
         viewModel.statusAlertEvent.collectOnStart {
             taskStatusDialog.showDialog(it.second, requireContext()) {
@@ -73,7 +77,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
         //validate errors observer
         viewModel.taskErrorState.collectOnStart { state ->
-            binding.taskTitleTIL.error = state.title?.getString(requireContext())
+            binding.title.taskTitleTIL.error = state.title?.getString(requireContext())
             binding.taskDeadlineTIL.error = state.endDate?.getString(requireContext())
             binding.taskPerformerTIL.error = state.performer?.getString(requireContext())
             binding.taskAuthorTIL.error = state.author?.getString(requireContext())
@@ -83,6 +87,8 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
 
         // Render enabled fields
         renderFields(viewModel)
+
+        renderUnread(viewModel)
 
         // SnackBar observer
         showSnackBar(viewModel.showSnackBar)
@@ -195,7 +201,7 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             return@setOnItemSelectedListener true
         }
 
-        binding.taskTitleDetailed.setOnClickListener {
+        binding.title.taskNameET.setOnClickListener {
             viewModel.showDialog(EditTitleDialog(null))
         }
 
@@ -219,7 +225,15 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
             viewModel.showDialog(EditDescriptionDialog(null))
         }
 
-        binding.backButtonTaskDetailed.setOnClickListener {
+        binding.taskMain.setOnClickListener {
+            viewModel.clickOnMainTask(binding.taskMain.text.toString())
+        }
+
+        binding.taskInner.setOnClickListener {
+            viewModel.clickOnInnerTasks(binding.taskInner.text.toString())
+        }
+
+        binding.title.backButton.setOnClickListener {
             onBackClick()
         }
     }

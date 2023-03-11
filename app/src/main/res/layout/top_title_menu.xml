@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/taskNumberTM"
+        style="@style/TitleTopperText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:elevation="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="ЦБ000327375" />
+
+    <TextView
+        android:id="@+id/taskStatus"
+        style="@style/TitleTopperText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:elevation="4dp"
+        app:layout_constraintStart_toEndOf="@+id/taskNumberTM"
+        app:layout_constraintEnd_toStartOf="@+id/taskDateTM"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Accepted" />
+
+    <TextView
+        android:id="@+id/taskDateTM"
+        style="@style/TitleTopperText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="10.09.22" />
+
+    <ImageButton
+        android:id="@+id/backButton"
+        style="@style/BackButton"
+        android:layout_marginStart="-4dp"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <ImageButton
+        android:id="@+id/shareButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_share_title_30"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/backButton"
+        app:layout_constraintBottom_toBottomOf="@+id/backButton"
+        android:background="@null"
+        android:layout_marginEnd="5dp"
+        />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/taskTitleCardView"
+        style="@style/EditableCardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/editable_text_background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/taskTitleTIL"
+            style="@style/EditableTextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxStrokeColor="@color/button_not_pressed">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/taskNameET"
+                style="@style/TitleEditable"
+                android:layout_width="match_parent"
+                android:ellipsize="end"
+                android:gravity="top|center"
+                android:inputType="textMultiLine"
+                tools:text="Социальная справедливость — один из распространённых общественных идеалов" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

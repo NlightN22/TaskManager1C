@@ -1,16 +1,15 @@
 package space.active.taskmanager1c.presentation.screens.task_detailed
 
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.domain.use_case.setState
+import space.active.taskmanager1c.domain.use_case.setText
 import space.active.taskmanager1c.presentation.utils.setColorState
 import space.active.taskmanager1c.presentation.utils.setState
 
 fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
     viewModel.taskState.collectOnCreated { taskState ->
         with(taskState) {
-            binding.taskTitleDetailed.setText(title)
-            binding.taskNumberDetailed.text = number
-            binding.taskStatus.text = resources.getString(status.getResId())
-            binding.taskDateDetailed.text = startDate
+            binding.title.setText(taskState.toTaskTitleViewState())
             binding.taskDeadline.setText(deadLine)
             binding.taskAuthor.setText(author)
             binding.taskDaysEnd.setText(daysEnd)
@@ -19,8 +18,8 @@ fun TaskDetailedFragment.renderState(viewModel: TaskDetailedViewModel) {
             binding.taskObservers.setText(observers)
             binding.taskDescription.setText(description)
             binding.taskBaseObject.setText(taskObject)
-            binding.taskMain.setText(mainTask)
-            binding.taskInner.setText(innerTasks)
+            binding.taskMain.setText(mainTask.name)
+            binding.taskInner.setText(innerTasks.toText())
         }
     }
 }
@@ -29,12 +28,7 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
     // Render enabled fields
     viewModel.enabledFields.collectOnCreated { fieldsState ->
         // Title
-        binding.taskTitleCardView.setState(enabled = fieldsState.title)
-        binding.taskTitleTIL.setState(enabled = fieldsState.title)
-
-        binding.taskDateDetailed.setColorState(fieldsState.title)
-        binding.taskStatus.setColorState(fieldsState.title)
-        binding.taskNumberDetailed.setColorState(fieldsState.title)
+        binding.title.setState(fieldsState.title)
         // End date
         binding.taskDeadlineCardView.setState(enabled = fieldsState.deadLine)
         binding.taskDeadlineTIL.setState(enabled = fieldsState.deadLine)
@@ -65,6 +59,21 @@ fun TaskDetailedFragment.renderFields(viewModel: TaskDetailedViewModel) {
                     fieldsState.bottomCancel
                 menu.findItem(R.id.detailed_messages).isVisible = fieldsState.bottomMessage
                 menu.findItem(R.id.detailed_attach).isVisible = fieldsState.bottomAttach
+            }
+        }
+    }
+}
+
+fun TaskDetailedFragment.renderUnread(viewModel: TaskDetailedViewModel) {
+    viewModel.taskUnreadStatus.collectOnCreated { unread ->
+        binding.bottomMenu.root.apply {
+            val messageItem = menu.findItem(R.id.detailed_messages)
+            if (messageItem.isVisible) {
+                if (unread) {
+                    messageItem.setIcon(R.drawable.ic_messages_bottom_menu_unread)
+                } else {
+                    messageItem.setIcon(R.drawable.ic_messages_bottom_menu)
+                }
             }
         }
     }

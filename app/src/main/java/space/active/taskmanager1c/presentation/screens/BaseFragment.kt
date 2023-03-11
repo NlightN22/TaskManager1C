@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
+import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -27,11 +28,15 @@ import kotlinx.coroutines.flow.collectLatest
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.CantShowSnackBar
+import space.active.taskmanager1c.coreutils.EmptyObject
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.BottomNavigationMenuBinding
+import space.active.taskmanager1c.domain.models.ClickableTask
+import space.active.taskmanager1c.domain.models.FragmentDeepLinks
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
+import space.active.taskmanager1c.domain.use_case.HandleDeepLink
 import space.active.taskmanager1c.presentation.screens.mainactivity.MainViewModel
 import space.active.taskmanager1c.presentation.utils.Toasts
 import space.active.taskmanager1c.presentation.utils.navigateWithAnim
@@ -51,6 +56,9 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     @Inject
     lateinit var exceptionHandler: ExceptionHandler
+
+    @Inject
+    lateinit var handleDeepLink: HandleDeepLink
 
     private var currentDestination: NavDestination? = null
 
@@ -176,6 +184,19 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
                         "\nprevious fragment: ${backDest?.displayName}"
             )
             findNavController().navigateWithAnim(directions)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+    }
+
+    fun navigate(clickableTask: ClickableTask) {
+        try {
+            if (clickableTask.id.isNotBlank()) {
+                val deepLink = FragmentDeepLinks.Detailed(clickableTask.id)
+                handleDeepLink(findNavController(), deepLink)
+            } else {
+                throw EmptyObject ("ClickableTask.id")
+            }
         } catch (e: Throwable) {
             e.printStackTrace()
         }

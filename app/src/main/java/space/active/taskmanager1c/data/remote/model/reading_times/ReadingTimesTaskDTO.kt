@@ -21,10 +21,6 @@ data class ReadingTimesTaskDTO(
             if (readingTime.isBlank()) return true
             val messageTime = lastMessageTime.toZonedDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             val lastRead = readingTime.toZonedDateTime(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-//            if (messageTime > lastRead) {
-//                Log.d("incomeReadingTimes", "$id  $lastMessageTime > $readingTime")
-//                Log.d("getUnreadStatus", "$id  $messageTime > $lastRead")
-//            }
             return (messageTime > lastRead)
         }
         return false

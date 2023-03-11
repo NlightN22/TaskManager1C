@@ -11,6 +11,8 @@ import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.domain.models.Messages
 import space.active.taskmanager1c.domain.models.Messages.Companion.toMessages
+import space.active.taskmanager1c.domain.models.TaskTitleViewState
+import space.active.taskmanager1c.domain.models.TaskTitleViewState.Companion.setTitleState
 import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
@@ -33,8 +35,8 @@ class MessagesViewModel @Inject constructor(
     private val tasksRepository: TasksRepository,
 ) : BaseViewModel(settings, logger) {
 
-    private val _messagesViewState = MutableStateFlow(MessagesViewState())
-    val messagesViewState = _messagesViewState.asStateFlow()
+    private val _taskTitleViewState = MutableStateFlow(TaskTitleViewState())
+    val taskTitleViewState = _taskTitleViewState.asStateFlow()
 
     private val _sendMessageEvent = MutableSharedFlow<StateProgress<Any>>()
     val sendMessageEvent = _sendMessageEvent.asSharedFlow()
@@ -62,16 +64,7 @@ class MessagesViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            tasksRepository.getTask(taskId).collectLatest { task ->
-                task?.let {
-                    _messagesViewState.value = _messagesViewState.value.copy(
-                        title = it.name,
-                        date = it.date.toShortDate(),
-                        number = it.number,
-                        status = it.status.getResId()
-                    )
-                }
-            }
+            _taskTitleViewState.setTitleState(tasksRepository, taskId)
         }
     }
 

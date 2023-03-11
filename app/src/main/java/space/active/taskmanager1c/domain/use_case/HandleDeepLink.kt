@@ -24,47 +24,55 @@ class HandleDeepLink @Inject constructor(
         val intentUri = intent.data
         intentUri?.let { uri ->
             val fragmentDL = FragmentDeepLinks.getFragmentLink(uri)
-            when (fragmentDL) {
-                is FragmentDeepLinks.Detailed -> {
-                    logger.log(TAG, "handleDeepLink open Detailed ${fragmentDL}")
-                    val currentFragmentId = navController.currentDestination?.id
-                    val taskId: String? = getCurrentArgs(navController) {
-                        TaskDetailedFragmentArgs.fromBundle(it).taskId
-                    }
-                    logger.log(TAG, "currentFragmentId ${currentFragmentId} taskId $taskId")
-                    if (!fragmentDL.isCurrentLink(currentFragmentId, taskId)) {
-                        navController.navigateWithAnim(fragmentDL.destination, args = fragmentDL.bundleArg)
-                    } else {
-                        toasts(UiText.Resource(R.string.link_already_opened))
-                    }
+            fragmentDL?.navigate(navController)
+                ?: run {
+                logger.log(TAG, "Link not found ${fragmentDL}")
+                toasts(UiText.Resource(R.string.wrong_link))
+            }
+        }
+    }
+
+    operator fun invoke(navController: NavController, fragmentDeepLinks: FragmentDeepLinks) {
+        fragmentDeepLinks.navigate(navController)
+    }
+
+    private fun FragmentDeepLinks.navigate(navController: NavController) {
+        when (this) {
+            is FragmentDeepLinks.Detailed -> {
+                logger.log(TAG, "handleDeepLink open Detailed ${this}")
+                val currentFragmentId = navController.currentDestination?.id
+                val taskId: String? = getCurrentArgs(navController) {
+                    TaskDetailedFragmentArgs.fromBundle(it).taskId
                 }
-                is FragmentDeepLinks.Messages -> {
-                    logger.log(TAG, "handleDeepLink open Messages ${fragmentDL}")
-                    val currentFragmentId = navController.currentDestination?.id
-                    val taskId: String? = getCurrentArgs(navController) {
-                        MessagesFragmentArgs.fromBundle(it).taskId
-                    }
-                    if (!fragmentDL.isCurrentLink(currentFragmentId, taskId)) {
-                        navController.navigateWithAnim(fragmentDL.destination, args = fragmentDL.bundleArg)
-                    } else {
-                        toasts(UiText.Resource(R.string.link_already_opened))
-                    }
+                logger.log(TAG, "currentFragmentId ${currentFragmentId} taskId $taskId")
+                if (!this.isCurrentLink(currentFragmentId, taskId)) {
+                    navController.navigateWithAnim(this.destination, args = this.bundleArg)
+                } else {
+                    toasts(UiText.Resource(R.string.link_already_opened))
                 }
-                is FragmentDeepLinks.Attachments -> {
-                    logger.log(TAG, "handleDeepLink open Attachments ${fragmentDL}")
-                    val currentFragmentId = navController.currentDestination?.id
-                    val taskId: String? = getCurrentArgs(navController) {
-                        AttachmentsFragmentArgs.fromBundle(it).taskId
-                    }
-                    if (!fragmentDL.isCurrentLink(currentFragmentId, taskId)) {
-                        navController.navigateWithAnim(fragmentDL.destination, args = fragmentDL.bundleArg)
-                    } else {
-                        toasts(UiText.Resource(R.string.link_already_opened))
-                    }
+            }
+            is FragmentDeepLinks.Messages -> {
+                logger.log(TAG, "handleDeepLink open Messages ${this}")
+                val currentFragmentId = navController.currentDestination?.id
+                val taskId: String? = getCurrentArgs(navController) {
+                    MessagesFragmentArgs.fromBundle(it).taskId
                 }
-                else -> {
-                    logger.log(TAG, "Link not found ${fragmentDL}")
-                    toasts(UiText.Resource(R.string.wrong_link))
+                if (!this.isCurrentLink(currentFragmentId, taskId)) {
+                    navController.navigateWithAnim(this.destination, args = this.bundleArg)
+                } else {
+                    toasts(UiText.Resource(R.string.link_already_opened))
+                }
+            }
+            is FragmentDeepLinks.Attachments -> {
+                logger.log(TAG, "handleDeepLink open Attachments ${this}")
+                val currentFragmentId = navController.currentDestination?.id
+                val taskId: String? = getCurrentArgs(navController) {
+                    AttachmentsFragmentArgs.fromBundle(it).taskId
+                }
+                if (!this.isCurrentLink(currentFragmentId, taskId)) {
+                    navController.navigateWithAnim(this.destination, args = this.bundleArg)
+                } else {
+                    toasts(UiText.Resource(R.string.link_already_opened))
                 }
             }
         }

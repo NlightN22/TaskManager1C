@@ -4,24 +4,42 @@ import android.content.UriMatcher
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import androidx.core.net.toUri
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.EmptyObject
+import space.active.taskmanager1c.di.BASE_URL
+import space.active.taskmanager1c.presentation.screens.messages.MessagesFragment
 import space.active.taskmanager1c.presentation.screens.messages.MessagesFragmentArgs
 import space.active.taskmanager1c.presentation.screens.task_attachments.AttachmentsFragmentArgs
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedFragmentArgs
 
+/**
+ * @param matcherId must contains unique id for matcher
+ * @param matcherPath must contains path in UriMatcher path format.
+ * "*" may be used as a wild card for any text, and "#" may be used as a wild card for numbers.
+ */
 sealed class FragmentDeepLinks {
     abstract val taskId: String
     abstract val destination: Int
     abstract val bundleArg: Bundle
+    abstract fun getUri(): Uri
 
     data class Messages(
         override val taskId: String,
         override val destination: Int = R.id.messagesFragment,
         override val bundleArg: Bundle = MessagesFragmentArgs(taskId).toBundle()
     ) : FragmentDeepLinks() {
+
+        override fun getUri(): Uri {
+            val startPath = super.getSchemeAndHost()
+            val combinedPath = startPath + uriPath + taskId
+            return combinedPath.toUri()
+        }
+
         companion object {
             const val matcherId = 1
             const val matcherPath = "taskmgr/hs/taskmgr/tasks/messages"
+            const val uriPath = "taskmgr/hs/taskmgr/tasks/messages?id="
         }
     }
 
@@ -30,6 +48,14 @@ sealed class FragmentDeepLinks {
         override val destination: Int = R.id.attachmentsFragment,
         override val bundleArg: Bundle = AttachmentsFragmentArgs(taskId).toBundle()
     ) : FragmentDeepLinks() {
+
+        override fun getUri(): Uri {
+            val startPath = super.getSchemeAndHost()
+            val replacedMatcher = matcherPath.replace("*", taskId)
+            val combinedPath = startPath + replacedMatcher
+            return combinedPath.toUri()
+        }
+
         companion object {
             const val matcherId = 2
             const val matcherPath = "taskmgr/hs/taskmgr/tasks/*/file"
@@ -39,8 +65,16 @@ sealed class FragmentDeepLinks {
     data class Detailed(
         override val taskId: String,
         override val bundleArg: Bundle = TaskDetailedFragmentArgs(taskId).toBundle(),
-        override val destination: Int = R.id.taskDetailedFragment
+        override val destination: Int = R.id.taskDetailedFragment,
     ) : FragmentDeepLinks() {
+
+        override fun getUri(): Uri {
+            val startPath = super.getSchemeAndHost()
+            val replacedMatcher = Attachments.matcherPath.replace("*", taskId)
+            val combinedPath = startPath + replacedMatcher
+            return combinedPath.toUri()
+        }
+
         companion object {
             const val matcherId = 3
             const val matcherPath = "taskmgr/hs/taskmgr/tasks/*"
@@ -51,8 +85,17 @@ sealed class FragmentDeepLinks {
         return currentFragmentId == this.destination && taskId == this.taskId
     }
 
+    private fun getSchemeAndHost(): String {
+        val uri = BASE_URL.toUri()
+        val scheme = uri.scheme ?: throw EmptyObject("getSchemeAndHost scheme")
+        val host = uri.host ?: throw EmptyObject("getSchemeAndHost host")
+        return "$scheme://$host/"
+    }
+
+
     companion object {
-        private val matcher = MyUriMatcher()
+        private val authority = BASE_URL.toUri().host ?: throw EmptyObject("MyUriMatcher authority")
+        private val matcher = MyUriMatcher(authority)
         fun getFragmentLink(uri: Uri): FragmentDeepLinks? {
             val matchedUri = matcher.match(uri)
             Log.d("FragmentDeepLinks", "matchedUri: $matchedUri")
@@ -85,9 +128,7 @@ sealed class FragmentDeepLinks {
         }
     }
 
-    private class MyUriMatcher() : UriMatcher(NO_MATCH) {
-        private val authority = "taskmgr.komponent-m.ru"
-
+    private class MyUriMatcher(private val authority: String) : UriMatcher(NO_MATCH) {
         init {
             addURI(
                 authority,
@@ -107,7 +148,3 @@ sealed class FragmentDeepLinks {
         }
     }
 }
-
-
-
-

@@ -5,9 +5,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import space.active.taskmanager1c.coreutils.logger.Logger
+import space.active.taskmanager1c.coreutils.toShortDate
+import space.active.taskmanager1c.domain.models.TaskTitleViewState
 import space.active.taskmanager1c.domain.repository.SettingsRepository
+import space.active.taskmanager1c.domain.repository.TasksRepository
 
 private const val TAG = "BaseViewModel"
 
@@ -34,6 +39,8 @@ abstract class BaseViewModel(
             }
         }
     }
+
+
 
     private fun clearsViewModelScope() {
         viewModelScope.cancel()

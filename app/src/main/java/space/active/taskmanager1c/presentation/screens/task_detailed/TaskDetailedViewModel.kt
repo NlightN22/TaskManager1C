@@ -30,6 +30,7 @@ class TaskDetailedViewModel @Inject constructor(
     private val validate: Validate,
     private val exceptionHandler: ExceptionHandler,
     private val whoUserInTask: DefineUserInTask,
+    private val getTaskUnreadStatus: GetTaskUnreadStatus,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel(settings, logger) {
 
@@ -46,12 +47,18 @@ class TaskDetailedViewModel @Inject constructor(
         MutableSharedFlow<Pair<TaskChangesEvents.Status, TaskStatusDialog.DialogParams>>()
     val statusAlertEvent = _statusAlertEvent.asSharedFlow()
 
+    private val _taskUnreadStatus = MutableStateFlow<Boolean>(false)
+    val taskUnreadStatus = _taskUnreadStatus.asStateFlow()
+
     private val _enabledFields: MutableStateFlow<EditableFields> =
         MutableStateFlow(EditableFields())
     val enabledFields = _enabledFields.asStateFlow()
 
     private val _showDialogEvent = MutableSharedFlow<TaskDetailedDialogs>()
     val showDialogEvent = _showDialogEvent.asSharedFlow()
+
+    private val _openClickableTask = MutableSharedFlow<ClickableTask>()
+    val openClickableTask = _openClickableTask.asSharedFlow()
 
     private val _saveNewTaskEvent = MutableSharedFlow<SaveEvents>()
     val saveNewTaskEvent = _saveNewTaskEvent.asSharedFlow()
@@ -128,6 +135,19 @@ class TaskDetailedViewModel @Inject constructor(
 
     fun setTaskFlow(taskId: String) {
         logger.log(TAG, "_inputTaskId $taskId")
+        setInputTask(taskId)
+        setTaskUnreadStatus(taskId)
+    }
+
+    private fun setTaskUnreadStatus(taskId: String) {
+        viewModelScope.launch {
+            getTaskUnreadStatus(taskId).collect{
+                _taskUnreadStatus.value = it
+            }
+        }
+    }
+
+    private fun setInputTask(taskId: String) {
         viewModelScope.launch {
             _inputTaskId.emit(taskId)
         }
@@ -303,18 +323,39 @@ class TaskDetailedViewModel @Inject constructor(
     private suspend fun setMainTask(mainTaskId: String) {
         val mainTask = repository.getTask(mainTaskId).first()
         mainTask?.let {
-            _taskState.value = _taskState.value.copy(mainTask = it.name)
-            // todo clickable for open
+            _taskState.value = _taskState.value.copy(mainTask = it.toClickableTask())
         }
     }
 
     private suspend fun setInnerTasks(taskId: String) {
         repository.getInnerTasks(taskId).collectLatest { innerTasks ->
             if (innerTasks.isNotEmpty()) {
-                val innerNames = innerTasks.map { it.name }.joinToString("\n")
-                _taskState.value = _taskState.value.copy(innerTasks = innerNames)
-                // todo clickable for open
+                val clickableInners = innerTasks.map { it.toClickableTask() }
+                _taskState.value = _taskState.value.copy(innerTasks = clickableInners)
             }
+        }
+    }
+
+    fun clickOnMainTask(text: String?) {
+        if (!text.isNullOrEmpty()) {
+            openEventClickableTask(_taskState.value.mainTask)
+        }
+    }
+
+    fun clickOnInnerTasks(text: String?) {
+        if (!text.isNullOrEmpty()) {
+            if (_taskState.value.innerTasks.size == 1) {
+                openEventClickableTask(_taskState.value.innerTasks.first())
+            } else if (_taskState.value.innerTasks.size > 1) {
+                // todo add task select dialog
+            }
+        }
+    }
+
+    // todo clickable for open
+    private fun openEventClickableTask(clickableTask: ClickableTask) {
+        viewModelScope.launch {
+            _openClickableTask.emit(clickableTask)
         }
     }
 

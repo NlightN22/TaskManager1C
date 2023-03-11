@@ -16,6 +16,8 @@ import space.active.taskmanager1c.coreutils.PendingRequest
 import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.databinding.FragmentAttachmentsBinding
 import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
+import space.active.taskmanager1c.domain.use_case.setState
+import space.active.taskmanager1c.domain.use_case.setText
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.bottom_sheet_dialog.AttachmentBottomDialog
 import space.active.taskmanager1c.presentation.screens.bottom_sheet_dialog.AttachmentDialogListener
@@ -36,9 +38,14 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
         binding = FragmentAttachmentsBinding.bind(view)
         super.onViewCreated(view, savedInstanceState)
 
+        initTitle()
         initRV()
         observers()
         listeners()
+    }
+
+    private fun initTitle() {
+        binding.titleAttachments.setState(false)
     }
 
     private fun initRV() {
@@ -60,6 +67,10 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
     }
 
     private fun observers() {
+        viewModel.taskTitleViewState.collectOnStart {
+            binding.titleAttachments.setText(it)
+        }
+
         viewModel.openFileEvent.collectOnStart {
             openFile(it)
         }
@@ -109,7 +120,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
             return@setOnItemSelectedListener true
         }
 
-        binding.backButton.root.setOnClickListener {
+        binding.titleAttachments.backButton.setOnClickListener {
             onBackClick()
         }
     }
