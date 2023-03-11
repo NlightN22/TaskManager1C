@@ -16,8 +16,9 @@ import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
-import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
-import space.active.taskmanager1c.presentation.utils.TaskStatusDialog
+import space.active.taskmanager1c.presentation.utils.dialogs.DialogItem
+import space.active.taskmanager1c.presentation.utils.dialogs.EditTextDialogStates
+import space.active.taskmanager1c.presentation.utils.dialogs.TaskStatusDialog
 import javax.inject.Inject
 
 private const val TAG = "TaskDetailedVM"
@@ -351,12 +352,15 @@ class TaskDetailedViewModel @Inject constructor(
             if (_taskState.value.innerTasks.size == 1) {
                 openEventClickableTask(_taskState.value.innerTasks.first())
             } else if (_taskState.value.innerTasks.size > 1) {
-                // todo add task select dialog
+                showDialog(InnerTasksDialog(_taskState.value.innerTasks))
             }
         }
     }
 
-    // todo clickable for open
+    fun selectInnerTask(dialogItem: DialogItem) {
+        openEventClickableTask(dialogItem.toClickableTask())
+    }
+
     private fun openEventClickableTask(clickableTask: ClickableTask) {
         viewModelScope.launch {
             _openClickableTask.emit(clickableTask)
@@ -401,6 +405,9 @@ class TaskDetailedViewModel @Inject constructor(
                             return@launch
                         }
                         _showDialogEvent.emit(DatePicker)
+                    }
+                    is InnerTasksDialog -> {
+                        _showDialogEvent.emit(eventType)
                     }
                     is EditTitleDialog -> {
                         if (!_enabledFields.value.title) {

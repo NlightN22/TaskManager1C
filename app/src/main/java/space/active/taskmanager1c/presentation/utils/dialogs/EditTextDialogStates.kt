@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.presentation.utils
+package space.active.taskmanager1c.presentation.utils.dialogs
 
 import android.os.Parcelable
 import androidx.annotation.DimenRes

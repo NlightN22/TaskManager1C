@@ -10,13 +10,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.databinding.FragmentTaskDetailedBinding
-import space.active.taskmanager1c.domain.models.FragmentDeepLinks
+import space.active.taskmanager1c.domain.models.ClickableTask.Companion.toDialogListItems
 import space.active.taskmanager1c.domain.models.SaveEvents
 import space.active.taskmanager1c.domain.models.TaskChangesEvents
 import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.models.UserDomain.Companion.fromDialogItems
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.utils.*
+import space.active.taskmanager1c.presentation.utils.dialogs.*
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
@@ -115,7 +116,8 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                             parentFragmentManager,
                             it,
                             ok = false,
-                            cancel = true
+                            cancel = true,
+                            REQUEST_PERFORMER
                         )
                     }
                 }
@@ -143,6 +145,15 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                 }
                 is DatePicker -> {
                     showDatePicker()
+                }
+                is InnerTasksDialog -> {
+                    SingleChooseDialog.show(
+                        parentFragmentManager,
+                        event.listTasks.toDialogListItems(),
+                        false,
+                        true,
+                        REQUEST_INNER_TASK
+                    )
                 }
                 is EditTitleDialog -> {
                     event.dialogState?.let {
@@ -298,11 +309,24 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     }
 
     private fun setupSingleChooseDialog() {
-        SingleChooseDialog.setupListener(parentFragmentManager, this) {
-            it?.let {
-                viewModel.saveEditChanges(TaskChangesEvents.Performer(UserDomain.fromDialogItem(it)))
+        val listener: CustomSingleDialogListener = { requestKey, item ->
+            when (requestKey) {
+                REQUEST_PERFORMER -> {
+                    item?.let {
+                        viewModel.saveEditChanges(TaskChangesEvents.Performer(UserDomain.fromDialogItem(it)))
+                    }
+
+                }
+                REQUEST_INNER_TASK -> {
+                    item?.let {
+                        viewModel.selectInnerTask(it)
+                    }
+                }
             }
         }
+
+        SingleChooseDialog.setupListener(parentFragmentManager, this, REQUEST_PERFORMER,listener)
+        SingleChooseDialog.setupListener(parentFragmentManager, this, REQUEST_INNER_TASK,listener)
     }
 
     private fun setupEditTextListener() {
@@ -323,6 +347,8 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
     companion object {
         private const val REQUEST_COPERFOMREFRS = "REQUEST_COPERFOMREFRS"
         private const val REQUEST_OBSERVERS = "REQUEST_OBSERVERS"
+        private const val REQUEST_PERFORMER = "REQUEST_PERFORMER"
+        private const val REQUEST_INNER_TASK = "REQUEST_INNER_TASK"
         private const val REQUEST_TITLE = "REQUEST_TITLE"
         private const val REQUEST_DESCRIPTION = "REQUEST_DESCRIPTION"
     }

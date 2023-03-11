@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.presentation.utils
+package space.active.taskmanager1c.presentation.utils.dialogs
 
 
 import android.content.res.Resources.NotFoundException

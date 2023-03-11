@@ -23,8 +23,8 @@ import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.DialogBottomSheetBinding
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.presentation.utils.MultiChooseDialog
 import space.active.taskmanager1c.presentation.utils.Toasts
+import space.active.taskmanager1c.presentation.utils.dialogs.MultiChooseDialog
 import javax.inject.Inject
 
 

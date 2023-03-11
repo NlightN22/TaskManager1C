@@ -3,7 +3,7 @@ package space.active.taskmanager1c.domain.models
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.CoPerformersInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.ObserversInTask
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.UserInput
-import space.active.taskmanager1c.presentation.utils.DialogItem
+import space.active.taskmanager1c.presentation.utils.dialogs.DialogItem
 
 data class UserDomain(
     val id: String,

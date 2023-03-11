@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.presentation.utils
+package space.active.taskmanager1c.presentation.utils.dialogs
 
 
 import android.os.Bundle
@@ -16,7 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.DialogSingleMultiChooseBinding
 import space.active.taskmanager1c.databinding.ListItemBinding
-import space.active.taskmanager1c.presentation.utils.DialogItem.Companion.toggleDialogItem
+import space.active.taskmanager1c.presentation.utils.dialogs.DialogItem
+import space.active.taskmanager1c.presentation.utils.dialogs.DialogItem.Companion.toggleDialogItem
 
 typealias CustomInputDialogListener = (requestKey: String, listItems: java.util.ArrayList<DialogItem>?) -> Unit
 

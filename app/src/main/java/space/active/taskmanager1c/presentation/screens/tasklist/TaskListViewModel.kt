@@ -14,7 +14,7 @@ import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.*
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
-import space.active.taskmanager1c.presentation.utils.TaskStatusDialog
+import space.active.taskmanager1c.presentation.utils.dialogs.TaskStatusDialog
 import javax.inject.Inject
 
 private const val TAG = "TaskListViewModel"

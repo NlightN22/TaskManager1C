@@ -3,8 +3,8 @@ package space.active.taskmanager1c.presentation.screens.task_detailed
 import space.active.taskmanager1c.domain.models.ClickableTask
 import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskTitleViewState
-import space.active.taskmanager1c.presentation.utils.DialogItem
-import space.active.taskmanager1c.presentation.utils.EditTextDialogStates
+import space.active.taskmanager1c.presentation.utils.dialogs.DialogItem
+import space.active.taskmanager1c.presentation.utils.dialogs.EditTextDialogStates
 
 data class TaskState(
     val id: String = "",
@@ -31,7 +31,7 @@ data class TaskState(
     )
 
     fun List<ClickableTask>.toText(): String {
-        return this.map{ it.name }.joinToString("\n")
+        return this.map { it.name }.joinToString("\n")
     }
 }
 
@@ -55,4 +55,8 @@ data class EditTitleDialog(
 
 data class EditDescriptionDialog(
     val dialogState: EditTextDialogStates?,
+) : TaskDetailedDialogs()
+
+data class InnerTasksDialog(
+    val listTasks: List<ClickableTask>
 ) : TaskDetailedDialogs()

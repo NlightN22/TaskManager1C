@@ -1,4 +1,4 @@
-package space.active.taskmanager1c.presentation.utils
+package space.active.taskmanager1c.presentation.utils.dialogs
 
 
 import android.os.Bundle
@@ -17,15 +17,23 @@ import space.active.taskmanager1c.R
 import space.active.taskmanager1c.databinding.DialogSingleMultiChooseBinding
 import space.active.taskmanager1c.databinding.ListItemBinding
 
+
+typealias CustomSingleDialogListener = (requestKey: String, item: DialogItem?) -> Unit
+
 class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
     private lateinit var binding: DialogSingleMultiChooseBinding
+
+    lateinit var requestKey: String
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = DialogSingleMultiChooseBinding.bind(view)
 
-        val items: List<DialogItem> = arguments?.getParcelableArrayList<DialogItem>(BUNDLE_TAG) ?: listOf<DialogItem>()
+        requestKey = requireArguments().getString(SingleChooseDialog.ARG_REQUEST_KEY)!!
+
+        val items: List<DialogItem> =
+            arguments?.getParcelableArrayList<DialogItem>(BUNDLE_TAG) ?: listOf<DialogItem>()
         val ok: Boolean = arguments?.getBoolean(OK_TAG) ?: true
         val cancel: Boolean = arguments?.getBoolean(CANCEL_TAG) ?: true
 
@@ -50,7 +58,7 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
         binding.searchDialog.addTextChangedListener { editable ->
             editable?.let { textChar ->
-                val filteredList = items.filter { it.text.contains(textChar,true) }
+                val filteredList = items.filter { it.text.contains(textChar, true) }
                 itemsAdapter.listItems = filteredList
             }
         }
@@ -58,8 +66,10 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
 
     private fun emitResult(item: DialogItem) {
         parentFragmentManager.setFragmentResult(
-            REQUEST_KEY, bundleOf(
-                RESPONSE_TAG to item))
+            requestKey, bundleOf(
+                RESPONSE_TAG to item
+            )
+        )
     }
 
     private fun close() {
@@ -109,6 +119,7 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
     companion object {
         private const val OK_TAG = "OK"
         private const val CANCEL_TAG = "CANCEL"
+        private const val ARG_REQUEST_KEY = "ARG_REQUEST_KEY"
 
         @JvmStatic
         private val TAG = SingleChooseDialog::class.java.simpleName
@@ -119,31 +130,33 @@ class SingleChooseDialog : DialogFragment(R.layout.dialog_single_multi_choose) {
         @JvmStatic
         private val RESPONSE_TAG = "RESPONSE"
 
-        @JvmStatic
-        val REQUEST_KEY = "$TAG:defaultRequestKey"
-
         fun show(
             manager: FragmentManager,
             listItems: List<DialogItem>,
             ok: Boolean = true,
-            cancel: Boolean = true
+            cancel: Boolean = true,
+            requestKey: String
         ) {
             val dialogFragment = SingleChooseDialog()
             dialogFragment.arguments =
-                bundleOf(BUNDLE_TAG to listItems, OK_TAG to ok, CANCEL_TAG to cancel)
+                bundleOf(
+                    BUNDLE_TAG to listItems, OK_TAG to ok, CANCEL_TAG to cancel,
+                    ARG_REQUEST_KEY to requestKey
+                )
             dialogFragment.show(manager, TAG)
         }
 
         fun setupListener(
             manager: FragmentManager,
             lifecycleOwner: LifecycleOwner,
-            listener: (DialogItem?) -> Unit
+            requestKey: String,
+            listener: CustomSingleDialogListener
         ) {
             manager.setFragmentResultListener(
-                REQUEST_KEY,
+                requestKey,
                 lifecycleOwner
             ) { _, result ->
-                listener.invoke(result.getParcelable(RESPONSE_TAG))
+                listener.invoke(requestKey, result.getParcelable(RESPONSE_TAG))
             }
         }
     }
