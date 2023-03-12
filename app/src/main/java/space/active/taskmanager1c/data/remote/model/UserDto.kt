@@ -12,4 +12,9 @@ data class UserDto(
             userName = name?: ""
         )
     }
+    fun toAuthUserDto(): AuthUserDto = AuthUserDto(
+        tokenId = "",
+        userId = this.id,
+        userName = this.name ?: ""
+    )
 }

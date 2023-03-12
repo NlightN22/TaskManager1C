@@ -11,14 +11,28 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('D:\\Programming\\keystore\\keystore.jks')
+            storePassword 'testTaskmanger22'
+            keyAlias 'key0'
+            keyPassword 'testTaskmanger22'
+        }
+        release {
+            storeFile file('D:\\Programming\\keystore\\keystore.jks')
+            storePassword 'testTaskmanger22'
+            keyAlias 'taskmanager1c'
+            keyPassword '!releaseTaskmanger23'
+        }
+    }
     compileSdk 33
 
     defaultConfig {
         applicationId "space.active.taskmanager1c"
         minSdk 29
         targetSdk 33
-        versionCode 8
-        versionName "0.8-alpha"
+        versionCode 9
+        versionName "0.9-beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -28,12 +42,13 @@ android {
                 arg("room.schemaLocation", "$projectDir/schemas")
             }
         }
+        signingConfig signingConfigs.release
     }
-
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

@@ -8,16 +8,15 @@ import space.active.taskmanager1c.coreutils.SuccessRequest
 import space.active.taskmanager1c.data.remote.TaskApi
 import space.active.taskmanager1c.data.remote.model.AuthBasicDto
 import space.active.taskmanager1c.data.remote.model.AuthUserDto
-import space.active.taskmanager1c.data.remote.model.AuthUserDto.Companion.toUserDomain
 import space.active.taskmanager1c.domain.repository.Authorization
 import javax.inject.Inject
 
 class AuthorizationImpl @Inject constructor(
     private val taskApi: TaskApi
-): Authorization {
+) : Authorization {
 
     override fun auth(username: String, password: String): Flow<Request<AuthUserDto>> = flow {
-            emit(PendingRequest())
-            emit(SuccessRequest(taskApi.authUser(AuthBasicDto(username,password)).toUserDomain()))
+        emit(PendingRequest())
+        emit(SuccessRequest(taskApi.authUser(AuthBasicDto(username, password)).toAuthUserDto()))
     }
 }

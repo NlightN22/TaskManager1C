@@ -14,8 +14,18 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+#-dontobfuscate # not obfuscate ALL
+#-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
+
+-keep class space.active.taskmanager1c.data.remote.* { *; } # not obfuscate some classes
+-keep class space.active.taskmanager1c.data.remote.retrofit.* { *; } # not obfuscate some classes
+-keep class space.active.taskmanager1c.data.remote.model.* { *; } # not obfuscate some classes
+-keep class space.active.taskmanager1c.data.remote.model.files.* { *; } # not obfuscate some classes
+-keep class space.active.taskmanager1c.data.remote.model.messages_dto.* { *; } # not obfuscate some classes
+-keep class space.active.taskmanager1c.data.remote.model.reading_times.* { *; } # not obfuscate some classes
+-keep class space.active.taskmanager1c.data.remote.model.temp_update.* { *; } # not obfuscate some classes

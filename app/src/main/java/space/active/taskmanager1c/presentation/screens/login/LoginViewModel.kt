@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.coreutils.logger.Logger
@@ -15,7 +16,6 @@ import space.active.taskmanager1c.domain.models.UserDomain
 import space.active.taskmanager1c.domain.repository.Authorization
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.domain.use_case.LoadFromAsset
 import space.active.taskmanager1c.domain.use_case.ValidateCredentials
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import javax.inject.Inject
@@ -25,9 +25,9 @@ private const val TAG = "LoginViewModel"
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     settings: SettingsRepository,
-    private val loadFromAsset: LoadFromAsset,
     private val authorization: Authorization,
     private val exceptionHandler: ExceptionHandler,
+    private val retrofit: Retrofit,
     logger: Logger
 ) : BaseViewModel(settings, logger) {
 
@@ -42,18 +42,8 @@ class LoginViewModel @Inject constructor(
     init {
         logger.log(TAG, "start LoginViewModel")
         viewModelScope.launch {
-            val serverAddress = try {
-                settings.getServerAddress()
-            } catch (e: EmptyObject) {
-                null
-            }
-
             // read from settings
             val (name, pass) = readFromSettings()
-
-            if (serverAddress == null) {
-                tryToLoadServerAddress()
-            }
 
             if (name == null || pass == null) {
                 // if null load base URL from asset
@@ -83,15 +73,6 @@ class LoginViewModel @Inject constructor(
         _viewState.value = _viewState.value.copy(username = username, password = password)
     }
 
-    private suspend fun tryToLoadServerAddress() {
-        val addressAsset: String? = loadFromAsset.invoke()
-        addressAsset?.let {
-            if (validate.server(it)) {
-                settings.saveServerAddress(it)
-            }
-        }
-    }
-
     fun auth(
         name: String,
         pass: String,
@@ -102,16 +83,16 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             updateUI(name, pass)
             try {
-                settings.getServerAddress()?.let {
-                    if (validate.server(it)) {
-                        tryToAuth(name, pass, it)
-                    } else {
-                        _authState.value = OnWait()
-                        exceptionHandler(NotCorrectServerAddress)
-                    }
+                val serverAddress = retrofit.baseUrl().toString()
+                if (validate.server(serverAddress)) {
+                    tryToAuth(name, pass, serverAddress)
+                } else {
+                    _authState.value = OnWait()
+                    exceptionHandler(NotCorrectServerAddress)
                 }
             } catch (e: EmptyObject) {
                 exceptionHandler(e)
+                _authState.value = OnWait()
             }
         }
     }

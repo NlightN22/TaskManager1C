@@ -35,8 +35,6 @@ class SettingsViewModel @Inject constructor(
     private val _visibleState = MutableStateFlow(SettingsVisibleState())
     val visibleState = _visibleState.asStateFlow()
 
-    val validateCredentials = ValidateCredentials()
-
     private val _saveEvent = MutableSharedFlow<Boolean>()
     val saveEvent = _saveEvent.asSharedFlow()
 
