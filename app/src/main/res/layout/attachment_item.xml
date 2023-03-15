@@ -12,113 +12,133 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/imageViewItem"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/fileName"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintDimensionRatio="1:1"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_gravity="center"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:src="@drawable/ic_baseline_cloud_24"
+            app:layout_constraintBottom_toTopOf="@id/fileName"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:scaleType="fitCenter"
-            tools:visibility="visible"
-            />
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/fileName"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
-            android:gravity="center_horizontal"
-            tools:text="image_1231asdfasdfasdfasdfasdf2412.jpg"
             android:ellipsize="end"
+            android:fontFamily="@font/poppins"
+            android:gravity="center_horizontal"
             android:maxLines="2"
             android:textSize="14sp"
-            android:fontFamily="@font/poppins"
-            />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="image_1231asdfasdfasdfasdfasdf2412.jpg" />
 
         <androidx.constraintlayout.widget.Group
             android:id="@+id/groupNotUploaded"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             app:constraint_referenced_ids="
             imageViewNotUploadedRepeat,
             textViewNotUploadedRepeat
             "
-            android:visibility="gone"
-            tools:visibility="visible"
-            />
+            tools:visibility="visible" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/horizontalUploadRepeat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.4"/>
+            app:layout_constraintGuide_percent="0.4" />
 
         <ImageView
             android:id="@+id/imageViewNotUploadedRepeat"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/horizontalUploadRepeat"
-            app:layout_constraintWidth_percent="0.3"
-            app:layout_constraintHeight_percent="0.3"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/ic_baseline_replay_24"
             android:layout_gravity="center"
-            />
+            android:src="@drawable/ic_baseline_replay_24"
+            app:layout_constraintBottom_toTopOf="@+id/horizontalUploadRepeat"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.3" />
 
         <TextView
             android:id="@+id/textViewNotUploadedRepeat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewNotUploadedRepeat"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
-            android:textSize="12sp"
             android:gravity="center"
             android:text="@string/attach_error_not_uploaded"
-            />
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageViewNotUploadedRepeat" />
 
         <ImageView
             android:id="@+id/attachmentOptions"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintWidth_percent="0.25"
-            app:layout_constraintHeight_percent="0.25"
             android:layout_alignParentTop="true"
+            android:src="@drawable/ic_baseline_more_vert_24"
+            app:layout_constraintHeight_percent="0.25"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/ic_baseline_more_vert_24"
-            />
+            app:layout_constraintWidth_percent="0.25" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupLoadingProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="
+            progressAttach,
+            progressTV
+            "
+            tools:visibility="visible" />
 
         <ProgressBar
             android:id="@+id/progressAttach"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/fileName"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_gravity="center"
-            android:indeterminateTint="@color/button_not_pressed"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:indeterminateOnly="false"
+            android:progress="60"
+            android:progressDrawable="@drawable/circular_progress_bar"
+            android:rotation="-90"
+            app:layout_constraintBottom_toTopOf="@id/fileName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible"
-            />
+            tools:progress="60" />
+
+        <TextView
+            android:id="@+id/progressTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintBottom_toBottomOf="@+id/progressAttach"
+            app:layout_constraintEnd_toEndOf="@+id/progressAttach"
+            app:layout_constraintStart_toStartOf="@+id/progressAttach"
+            app:layout_constraintTop_toTopOf="@+id/progressAttach"
+            android:textColor="@color/hint_text"
+            tools:visibility="visible"
+            tools:text="60%" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

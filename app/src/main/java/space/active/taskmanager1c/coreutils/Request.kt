@@ -11,8 +11,11 @@ sealed class Request<T>
  */
 open class PendingRequest<T> : Request<T>()
 
-class SaveRequest<T> (
-    val timer: Int
+/**
+ * Operation is in progress and show progress
+ */
+class ProgressRequest<T> (
+    val progress: Int
         ): PendingRequest<T>()
 
 /**

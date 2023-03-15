@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.presentation.screens.mainactivity
 
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         listeners()
         observers()
     }
+    // todo fix open deep link in new app
 
     override fun onStart() {
         super.onStart()
@@ -59,7 +61,8 @@ class MainActivity : AppCompatActivity() {
         FLAG_ACTIVITY_SINGLE_TOP (0x20000000) - Если активность уже запущена в вершине стека, то не создавайте новый экземпляр активности, а вместо этого передайте ей новый Intent, содержащий последние изменения.
         FLAG_ACTIVITY_NO_ANIMATION (0x4000000) - Отключение стандартной анимации для этой операции старта активности.
          */
-        if (intent.flags == 0x13000000 && intent.action == Intent.ACTION_VIEW) {
+        if ((intent.flags == 0x13000000
+                    || intent.flags == FLAG_ACTIVITY_NEW_TASK) && intent.action == Intent.ACTION_VIEW) {
             handleDeepLink(navController, intent)
             intent.data = null
         }

@@ -15,8 +15,8 @@ android {
         debug {
             storeFile file('D:\\Programming\\keystore\\keystore.jks')
             storePassword 'testTaskmanger22'
-            keyAlias 'key0'
-            keyPassword 'testTaskmanger22'
+            keyAlias 'taskmanager1c'
+            keyPassword '!releaseTaskmanger23'
         }
         release {
             storeFile file('D:\\Programming\\keystore\\keystore.jks')

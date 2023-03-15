@@ -1,9 +1,13 @@
 package space.active.taskmanager1c.presentation.screens.task_attachments
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -43,6 +47,26 @@ class AttachmentsAdapter(
 
     inner class AttachmentsViewHolder(val itemBind: AttachmentItemBinding) :
         RecyclerView.ViewHolder(itemBind.root) {
+        fun renderLoadingState(state: Boolean) {
+            if (state) {
+                itemBind.groupLoadingProgress.isVisible = true
+                itemBind.progressAttach.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        itemBind.root.context,
+                        R.anim.clockwise_rotation_infinite
+                    )
+                )
+            } else {
+                itemBind.groupLoadingProgress.isVisible = false
+                itemBind.progressAttach.clearAnimation()
+            }
+        }
+
+        fun renderLoadingProgress(progress: Int) {
+            Log.d("AttachmentsAdapter", "progress ${progress}")
+            itemBind.progressTV.text = progress.toString()
+            itemBind.progressAttach.progress = progress
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AttachmentsViewHolder {
@@ -53,16 +77,31 @@ class AttachmentsAdapter(
         return AttachmentsViewHolder(binding)
     }
 
+    override fun onBindViewHolder(
+        holder: AttachmentsViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isNotEmpty() && payloads[0] is AttachmentPayloads) {
+            val attachmentPayloads = payloads[0] as AttachmentPayloads
+            val item = currentList[position]
+            if (attachmentPayloads.loadingChange){
+                holder.renderLoadingState(item.loading)
+            }
+            if (attachmentPayloads.progressChange) {
+                holder.renderLoadingProgress(item.progress)
+            }
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
     override fun onBindViewHolder(holder: AttachmentsViewHolder, position: Int) {
         val item = currentList[position]
         holder.itemView.tag = item
         holder.itemBind.apply {
-            progressAttach.isVisible = item.loading
-            imageViewItem.visibility = if (item.loading) {
-                View.INVISIBLE
-            } else {
-                View.VISIBLE
-            }
+            Log.d("AttachmentsAdapter", "item ${item}")
+            if (!item.loading) groupLoadingProgress.isVisible = false
             imageViewItem.cachedState(item.cached, item, item.notUploaded)
             groupNotUploaded.isVisible = item.notUploaded && !item.loading
             fileName.text = item.filename
@@ -109,6 +148,15 @@ class AttachmentsAdapter(
             newItem: CachedFile
         ): Boolean {
             return newItem == oldItem
+        }
+
+        override fun getChangePayload(oldItem: CachedFile, newItem: CachedFile): Any? {
+            val loadingChange = newItem.loading && oldItem.loading != newItem.loading
+            val progressChange = newItem.progress > 0 && oldItem.progress != newItem.progress
+            return if (loadingChange || progressChange) AttachmentPayloads(
+                loadingChange,
+                progressChange
+            ) else null
         }
     }
 }

@@ -110,8 +110,9 @@ class CachedFilesRepositoryImpl @Inject constructor(
         } else {
 //            logger.log(TAG, "loadingFiles: ${loadingFiles.joinToString("\n")}")
             outputList.map { output ->
-                if (loadingList.map { it.id }.contains(output.id)) {
-                    output.copy(loading = true)
+                val loadingItem = loadingList.find { it.id == output.id }
+                if (loadingItem != null) {
+                    output.copy(loading = true, progress = loadingItem!!.progress)
                 } else {
                     output
                 }
@@ -125,24 +126,38 @@ class CachedFilesRepositoryImpl @Inject constructor(
         cachePathName: String
     ): Flow<Request<CachedFile>> = flow {
         emit(PendingRequest())
+        if (cachedFile.isCached() || cachedFile.isLoading()) throw DownloadException(cachedFile)
         val fileId = cachedFile.id
         val fileName = cachedFile.filename
-        val downloadQuery = "auth: ${auth.toBasic()} taskId: $cachePathName fileId: $fileId"
-        logger.log(TAG, "downloadQuery $downloadQuery")
+        val downloadQuery = "downloadQuery taskId: $cachePathName fileId: $fileId"
+        logger.log(TAG, downloadQuery)
         wrapLoadingException(cachedFile) {
             wrapRetrofitExceptions(query = downloadQuery) {
                 val response = retrofitApi.downloadFile(auth.toBasic(), cachePathName, fileId)
                 if (response.isSuccessful) {
                     val inputStream = response.body()?.byteStream()
                     inputStream?.let {
+                        val contentLength = response.body()!!.contentLength()
                         val finalName = fileRepository.saveDownloadedFile(
                             inputStream,
                             cachePathName,
                             fileId,
-                            fileName
+                            fileName,
+                            contentLength
                         )
-                        cachedFile.setLoadingFile(false)
-                        emit(SuccessRequest(cachedFile.setCached(finalName)))
+                        finalName.collect { saveRequest ->
+                            when (saveRequest) {
+                                is ProgressRequest -> {
+                                    cachedFile.setLoadingProgress(saveRequest.progress)
+                                }
+                                is ErrorRequest -> {}
+                                is PendingRequest -> {}
+                                is SuccessRequest -> {
+                                    logger.log(TAG, "save completed")
+                                    emit(SuccessRequest(cachedFile.setCached(saveRequest.data)))
+                                }
+                            }
+                        }
                     }
                 } else {
                     throw HttpException(response)
@@ -166,9 +181,9 @@ class CachedFilesRepositoryImpl @Inject constructor(
         cacheDirPath: String
     ): Flow<Request<CachedFile>> = flow {
         emit(PendingRequest())
+        if (cachedFile.isLoading()) throw UploadException(cachedFile)
         val fileName = cachedFile.filename
         val inputFile = cachedFile.toFile()
-        // todo get progress by flow
         wrapLoadingException(cachedFile) {
             val response = multiPartUploadFileToServer(auth, fileName, inputFile, cacheDirPath)
             logger.log(TAG, "uploadFileToServer response: $response")
@@ -224,11 +239,30 @@ class CachedFilesRepositoryImpl @Inject constructor(
         }
     }
 
+    private fun CachedFile.isLoading(): Boolean = _loadingFiles.value.any { it.id == this.id }
+
+    private fun CachedFile.isCached(): Boolean = _uploadedFiles.value.any { it.fileID == this.id}
+
+    private fun CachedFile.setLoadingProgress(progress: Int) {
+        _loadingFiles.value = _loadingFiles.value.map {
+            if (it.id == this.id && it.progress != progress) {
+                it.copy(progress = progress)
+            } else {
+                it
+            }
+        }
+    }
+
     private fun CachedFile.setLoadingFile(state: Boolean) {
         if (state) {
             _loadingFiles.value = _loadingFiles.value.plus(this)
         } else {
-            _loadingFiles.value = _loadingFiles.value.minus(this)
+            val loadingItem = _loadingFiles.value.find { it.id == this.id }
+            loadingItem?.let {
+                _loadingFiles.value = _loadingFiles.value.minus(it)
+            } ?: run {
+                logger.log(TAG, "Can't find loading item with id: ${this.id}")
+            }
         }
     }
 
@@ -342,5 +376,7 @@ class CachedFilesRepositoryImpl @Inject constructor(
 
     companion object {
         private const val UPDATE_FROM_SERVER_DELAY = 2000L
+        data class DownloadException(val cachedFile: CachedFile): Throwable(message = "File ${cachedFile.filename} is already downloaded or in progress")
+        data class UploadException(val cachedFile: CachedFile): Throwable(message = "File ${cachedFile.filename} is already uploaded or in progress")
     }
 }

@@ -5,8 +5,13 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import space.active.taskmanager1c.coreutils.FileDownloadException
+import space.active.taskmanager1c.coreutils.ProgressRequest
+import space.active.taskmanager1c.coreutils.Request
+import space.active.taskmanager1c.coreutils.SuccessRequest
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -31,9 +36,14 @@ class FileRepository(
     }
 
     // save downloaded file
-    suspend fun saveDownloadedFile(inputStream: InputStream, cachedPathDir: String, fileId: String, fileName: String): File {
-        val newDownloadedFile = File(getCurrentCacheDir(cachedPathDir), createCachedFilename(fileId, fileName))
-        return saveFile(inputStream, newDownloadedFile)
+    fun saveDownloadedFile(
+        inputStream: InputStream, cachedPathDir: String,
+        fileId: String, fileName: String,
+        contentLength: Long
+    ): Flow<Request<File>> {
+        val newDownloadedFile =
+            File(getCurrentCacheDir(cachedPathDir), createCachedFilename(fileId, fileName))
+        return saveFileProgress(inputStream, newDownloadedFile, contentLength)
     }
 
     suspend fun saveFile(uri: Uri, cacheDirPath: String): File {
@@ -65,6 +75,40 @@ class FileRepository(
             }
         }
         return file
+    }
+
+    private fun saveFileProgress(inputStream: InputStream, file: File, contentLength: Long) = flow<Request<File>> {
+        wrapOutputStreamExceptions {
+            emit(ProgressRequest(0))
+            inputStream.use { input ->
+                val downloadPartFile =
+                    setDownloadPartName(finalName = file)
+                downloadPartFile.outputStream().use { output ->
+                    val buffer = ByteArray(8 * 1024)
+                    var bytesRead = input.read(buffer)
+                    var bytesCopied = 0L
+                    var currentPercent = -1
+                    while (bytesRead != -1) {
+                        output.write(buffer, 0, bytesRead)
+                        bytesCopied += bytesRead
+                        val percent =
+                            (bytesCopied.toFloat() / contentLength.toFloat() * 100).toInt()
+                        if (currentPercent != percent) {
+                            emit(ProgressRequest(percent))
+                        }
+                        currentPercent = percent
+                        bytesRead = inputStream.read(buffer)
+                    }
+                }
+                val finalRename = downloadPartFile.renameTo(file)
+                if (!finalRename) {
+                    deleteCacheAfterError(downloadPartFile)
+                    deleteCacheAfterError(file)
+                    throw IOException()
+                }
+            }
+        }
+        emit(SuccessRequest(file))
     }
 
     /**

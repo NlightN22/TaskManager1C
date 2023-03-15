@@ -70,7 +70,7 @@ class AttachmentsViewModel @Inject constructor(
 
     fun clickItem(cachedFile: CachedFile) {
         logger.log(TAG, "$cachedFile clicked")
-        if (cachedFile.loading) return
+        if (cachedFile.isLoading()) return
         if (cachedFile.cached) {
             // open in default app
             logger.log(TAG, "cached item clicked")
@@ -88,7 +88,7 @@ class AttachmentsViewModel @Inject constructor(
     }
 
     fun uploadFileToServer(cachedFile: CachedFile) {
-        if (cachedFile.loading) return
+        if (cachedFile.isLoading()) return
         viewModelScope.launch {
             cachedFilesRepository.uploadFileToServer(
                 getCredentials().toAuthBasicDto(),
@@ -131,14 +131,14 @@ class AttachmentsViewModel @Inject constructor(
     }
 
     fun openCachedFile(cachedFile: CachedFile) {
-        if (cachedFile.loading) return
+        if (cachedFile.isLoading()) return
         viewModelScope.launch {
             _openFileEvent.emit(cachedFile)
         }
     }
 
     fun deleteCachedFile(cachedFile: CachedFile) {
-        if (cachedFile.loading) return
+        if (cachedFile.isLoading()) return
         viewModelScope.launch {
             cachedFilesRepository.deleteCachedFile(cachedFile).collect {
                 if (!it) showErrorToast(UiText.Resource(R.string.attachments_delete_error))
@@ -147,7 +147,7 @@ class AttachmentsViewModel @Inject constructor(
     }
 
     fun downloadFileFromServer(cachedFile: CachedFile) {
-        if (cachedFile.loading) return
+        if (cachedFile.isLoading() || cachedFile.isDownloaded()) return
         viewModelScope.launch {
             cachedFilesRepository.downloadFromServerToCache(
                 getCredentials().toAuthBasicDto(),
@@ -157,8 +157,10 @@ class AttachmentsViewModel @Inject constructor(
                 .catch { exceptionHandler(it) }
                 .collect { request ->
                     when (request) {
-                        is PendingRequest -> {
+                        is ProgressRequest -> {
+
                         }
+                        is PendingRequest -> {}
                         is ErrorRequest -> {
                             showErrorToast(
                                 UiText.Resource(
@@ -204,6 +206,16 @@ class AttachmentsViewModel @Inject constructor(
                 return null
             }
         }
+    }
+
+    private fun CachedFile.isLoading(): Boolean {
+        val list = _listItems.value
+        return list is SuccessRequest && list.data.find { it.id == this.id }?.loading ?: true
+    }
+
+    private fun CachedFile.isDownloaded(): Boolean {
+        val list = _listItems.value
+        return list is SuccessRequest && list.data.find { it.id == this.id }?.cached ?: true
     }
 
 }
