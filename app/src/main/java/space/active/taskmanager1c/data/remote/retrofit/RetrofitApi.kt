@@ -1,6 +1,7 @@
 package space.active.taskmanager1c.data.remote.retrofit
 
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -144,6 +145,6 @@ interface RetrofitApi {
     suspend fun uploadFile(
         @Header("Authorization") auth: String,
         @Path("taskId") taskId: String,
-        @Body multipartBody: MultipartBody
+        @Body multipartBody: RequestBody
     ): FileDTO
 }

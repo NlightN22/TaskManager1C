@@ -25,7 +25,6 @@ private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private val viewModel by viewModels<MainViewModel>()
     private lateinit var binding: ActivityMainBinding
 
     @Inject
@@ -46,7 +45,6 @@ class MainActivity : AppCompatActivity() {
         listeners()
         observers()
     }
-    // todo fix open deep link in new app
 
     override fun onStart() {
         super.onStart()
@@ -83,6 +81,7 @@ class MainActivity : AppCompatActivity() {
     private fun listeners() {
     }
 
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         logger.log(TAG, "onBackPressed")
         val backDestination =
@@ -103,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun handleLoginBack(navController: NavController) {
         val previousState = navController.previousBackStackEntry?.savedStateHandle
         val loginState = previousState?.get<Boolean>(LOGIN_SUCCESSFUL)

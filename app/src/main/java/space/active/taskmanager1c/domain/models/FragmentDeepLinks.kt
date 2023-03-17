@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.EmptyObject
 import space.active.taskmanager1c.di.BASE_URL
+import space.active.taskmanager1c.di.START_PATH
 import space.active.taskmanager1c.presentation.screens.messages.MessagesFragmentArgs
 import space.active.taskmanager1c.presentation.screens.task_attachments.AttachmentsFragmentArgs
 import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedFragmentArgs
@@ -30,15 +31,15 @@ sealed class FragmentDeepLinks {
     ) : FragmentDeepLinks() {
 
         override fun toUri(): Uri {
-            val startPath = super.getSchemeAndHost()
+            val startPath = getFullStartPath()
             val combinedPath = startPath + uriPath + taskId
             return combinedPath.toUri()
         }
 
         companion object {
             const val matcherId = 1
-            const val matcherPath = "taskmgr/hs/taskmgr/tasks/messages"
-            const val uriPath = "taskmgr/hs/taskmgr/tasks/messages?id="
+            const val matcherPath = START_PATH + "tasks/messages"
+            const val uriPath = START_PATH + "tasks/messages?id="
         }
     }
 
@@ -49,7 +50,7 @@ sealed class FragmentDeepLinks {
     ) : FragmentDeepLinks() {
 
         override fun toUri(): Uri {
-            val startPath = getSchemeAndHost()
+            val startPath = getFullStartPath()
             val replacedMatcher = matcherPath.replace("*", taskId)
             val combinedPath = startPath + replacedMatcher
             return combinedPath.toUri()
@@ -57,7 +58,7 @@ sealed class FragmentDeepLinks {
 
         companion object {
             const val matcherId = 2
-            const val matcherPath = "taskmgr/hs/taskmgr/tasks/*/file"
+            const val matcherPath = START_PATH + "tasks/*/file"
         }
     }
 
@@ -68,7 +69,7 @@ sealed class FragmentDeepLinks {
     ) : FragmentDeepLinks() {
 
         override fun toUri(): Uri {
-            val startPath = super.getSchemeAndHost()
+            val startPath = getFullStartPath()
             val replacedMatcher = matcherPath.replace("*", taskId)
             val combinedPath = startPath + replacedMatcher
             return combinedPath.toUri()
@@ -76,7 +77,7 @@ sealed class FragmentDeepLinks {
 
         companion object {
             const val matcherId = 3
-            const val matcherPath = "taskmgr/hs/taskmgr/tasks/*"
+            const val matcherPath = START_PATH + "tasks/*"
         }
     }
 
@@ -89,6 +90,12 @@ sealed class FragmentDeepLinks {
         val scheme = uri.scheme ?: throw EmptyObject("getSchemeAndHost scheme")
         val host = uri.host ?: throw EmptyObject("getSchemeAndHost host")
         return "$scheme://$host/"
+    }
+
+    fun getFullStartPath(): String {
+        val schemeAndHost = getSchemeAndHost()
+        val fullPath = schemeAndHost + START_PATH
+        return fullPath
     }
 
 
@@ -127,7 +134,7 @@ sealed class FragmentDeepLinks {
         }
     }
 
-    private class MyUriMatcher(private val authority: String) : UriMatcher(NO_MATCH) {
+    private class MyUriMatcher(authority: String) : UriMatcher(NO_MATCH) {
         init {
             addURI(
                 authority,

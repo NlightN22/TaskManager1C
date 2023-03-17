@@ -15,9 +15,17 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
- * Used in MyUriMatcher too
+ * Used in FragmentDeepLinks too
+ *  With "/" at the end
  */
-const val BASE_URL = "https://taskmgr.komponent-m.ru/taskmgr/hs/taskmgr/"
+const val BASE_URL = "https://taskmgr.komponent-m.ru/"
+
+/**
+ *  Any string of start path after URL host.
+ *  Example "your_db_name/hs/taskmgr/"
+ *  With "/" at the end
+ */
+const val START_PATH = "taskmgr/hs/taskmgr/"
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -29,7 +37,7 @@ class RetrofitModule {
         .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(MoshiConverterFactory.create(provideMoshi()))
         .client(provideOkHttpClient())
-        .baseUrl(BASE_URL)
+        .baseUrl(BASE_URL + START_PATH)
         .build()
 
     fun provideMoshi(): Moshi =

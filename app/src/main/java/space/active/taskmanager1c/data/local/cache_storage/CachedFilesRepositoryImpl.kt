@@ -5,9 +5,9 @@ import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import okhttp3.Credentials
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -20,18 +20,19 @@ import space.active.taskmanager1c.data.local.cache_storage.models.CachedFile
 import space.active.taskmanager1c.data.remote.model.AuthBasicDto
 import space.active.taskmanager1c.data.remote.model.files.FileDTO
 import space.active.taskmanager1c.data.remote.retrofit.BaseRetrofitSource
+import space.active.taskmanager1c.data.remote.retrofit.RequestBodyProgress
 import space.active.taskmanager1c.data.remote.retrofit.RetrofitApi
 import space.active.taskmanager1c.di.IoDispatcher
 import java.io.File
-import java.nio.charset.StandardCharsets
+import java.io.IOException
 import java.security.InvalidParameterException
 import javax.inject.Inject
 
 private const val TAG = "CachedFilesRepositoryImpl"
 
 class CachedFilesRepositoryImpl @Inject constructor(
-    private val context: Application,
-    private val retrofit: Retrofit,
+    context: Application,
+    retrofit: Retrofit,
     private val logger: Logger,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : CachedFilesRepository, BaseRetrofitSource() {
@@ -182,43 +183,26 @@ class CachedFilesRepositoryImpl @Inject constructor(
     ): Flow<Request<CachedFile>> = flow {
         emit(PendingRequest())
         if (cachedFile.isLoading()) throw UploadException(cachedFile)
-        val fileName = cachedFile.filename
-        val inputFile = cachedFile.toFile()
         wrapLoadingException(cachedFile) {
-            val response = multiPartUploadFileToServer(auth, fileName, inputFile, cacheDirPath)
-            logger.log(TAG, "uploadFileToServer response: $response")
-            if (fileName != response.fileName) {
-                throw ParseBackendException(
-                    "Internal filename not equal server filename",
-                    InvalidParameterException()
-                )
-            }
-            if (response.fileID == null) {
-                throw ParseBackendException(
-                    "Null fileId in response from server",
-                    InvalidParameterException()
-                )
-            }
-            // get name cached file from response
-            val newFileAfterUpload = fileRepository.getFilenameForUploadedFile(
-                response.fileName,
-                response.fileID,
-                cacheDirPath
-            )
-            val newCachedAfterUpload = cachedFile.setCached(newFileAfterUpload)
-            wrapLoadingException(newCachedAfterUpload) {
-                // get and replace id from server onSuccess
-                val renameRes =
-                    inputFile.renameTo(newFileAfterUpload)
-                if (renameRes) {
-                    _uploadedFiles.value = _uploadedFiles.value.plus(response)
-//                        newCachedAfterUpload.setLoadingFile(state = false)
-                    delay(500)
-                    emit(SuccessRequest(newCachedAfterUpload))
-                } else {
-                    throw IllegalStateException()
+            val response = multiPartUploadFileToServerWithProgress(auth, cachedFile, cacheDirPath)
+            response.collect { request ->
+                when (request) {
+                    is ProgressRequest -> {
+                        logger.log(TAG, "uploadFileToServer progress: ${request.progress}")
+                        cachedFile.setLoadingProgress(request.progress)
+                    }
+                    is SuccessRequest -> {
+                        if (validateUploadResponse(request.data, cachedFile)) {
+                            logger.log(TAG, "uploadFileToServer success: ${request.data}")
+                            val uploadedFile =
+                                updateUploadedCachedFile(request.data, cachedFile, cacheDirPath)
+                            emit(SuccessRequest(uploadedFile))
+                        }
+                    }
+                    else -> {}
                 }
             }
+
         }
     }.flowOn(ioDispatcher)
 
@@ -239,9 +223,56 @@ class CachedFilesRepositoryImpl @Inject constructor(
         }
     }
 
+    private fun validateUploadResponse(response: FileDTO, cachedFile: CachedFile): Boolean {
+        if (cachedFile.filename != response.fileName) {
+            throw ParseBackendException(
+                "Internal filename not equal server filename",
+                InvalidParameterException()
+            )
+        }
+        if (response.fileID == null) {
+            throw ParseBackendException(
+                "Null fileId in response from server",
+                InvalidParameterException()
+            )
+        }
+        return true
+    }
+
+    private suspend fun updateUploadedCachedFile(
+        successResponse: FileDTO,
+        uploadedFile: CachedFile,
+        cacheDirPath: String,
+    ): CachedFile {
+        // get name cached file from response
+        val newFileAfterUpload = fileRepository.getFilenameForUploadedFile(
+            successResponse.fileName,
+            successResponse.fileID,
+            cacheDirPath
+        )
+        val newCachedAfterUpload = uploadedFile.setCached(newFileAfterUpload)
+        val inputFile = uploadedFile.toFile()
+        wrapLoadingException(newCachedAfterUpload) {
+            // get and replace id from server onSuccess
+            val renameRes =
+                inputFile.renameTo(newFileAfterUpload)
+            if (renameRes) {
+                successResponse.updateServerListByResponse()
+                delay(500)
+            } else {
+                throw IOException()
+            }
+        }
+        return newCachedAfterUpload
+    }
+
+    private fun FileDTO.updateServerListByResponse() {
+        _uploadedFiles.value = _uploadedFiles.value.plus(this)
+    }
+
     private fun CachedFile.isLoading(): Boolean = _loadingFiles.value.any { it.id == this.id }
 
-    private fun CachedFile.isCached(): Boolean = _uploadedFiles.value.any { it.fileID == this.id}
+    private fun CachedFile.isCached(): Boolean = _uploadedFiles.value.any { it.fileID == this.id }
 
     private fun CachedFile.setLoadingProgress(progress: Int) {
         _loadingFiles.value = _loadingFiles.value.map {
@@ -268,10 +299,11 @@ class CachedFilesRepositoryImpl @Inject constructor(
 
     private suspend fun multiPartUploadFileToServer(
         auth: AuthBasicDto,
-        fileName: String,
-        file: File,
+        cachedFile: CachedFile,
         taskId: String
     ): FileDTO {
+        val fileName = cachedFile.filename
+        val file = cachedFile.toFile()
         val uploadQuery = "auth: ${auth.toBasic()} fileName: $fileName"
         return wrapRetrofitExceptions(uploadQuery) {
             val fileNameBody = fileName.toRequestBody("multipart/form-data".toMediaType())
@@ -288,6 +320,43 @@ class CachedFilesRepositoryImpl @Inject constructor(
         }
     }
 
+    private suspend fun multiPartUploadFileToServerWithProgress(
+        auth: AuthBasicDto,
+        cachedFile: CachedFile,
+        taskId: String
+    ) = callbackFlow<Request<FileDTO>> {
+        trySend(PendingRequest())
+        val fileName = cachedFile.filename
+        val file = cachedFile.toFile()
+        val uploadQuery = "auth: ${auth.toBasic()} fileName: $fileName"
+        wrapRetrofitExceptions(uploadQuery) {
+            val fileNameBody = fileName.toRequestBody("multipart/form-data".toMediaType())
+            val fileNamePart = MultipartBody.Part.createFormData("filename", null, fileNameBody)
+            // prepare file
+            val requestFileBody = file.asRequestBody("multipart/form-data".toMediaType())
+            val filePart =
+                MultipartBody.Part.createFormData("file", null, requestFileBody)
+            val fullMultipartRequest = MultipartBody.Builder()
+                .addPart(fileNamePart)
+                .addPart(filePart)
+                .build()
+            val requestBodyWithProgress =
+                RequestBodyProgress(fullMultipartRequest) { progress ->
+                    // Calculate and emit progress here
+                    trySend(ProgressRequest(progress))
+                }
+            trySend(
+                SuccessRequest(
+                    retrofitApi.uploadFile(
+                        auth.toBasic(),
+                        taskId,
+                        requestBodyWithProgress
+                    )
+                )
+            )
+        }
+        awaitClose { close() }
+    }
 
     override fun getCurrentCachePath(cacheDirPath: String): File =
         fileRepository.getCurrentCacheDir(cacheDirPath)
@@ -371,12 +440,13 @@ class CachedFilesRepositoryImpl @Inject constructor(
         return filesObserver.observe(fileRepository.getCurrentCacheDir(taskIdObserver).path)
     }
 
-    private fun AuthBasicDto.toBasic(): String =
-        Credentials.basic(this.name, this.pass, StandardCharsets.UTF_8)
-
     companion object {
         private const val UPDATE_FROM_SERVER_DELAY = 2000L
-        data class DownloadException(val cachedFile: CachedFile): Throwable(message = "File ${cachedFile.filename} is already downloaded or in progress")
-        data class UploadException(val cachedFile: CachedFile): Throwable(message = "File ${cachedFile.filename} is already uploaded or in progress")
+
+        data class DownloadException(val cachedFile: CachedFile) :
+            Throwable(message = "File ${cachedFile.filename} is already downloaded or in progress")
+
+        data class UploadException(val cachedFile: CachedFile) :
+            Throwable(message = "File ${cachedFile.filename} is already uploaded or in progress")
     }
 }

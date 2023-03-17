@@ -47,8 +47,9 @@ class AttachmentsAdapter(
 
     inner class AttachmentsViewHolder(val itemBind: AttachmentItemBinding) :
         RecyclerView.ViewHolder(itemBind.root) {
-        fun renderLoadingState(state: Boolean) {
-            if (state) {
+
+        fun renderLoadingState(item: CachedFile) {
+            if (item.loading) {
                 itemBind.groupLoadingProgress.isVisible = true
                 itemBind.progressAttach.startAnimation(
                     AnimationUtils.loadAnimation(
@@ -57,13 +58,14 @@ class AttachmentsAdapter(
                     )
                 )
             } else {
+                itemBind.groupNotUploaded.isVisible = item.notUploaded
                 itemBind.groupLoadingProgress.isVisible = false
                 itemBind.progressAttach.clearAnimation()
             }
         }
 
         fun renderLoadingProgress(progress: Int) {
-            Log.d("AttachmentsAdapter", "progress ${progress}")
+//            Log.d("AttachmentsAdapter", "progress ${progress}")
             itemBind.progressTV.text = progress.toString()
             itemBind.progressAttach.progress = progress
         }
@@ -86,7 +88,7 @@ class AttachmentsAdapter(
             val attachmentPayloads = payloads[0] as AttachmentPayloads
             val item = currentList[position]
             if (attachmentPayloads.loadingChange){
-                holder.renderLoadingState(item.loading)
+                holder.renderLoadingState(item)
             }
             if (attachmentPayloads.progressChange) {
                 holder.renderLoadingProgress(item.progress)
@@ -103,7 +105,6 @@ class AttachmentsAdapter(
             Log.d("AttachmentsAdapter", "item ${item}")
             if (!item.loading) groupLoadingProgress.isVisible = false
             imageViewItem.cachedState(item.cached, item, item.notUploaded)
-            groupNotUploaded.isVisible = item.notUploaded && !item.loading
             fileName.text = item.filename
             attachmentOptions.setOnClickListener { clickViews.onOptionsMenuClick(it, item) }
         }
