@@ -13,9 +13,8 @@ import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.cache_storage.CachedFilesRepository
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
-import space.active.taskmanager1c.domain.use_case.ShowErrorToast
+import space.active.taskmanager1c.domain.use_case.ShowToast
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,7 +23,7 @@ class AttachmentBottomDialogViewModel @Inject constructor(
     logger: Logger,
     private val cachedFilesRepository: CachedFilesRepository,
     private val exceptionHandler: ExceptionHandler,
-    private val showErrorToast: ShowErrorToast
+    private val showToast: ShowToast
 ) : BaseViewModel(settings, logger) {
 
     private val _saveNewPhotoEvent = MutableSharedFlow<Uri>()
@@ -76,7 +75,7 @@ class AttachmentBottomDialogViewModel @Inject constructor(
             if (isSuccess) {
                 finishSave("File saved successfully")
             } else {
-                showErrorToast(UiText.Resource(R.string.bottom_sheet_error_save_file))
+                showToast(UiText.Resource(R.string.bottom_sheet_error_save_file))
             }
         }
     }

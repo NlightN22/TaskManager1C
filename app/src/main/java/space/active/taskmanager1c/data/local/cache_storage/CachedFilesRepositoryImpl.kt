@@ -27,9 +27,11 @@ import java.io.File
 import java.io.IOException
 import java.security.InvalidParameterException
 import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val TAG = "CachedFilesRepositoryImpl"
 
+@Singleton
 class CachedFilesRepositoryImpl @Inject constructor(
     context: Application,
     retrofit: Retrofit,
@@ -60,8 +62,14 @@ class CachedFilesRepositoryImpl @Inject constructor(
         auth: AuthBasicDto,
         cachedFile: CachedFile,
         cacheDirPath: String
-    ) {
-        TODO("Not yet implemented")
+    ): Flow<Boolean> = flow {
+        if (cachedFile.notUploaded) throw DeleteNotExistingAtServer(cachedFile)
+        wrapRetrofitExceptions {
+            val response = retrofitApi.deleteFile(auth.toBasic(), cacheDirPath, cachedFile.id)
+            if (cachedFile.id != response.fileID) throw DeletedIdNotEqual(cachedFile, response)
+            if (cachedFile.filename != response.fileName) throw DeletedNameNotEqual(cachedFile, response)
+            emit(true)
+        }
     }
 
     override fun getFileList(auth: AuthBasicDto, cacheDirPath: String): Flow<List<CachedFile>> {
@@ -448,5 +456,15 @@ class CachedFilesRepositoryImpl @Inject constructor(
 
         data class UploadException(val cachedFile: CachedFile) :
             Throwable(message = "File ${cachedFile.filename} is already uploaded or in progress")
+
+        data class DeleteNotExistingAtServer(val cachedFile: CachedFile) :
+            Throwable(message = "File ${cachedFile.filename} is not uploaded at server")
+
+        data class DeletedIdNotEqual(val cachedFile: CachedFile, val response: FileDTO) :
+            Throwable(message = "File ${cachedFile.filename} ID ${cachedFile.id} is not equal response ID ${response.fileID}")
+
+        data class DeletedNameNotEqual(val cachedFile: CachedFile, val response: FileDTO) :
+            Throwable(message = "File ${cachedFile.filename} is not equal response filename ${response.fileName}")
+
     }
 }

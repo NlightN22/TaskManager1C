@@ -20,4 +20,9 @@
         android:title="@string/download_item"
         android:tooltipText="@string/download_item"
         />
+    <item
+        android:id="@+id/attachmentItemDeleteFromServer"
+        android:title="@string/delete_item_from_server"
+        android:tooltipText="@string/delete_item_from_server"
+        />
 </menu>

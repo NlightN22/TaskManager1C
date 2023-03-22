@@ -2,6 +2,7 @@ package space.active.taskmanager1c.presentation.screens.task_attachments
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -16,7 +17,7 @@ import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.repository.TasksRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.domain.use_case.GetCredentials
-import space.active.taskmanager1c.domain.use_case.ShowErrorToast
+import space.active.taskmanager1c.domain.use_case.ShowToast
 import space.active.taskmanager1c.presentation.screens.BaseViewModel
 import javax.inject.Inject
 
@@ -31,7 +32,7 @@ class AttachmentsViewModel @Inject constructor(
     private val cachedFilesRepository: CachedFilesRepository,
     private val tasksRepository: TasksRepository,
     private val getCredentials: GetCredentials,
-    private val showErrorToast: ShowErrorToast
+    private val showToast: ShowToast
 ) : BaseViewModel(settings, logger) {
 
     private val _taskTitleViewState = MutableStateFlow(TaskTitleViewState())
@@ -45,9 +46,11 @@ class AttachmentsViewModel @Inject constructor(
     private val _listItems = MutableStateFlow<Request<List<CachedFile>>>(PendingRequest())
     val listItems = _listItems.asStateFlow()
 
+    var collectJob: Job? = null
     fun collectStorageItems(taskId: String) {
         _currentTaskId.value = taskId
-        viewModelScope.launch {
+        collectJob?.cancel()
+        collectJob = viewModelScope.launch {
             cachedFilesRepository.getFileList(
                 getCredentials().toAuthBasicDto(),
                 _currentTaskId.value
@@ -58,7 +61,6 @@ class AttachmentsViewModel @Inject constructor(
                 }
                 .collect { inputList ->
                     if (inputList != _listItems.value) {
-//                        logger.log(TAG, "inputList:\n${inputList.joinToString("\n")}")
                         _listItems.value = SuccessRequest(inputList)
                     }
                 }
@@ -100,7 +102,7 @@ class AttachmentsViewModel @Inject constructor(
                         it.errorCode == "500" &&
                         it.errorBody.contains("Уже есть файл с таким наименованием")
                     ) {
-                        showErrorToast(it)
+                        showToast(it)
                     } else {
                         exceptionHandler(it)
                     }
@@ -108,7 +110,7 @@ class AttachmentsViewModel @Inject constructor(
                 .collect { request ->
                     when (request) {
                         is SuccessRequest -> {
-                            showErrorToast(
+                            showToast(
                                 UiText.Resource(
                                     R.string.attachments_end_loading,
                                     cachedFile.filename
@@ -118,7 +120,7 @@ class AttachmentsViewModel @Inject constructor(
                         is PendingRequest -> {
                         }
                         is ErrorRequest -> {
-                            showErrorToast(
+                            showToast(
                                 UiText.Resource(
                                     R.string.attachments_error_loading,
                                     cachedFile.filename
@@ -141,8 +143,23 @@ class AttachmentsViewModel @Inject constructor(
         if (cachedFile.isLoading()) return
         viewModelScope.launch {
             cachedFilesRepository.deleteCachedFile(cachedFile).collect {
-                if (!it) showErrorToast(UiText.Resource(R.string.attachments_delete_error))
+                if (!it) showToast(UiText.Resource(R.string.attachments_delete_error))
             }
+        }
+    }
+
+    fun deleteFileFromServer(cachedFile: CachedFile) {
+        if (cachedFile.isLoading()) return
+        viewModelScope.launch {
+            cachedFilesRepository.deleteFileFromServer(
+                getCredentials().toAuthBasicDto(),
+                cachedFile,
+                _currentTaskId.value
+            )
+                .catch { exceptionHandler(it) }
+                .collect{
+                    if (it) showToast(UiText.Resource(R.string.attachments_delete_from_server, cachedFile.filename))
+                }
         }
     }
 
@@ -162,7 +179,7 @@ class AttachmentsViewModel @Inject constructor(
                         }
                         is PendingRequest -> {}
                         is ErrorRequest -> {
-                            showErrorToast(
+                            showToast(
                                 UiText.Resource(
                                     R.string.attachments_error_loading,
                                     cachedFile.filename
@@ -170,7 +187,7 @@ class AttachmentsViewModel @Inject constructor(
                             )
                         }
                         is SuccessRequest -> {
-                            showErrorToast(
+                            showToast(
                                 UiText.Resource(
                                     R.string.attachments_end_loading,
                                     cachedFile.filename

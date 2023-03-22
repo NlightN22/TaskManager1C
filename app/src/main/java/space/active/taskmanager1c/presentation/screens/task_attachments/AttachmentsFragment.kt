@@ -63,7 +63,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                 showOptionsMenu(item, view)
             }
         })
-        registerForContextMenu(binding.listAttachmentsRV)
+//        registerForContextMenu(binding.listAttachmentsRV) //todo delete
         binding.listAttachmentsRV.adapter = attachmentsAdapter
     }
 
@@ -151,6 +151,10 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                     viewModel.downloadFileFromServer(item)
                     return@setOnMenuItemClickListener true
                 }
+                R.id.attachmentItemDeleteFromServer -> {
+                    viewModel.deleteFileFromServer(item)
+                    return@setOnMenuItemClickListener true
+                }
             }
             return@setOnMenuItemClickListener false
         }
@@ -159,6 +163,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
 
     private fun renderOptionsMenu(view: View, item: CachedFile): PopupMenu {
         val popupMenu = PopupMenu(requireContext(), view)
+
         if (item.cached) {
             popupMenu.menu.apply {
                 add(
@@ -189,6 +194,14 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                 R.id.attachmentItemDownload,
                 4,
                 R.string.download_item
+            )
+        }
+        if (!item.notUploaded) {
+            popupMenu.menu.add(
+                R.menu.options_menu_attachment_item,
+                R.id.attachmentItemDeleteFromServer,
+                5,
+                R.string.delete_item_from_server
             )
         }
         return popupMenu

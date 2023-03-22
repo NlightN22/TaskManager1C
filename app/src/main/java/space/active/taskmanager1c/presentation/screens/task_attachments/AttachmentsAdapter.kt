@@ -50,22 +50,27 @@ class AttachmentsAdapter(
 
         fun renderLoadingState(item: CachedFile) {
             if (item.loading) {
-                itemBind.groupLoadingProgress.isVisible = true
-                itemBind.progressAttach.startAnimation(
-                    AnimationUtils.loadAnimation(
-                        itemBind.root.context,
-                        R.anim.clockwise_rotation_infinite
+                itemBind.apply {
+                    groupLoadingProgress.isVisible = true
+                    progressAttach.startAnimation(
+                        AnimationUtils.loadAnimation(
+                            root.context,
+                            R.anim.clockwise_rotation_infinite
+                        )
                     )
-                )
+                    imageViewItem.visibility = View.INVISIBLE
+                }
             } else {
-                itemBind.groupNotUploaded.isVisible = item.notUploaded
-                itemBind.groupLoadingProgress.isVisible = false
-                itemBind.progressAttach.clearAnimation()
+                itemBind.apply {
+                    groupNotUploaded.isVisible = item.notUploaded
+                    groupLoadingProgress.isVisible = false
+                    progressAttach.clearAnimation()
+                    imageViewItem.visibility = View.VISIBLE
+                }
             }
         }
 
         fun renderLoadingProgress(progress: Int) {
-//            Log.d("AttachmentsAdapter", "progress ${progress}")
             itemBind.progressTV.text = progress.toString()
             itemBind.progressAttach.progress = progress
         }
@@ -103,7 +108,10 @@ class AttachmentsAdapter(
         holder.itemView.tag = item
         holder.itemBind.apply {
             Log.d("AttachmentsAdapter", "item ${item}")
-            if (!item.loading) groupLoadingProgress.isVisible = false
+            if (!item.loading) {
+                groupLoadingProgress.isVisible = false
+                imageViewItem.visibility = View.VISIBLE
+            }
             imageViewItem.cachedState(item.cached, item, item.notUploaded)
             fileName.text = item.filename
             attachmentOptions.setOnClickListener { clickViews.onOptionsMenuClick(it, item) }

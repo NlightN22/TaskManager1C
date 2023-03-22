@@ -7,9 +7,9 @@ import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.presentation.utils.Toasts
 import javax.inject.Inject
 
-private const val TAG = "ShowErrorToast"
+private const val TAG = "ShowToast"
 
-class ShowErrorToast @Inject constructor(
+class ShowToast @Inject constructor(
     private val toast: Toasts,
     private val context: Application
 ) {

@@ -15,7 +15,7 @@ private const val TAG = "ExceptionHandler"
 
 @Singleton
 class ExceptionHandler @Inject constructor(
-    private val showErrorToast: ShowErrorToast,
+    private val showToast: ShowToast,
     private val context: Application,
     private val logger: Logger
 ) {
@@ -33,27 +33,27 @@ class ExceptionHandler @Inject constructor(
     operator fun invoke(e: Throwable) {
         when (e) {
             is NotCorrectServerAddress -> {
-                showErrorToast(e)
+                showToast(e)
             }
             is AuthException -> {
-                showErrorToast(e)
+                showToast(e)
                 logger.error(TAG, "${e::class.java.simpleName} ${e.text.getString(context)}")
             }
             is EmptyObject -> {
-                showErrorToast(e)
+                showToast(e)
                 logger.error(TAG, "${e::class.java.simpleName} ${e.text.getString(context)}")
                 e.printStackTrace()
             }
             is DbUnexpectedResult -> {
-                showErrorToast(e)
+                showToast(e)
                 e.printStackTrace()
             }
             is CantShowSnackBar -> {
-                showErrorToast(e)
+                showToast(e)
                 e.printStackTrace()
             }
             is ParseBackendException -> {
-                showErrorToast(e)
+                showToast(e)
                 e.message?.let { logger.log(TAG, "Message: $it") }
                 e.cause?.let { logger.log(TAG, "Cause: $it") }
                 e.printStackTrace()
@@ -68,7 +68,7 @@ class ExceptionHandler @Inject constructor(
                 if (_skipBackendException.value.contains(e)) {
                     logger.log(TAG, "skipped to show: $e")
                 }else {
-                    showErrorToast(e)
+                    showToast(e)
                     if (backendCounter >= maxBackendException) {
                         logger.log(TAG, "Start dialog event")
                         _sendExceptionEvent.tryEmit(e)
@@ -76,11 +76,11 @@ class ExceptionHandler @Inject constructor(
                 }
             }
             is ConnectionException -> {
-                showErrorToast(e)
+                showToast(e)
                 e.printStackTrace()
             }
             else -> {
-                showErrorToast(e)
+                showToast(e)
                 e.printStackTrace()
             }
         }

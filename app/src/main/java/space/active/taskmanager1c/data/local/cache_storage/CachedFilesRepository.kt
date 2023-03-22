@@ -38,5 +38,5 @@ interface CachedFilesRepository {
     ): Flow<Request<CachedFile>>
 
     fun deleteCachedFile(cachedFile: CachedFile): Flow<Boolean>
-    fun deleteFileFromServer(auth: AuthBasicDto, cachedFile: CachedFile, cacheDirPath: String)
+    fun deleteFileFromServer(auth: AuthBasicDto, cachedFile: CachedFile, cacheDirPath: String): Flow<Boolean>
 }

@@ -147,4 +147,11 @@ interface RetrofitApi {
         @Path("taskId") taskId: String,
         @Body multipartBody: RequestBody
     ): FileDTO
+
+    @POST("tasks/{taskId}/file/{fileId}/delete")
+    suspend fun deleteFile(
+        @Header("Authorization") auth: String,
+        @Path("taskId") taskId: String,
+        @Path("fileId") fileId: String,
+    ): FileDTO
 }

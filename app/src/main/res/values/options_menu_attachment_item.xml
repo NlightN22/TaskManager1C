@@ -4,4 +4,5 @@
     <string name="delete_item">Удалить файл</string>
     <string name="upload_item">Отправить файл на сервер</string>
     <string name="download_item">Загрузить файл с сервера</string>
+    <string name="delete_item_from_server">Удалить файл с сервера</string>
 </resources>

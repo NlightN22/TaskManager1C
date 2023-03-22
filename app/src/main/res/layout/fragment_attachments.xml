@@ -26,7 +26,6 @@
         tools:scrollbars="vertical"
         />
 
-
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmerAttachmentsRV"
         android:layout_width="match_parent"
