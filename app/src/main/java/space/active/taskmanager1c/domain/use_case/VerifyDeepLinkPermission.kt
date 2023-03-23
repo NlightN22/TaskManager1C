@@ -28,9 +28,12 @@ class VerifyDeepLinkPermission @Inject constructor(
             logger.log(TAG, "selectedDomains: $selectedDomains")
             logger.log(TAG, "unapprovedDomains: $unapprovedDomains")
             val host = BASE_URL.toUri().host
-            if (!verifiedDomains.isNullOrEmpty()) {
-                host?.let {
+            host?.let {
+                if (!verifiedDomains.isNullOrEmpty()) {
                     if (verifiedDomains.keys.contains(it)) return true
+                }
+                if (!selectedDomains.isNullOrEmpty()) {
+                    if (selectedDomains.keys.contains(it)) return true
                 }
             }
             return false
