@@ -31,7 +31,7 @@ sealed class FragmentDeepLinks {
     ) : FragmentDeepLinks() {
 
         override fun toUri(): Uri {
-            val startPath = getFullStartPath()
+            val startPath = getSchemeAndHost()
             val combinedPath = startPath + uriPath + taskId
             return combinedPath.toUri()
         }
@@ -50,7 +50,7 @@ sealed class FragmentDeepLinks {
     ) : FragmentDeepLinks() {
 
         override fun toUri(): Uri {
-            val startPath = getFullStartPath()
+            val startPath = getSchemeAndHost()
             val replacedMatcher = matcherPath.replace("*", taskId)
             val combinedPath = startPath + replacedMatcher
             return combinedPath.toUri()
@@ -69,7 +69,7 @@ sealed class FragmentDeepLinks {
     ) : FragmentDeepLinks() {
 
         override fun toUri(): Uri {
-            val startPath = getFullStartPath()
+            val startPath = getSchemeAndHost()
             val replacedMatcher = matcherPath.replace("*", taskId)
             val combinedPath = startPath + replacedMatcher
             return combinedPath.toUri()
@@ -103,6 +103,7 @@ sealed class FragmentDeepLinks {
         private val authority = BASE_URL.toUri().host ?: throw EmptyObject("MyUriMatcher authority")
         private val matcher = MyUriMatcher(authority)
         fun getFragmentLink(uri: Uri): FragmentDeepLinks? {
+            Log.d("FragmentDeepLinks", "authority: $authority")
             val matchedUri = matcher.match(uri)
             Log.d("FragmentDeepLinks", "matchedUri: $matchedUri")
             return when (matchedUri) {
@@ -136,6 +137,9 @@ sealed class FragmentDeepLinks {
 
     private class MyUriMatcher(authority: String) : UriMatcher(NO_MATCH) {
         init {
+            Log.d("FragmentDeepLinks", "Messages.matcherPath: ${Messages.matcherPath}")
+            Log.d("FragmentDeepLinks", "Attachments.matcherPath: ${Attachments.matcherPath}")
+            Log.d("FragmentDeepLinks", "Detailed.matcherPath: ${Detailed.matcherPath}")
             addURI(
                 authority,
                 Messages.matcherPath,

@@ -1,13 +1,17 @@
 package space.active.taskmanager1c.presentation.screens.tasklist
 
 import android.content.Context
+import android.content.pm.verify.domain.DomainVerificationManager
+import android.content.pm.verify.domain.DomainVerificationUserState
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.net.toUri
 import androidx.core.view.forEach
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -15,16 +19,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.*
 import space.active.taskmanager1c.databinding.FragmentTaskListBinding
+import space.active.taskmanager1c.di.BASE_URL
 import space.active.taskmanager1c.domain.models.TaskDomain
 import space.active.taskmanager1c.domain.models.TaskListFilterTypes
 import space.active.taskmanager1c.domain.models.TaskListOrderTypes
+import space.active.taskmanager1c.domain.use_case.OpenPermissionSetting
+import space.active.taskmanager1c.domain.use_case.ShowPermissionSnackBar
+import space.active.taskmanager1c.domain.use_case.VerifyDeepLinkPermission
 import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.utils.*
 import space.active.taskmanager1c.presentation.utils.dialogs.TaskStatusDialog
@@ -44,6 +51,16 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
 
     @Inject
     lateinit var taskStatusDialog: TaskStatusDialog
+
+    @Inject
+    lateinit var verifyDeepLinkPermission: VerifyDeepLinkPermission
+
+    @Inject
+    lateinit var showPermissionSnackBar: ShowPermissionSnackBar
+
+    @Inject
+    lateinit var openPermissionSetting: OpenPermissionSetting
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding = FragmentTaskListBinding.bind(view)
@@ -76,10 +93,26 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
         binding.listTasksRV.adapter = recyclerTasks
         binding.listUpFAB.hide()
 
+
         initOrderMenu()
         observers()
         listeners()
     }
+
+    private fun verifyDeepLinks() {
+        if (!verifyDeepLinkPermission(requireContext())) {
+            val deepLinkText = getString(R.string.permissions_open_deeplinks)
+            showPermissionSnackBar(
+                text = getString(R.string.permissions_not_granted, deepLinkText),
+                context = requireContext(),
+                view = requireView()
+            ) {
+                openPermissionSetting(requireContext())
+            }
+        }
+    }
+
+
 
     override fun getBottomMenu(): BottomNavigationView? {
         val bottomNavigationView = binding.bottomMenu.root
@@ -92,6 +125,7 @@ class TaskListFragment : BaseFragment(R.layout.fragment_task_list) {
     }
 
     override fun successLogin() {
+        verifyDeepLinks()
         viewModel.collectListTasks()
     }
 

@@ -23,11 +23,12 @@ class HandleDeepLink @Inject constructor(
     operator fun invoke(navController: NavController, intent: Intent) {
         val intentUri = intent.data
         intentUri?.let { uri ->
+            logger.log(TAG, "handle uri: $uri")
             val fragmentDL = FragmentDeepLinks.getFragmentLink(uri)
             fragmentDL?.navigate(navController)
                 ?: run {
                 logger.log(TAG, "Link not found ${fragmentDL}")
-                toasts(UiText.Resource(R.string.wrong_link))
+                toasts(UiText.Resource(R.string.wrong_link, uri.toString()))
             }
         }
     }

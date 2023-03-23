@@ -50,6 +50,8 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="task_observers_hint">наблюдатели</string>
     <string name="snackbar_cancel_button">Отмена %dс</string>
+    <string name="snackbar_open_button">Открыть</string>
+    <string name="snackbar_allow_button">Разрешить</string>
     <string name="menu_i_do">Делаю</string>
     <string name="menu_i_delegate">Поручил</string>
     <string name="menu_i_didnt_check">Проверяю</string>
@@ -64,7 +66,7 @@
     <string name="menu_order_asc">(по воз.)</string>
     <string name="menu_order_desc">(по уб.)</string>
     <string name="exit_toast">Нажмите назад для выхода</string>
-    <string name="wrong_link">Ошибка. Некорректная ссылка</string>
+    <string name="wrong_link">Cсылка %s не найдена</string>
     <string name="link_already_opened">Ссылка уже открыта</string>
     <!--    TaskDomain statuses-->
     <string name="New">Новая</string>
@@ -74,7 +76,6 @@
     <string name="Finished">Выполнена</string>
     <string name="Deferred">Отложена</string>
     <string name="Cancelled">Отменена</string>
-
 
     <string name="title_dialog_hint">Введите наименование задачи</string>
     <string name="description_dialog_hint">Введите описание задачи</string>
@@ -118,4 +119,6 @@
     <string name="attachments_error_loading">Ошибка загрузки: %s</string>
     <string name="attachments_delete_from_server">Файл удалён с сервера: %s</string>
     <string name="attachments_name_exist">Файл с таким именем существует: %s</string>
+    <string name="permissions_not_granted">Отсутвует разрешение на: %s</string>
+    <string name="permissions_open_deeplinks">Открытие ссылок</string>
 </resources>
