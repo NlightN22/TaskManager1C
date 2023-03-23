@@ -148,6 +148,16 @@ interface RetrofitApi {
         @Body multipartBody: RequestBody
     ): FileDTO
 
+    @POST("tasks/{taskId}/fileCheck")
+    suspend fun checkFileName(
+        @Header("Authorization") auth: String,
+        @Path("taskId") taskId: String,
+        @Body fileNameJson: String
+    )
+
+    /**
+     * {"fileName":"20230303_151758.jpg"}
+     */
     @POST("tasks/{taskId}/file/{fileId}/delete")
     suspend fun deleteFile(
         @Header("Authorization") auth: String,

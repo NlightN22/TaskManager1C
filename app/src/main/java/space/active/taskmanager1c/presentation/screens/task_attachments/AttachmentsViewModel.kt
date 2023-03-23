@@ -46,11 +46,10 @@ class AttachmentsViewModel @Inject constructor(
     private val _listItems = MutableStateFlow<Request<List<CachedFile>>>(PendingRequest())
     val listItems = _listItems.asStateFlow()
 
-    var collectJob: Job? = null
     fun collectStorageItems(taskId: String) {
+        if (this.isResumed(taskId)) return
         _currentTaskId.value = taskId
-        collectJob?.cancel()
-        collectJob = viewModelScope.launch {
+        viewModelScope.launch {
             cachedFilesRepository.getFileList(
                 getCredentials().toAuthBasicDto(),
                 _currentTaskId.value
@@ -68,6 +67,10 @@ class AttachmentsViewModel @Inject constructor(
         viewModelScope.launch {
             _taskTitleViewState.setTitleState(tasksRepository, taskId)
         }
+    }
+
+    private fun AttachmentsViewModel.isResumed(taskId: String): Boolean {
+        return taskId == _currentTaskId.value
     }
 
     fun clickItem(cachedFile: CachedFile) {
@@ -100,9 +103,9 @@ class AttachmentsViewModel @Inject constructor(
                 .catch {
                     if (it is BackendException &&
                         it.errorCode == "500" &&
-                        it.errorBody.contains("Уже есть файл с таким наименованием")
+                        it.errorBody.contains("forbidden")
                     ) {
-                        showToast(it)
+                        showToast(UiText.Resource(R.string.attachments_name_exist, cachedFile.filename))
                     } else {
                         exceptionHandler(it)
                     }

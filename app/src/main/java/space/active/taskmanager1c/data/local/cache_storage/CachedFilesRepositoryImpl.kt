@@ -67,7 +67,10 @@ class CachedFilesRepositoryImpl @Inject constructor(
         wrapRetrofitExceptions {
             val response = retrofitApi.deleteFile(auth.toBasic(), cacheDirPath, cachedFile.id)
             if (cachedFile.id != response.fileID) throw DeletedIdNotEqual(cachedFile, response)
-            if (cachedFile.filename != response.fileName) throw DeletedNameNotEqual(cachedFile, response)
+            if (cachedFile.filename != response.fileName) throw DeletedNameNotEqual(
+                cachedFile,
+                response
+            )
             emit(true)
         }
     }
@@ -192,27 +195,41 @@ class CachedFilesRepositoryImpl @Inject constructor(
         emit(PendingRequest())
         if (cachedFile.isLoading()) throw UploadException(cachedFile)
         wrapLoadingException(cachedFile) {
-            val response = multiPartUploadFileToServerWithProgress(auth, cachedFile, cacheDirPath)
-            response.collect { request ->
-                when (request) {
-                    is ProgressRequest -> {
-                        logger.log(TAG, "uploadFileToServer progress: ${request.progress}")
-                        cachedFile.setLoadingProgress(request.progress)
-                    }
-                    is SuccessRequest -> {
-                        if (validateUploadResponse(request.data, cachedFile)) {
-                            logger.log(TAG, "uploadFileToServer success: ${request.data}")
-                            val uploadedFile =
-                                updateUploadedCachedFile(request.data, cachedFile, cacheDirPath)
-                            emit(SuccessRequest(uploadedFile))
+            if (validateUploadOnServer(auth, cachedFile, cacheDirPath)) {
+                val response =
+                    multiPartUploadFileToServerWithProgress(auth, cachedFile, cacheDirPath)
+                response.collect { request ->
+                    when (request) {
+                        is ProgressRequest -> {
+                            logger.log(TAG, "uploadFileToServer progress: ${request.progress}")
+                            cachedFile.setLoadingProgress(request.progress)
                         }
+                        is SuccessRequest -> {
+                            if (validateUploadResponse(request.data, cachedFile)) {
+                                logger.log(TAG, "uploadFileToServer success: ${request.data}")
+                                val uploadedFile =
+                                    updateUploadedCachedFile(request.data, cachedFile, cacheDirPath)
+                                emit(SuccessRequest(uploadedFile))
+                            }
+                        }
+                        else -> {}
                     }
-                    else -> {}
                 }
             }
-
         }
     }.flowOn(ioDispatcher)
+
+    private suspend fun validateUploadOnServer(
+        auth: AuthBasicDto,
+        cachedFile: CachedFile,
+        cacheDirPath: String
+    ): Boolean {
+        val fileNameBody = "{ \"fileName\": \"${cachedFile.filename}\" }"
+        wrapRetrofitExceptions(fileNameBody) {
+            retrofitApi.checkFileName(auth.toBasic(), cacheDirPath, fileNameBody)
+        }
+        return true
+    }
 
     private suspend fun wrapLoadingException(
         cachedFile: CachedFile,

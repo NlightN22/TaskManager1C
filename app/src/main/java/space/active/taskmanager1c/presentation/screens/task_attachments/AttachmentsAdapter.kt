@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.BlurTransformation
 import space.active.taskmanager1c.R
@@ -70,7 +71,9 @@ class AttachmentsAdapter(
             }
         }
 
-        fun renderLoadingProgress(progress: Int) {
+        fun renderLoadingProgress(item: CachedFile) {
+            if (!itemBind.groupLoadingProgress.isVisible) renderLoadingState(item)
+            val progress = item.progress
             itemBind.progressTV.text = progress.toString()
             itemBind.progressAttach.progress = progress
         }
@@ -96,7 +99,7 @@ class AttachmentsAdapter(
                 holder.renderLoadingState(item)
             }
             if (attachmentPayloads.progressChange) {
-                holder.renderLoadingProgress(item.progress)
+                holder.renderLoadingProgress(item)
             }
         } else {
             super.onBindViewHolder(holder, position, payloads)
@@ -131,6 +134,7 @@ class AttachmentsAdapter(
                         .fit()
                         .placeholder(R.drawable.ic_baseline_cloud_24)
                         .error(R.drawable.ic_baseline_image_not_supported_24)
+                        .memoryPolicy(MemoryPolicy.NO_CACHE)
                     if (notUploaded) {
                         picassoPreview.transform(BlurTransformation(this.context, 25, 1))
                     }

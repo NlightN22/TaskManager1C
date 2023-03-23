@@ -117,4 +117,5 @@
     <string name="attachments_end_loading">Файл загружен: %s</string>
     <string name="attachments_error_loading">Ошибка загрузки: %s</string>
     <string name="attachments_delete_from_server">Файл удалён с сервера: %s</string>
+    <string name="attachments_name_exist">Файл с таким именем существует: %s</string>
 </resources>
