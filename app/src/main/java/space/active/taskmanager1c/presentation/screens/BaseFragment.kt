@@ -372,7 +372,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             putExtra(Intent.EXTRA_SUBJECT, emailSubject)
             putExtra(Intent.EXTRA_TEXT, " To server: ${backendException.sendToServerData.toString()}" +
                     "\nCode: ${backendException.errorCode}" +
-                    "\nBody ${backendException.errorBody}")
+                    "\nBody: ${backendException.errorBody}")
         }
         val shareIntent = Intent.createChooser(intent, null)
         startActivity(shareIntent)
@@ -381,7 +381,8 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
     fun shareUri(uri: Uri) {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, "$uri")
+            putExtra(Intent.EXTRA_TEXT, "\"$uri\"")
+            putExtra(Intent.EXTRA_HTML_TEXT, "<a href=\"$uri\">Открыть ссылку</a>")
         }
         val shareIntent = Intent.createChooser(intent, null)
         startActivity(shareIntent)
