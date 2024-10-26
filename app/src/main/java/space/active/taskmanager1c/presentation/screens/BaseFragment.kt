@@ -336,11 +336,11 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     private fun showNavigationLog() {
         val backDestination = findNavController().previousBackStackEntry
-        logger.log(TAG, "backDestination: ${backDestination}")
+        logger.log(TAG, "backDestination: $backDestination")
         val currentDestination = findNavController().currentDestination
-        logger.log(TAG, "currentFragment: ${currentDestination}")
+        logger.log(TAG, "currentFragment: $currentDestination")
         val currentBackStackEntry = findNavController().currentBackStackEntry
-        logger.log(TAG, "currentBackStackEntry: ${currentBackStackEntry}")
+        logger.log(TAG, "currentBackStackEntry: $currentBackStackEntry")
     }
 
     private fun wrapSnackExceptions(block: () -> Unit) {
