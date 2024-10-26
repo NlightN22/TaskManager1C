@@ -43,8 +43,8 @@ interface RetrofitApi {
      * save tasks changes
      * https://host.name/torg_develop/hs/taskmgr/tasks/taskId
     {
-    "id: "dfsdsd",
-    "name": "11111Фразы покупателей в магазинах"
+    "id: "Task_ID",
+    "name": "Task Name"
     }
      */
     @POST("tasks/{taskId}")

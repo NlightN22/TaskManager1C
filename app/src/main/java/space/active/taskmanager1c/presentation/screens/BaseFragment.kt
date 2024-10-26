@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
@@ -16,7 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
@@ -260,13 +260,17 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     fun showSnackBar(collectableShared: SharedFlow<UiText>) = wrapSnackExceptions {
         collectableShared.collectOnStart {
-            Snackbar.make(requireView(), it.getString(requireContext()), Snackbar.LENGTH_SHORT)
-                .show()
+            val snackBar = Snackbar.make(requireView(), it.getString(requireContext()), Snackbar.LENGTH_SHORT)
+            snackBar.setAnchorView(getBottomMenuView())
+            snackBar.show()
+
         }
     }
 
     fun showSnackBar(text: UiText) = wrapSnackExceptions {
-        Snackbar.make(requireView(), text.getString(requireContext()), Snackbar.LENGTH_SHORT).show()
+        val snackBar = Snackbar.make(requireView(), text.getString(requireContext()), Snackbar.LENGTH_SHORT)
+        snackBar.setAnchorView(getBottomMenuView())
+        snackBar.show()
     }
 
     fun shimmerShow(shimmerView: ShimmerFrameLayout, mainView: View, visibility: Boolean) {
@@ -297,6 +301,7 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
                 )
             )
             snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
+            snack.setAnchorView(getBottomMenuView())
             snack.show()
             while (duration > 0) {
                 snack.setAction(getString(R.string.snackbar_cancel_button, duration), listener)
@@ -306,6 +311,10 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             snack.dismiss()
 
         }
+    }
+
+    private fun getBottomMenuView(): BottomNavigationView  {
+        return requireView().findViewById(R.id.bottomMenu)
     }
 
     private fun checkLoginState(login: Boolean) {

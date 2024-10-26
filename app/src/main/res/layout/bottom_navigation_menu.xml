@@ -5,6 +5,7 @@
     style="@style/BottomMenu"
     tools:ignore="MissingConstraints"
     tools:showIn="@layout/fragment_task_detailed"
+    android:id="@+id/bottom_navigation_view"
     >
     <include layout="@layout/bottom_version_text_view"
         android:id="@+id/versionTV"

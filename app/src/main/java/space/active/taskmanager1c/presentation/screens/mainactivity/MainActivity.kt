@@ -3,21 +3,18 @@ package space.active.taskmanager1c.presentation.screens.mainactivity
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.navigation.navArgs
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import space.active.taskmanager1c.R
+import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.databinding.ActivityMainBinding
-import space.active.taskmanager1c.domain.models.FragmentDeepLinks
 import space.active.taskmanager1c.domain.use_case.HandleDeepLink
+import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.LOGIN_SUCCESSFUL
-import space.active.taskmanager1c.presentation.screens.task_detailed.TaskDetailedFragmentArgs
 import space.active.taskmanager1c.presentation.utils.Toasts
 import javax.inject.Inject
 
@@ -119,9 +116,24 @@ class MainActivity : AppCompatActivity() {
     private var lastPress: Long = 0
     private fun exitWithTimer() {
         val currentTime: Long = System.currentTimeMillis()
-        val delay: Long = 2000
+        val delay: Int = 2000
         if (currentTime - lastPress > delay) {
-            Toast.makeText(this, getString(R.string.exit_toast), delay.toInt()).show()
+            val message = getString(R.string.exit_msg)
+
+            val currentFragment = supportFragmentManager
+                .findFragmentById(R.id.fragmentContainerView)
+                ?.childFragmentManager
+                ?.fragments
+                ?.firstOrNull()
+
+            if (currentFragment is BaseFragment) {
+                logger.log(TAG, "BaseFragment")
+                currentFragment.showSnackBar(UiText.Dynamic(message))
+            } else {
+                logger.log(TAG, "not BaseFragment")
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show()
+            }
+
             lastPress = System.currentTimeMillis()
         } else {
             this.finishAffinity()

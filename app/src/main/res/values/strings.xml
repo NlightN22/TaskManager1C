@@ -65,7 +65,7 @@
     <string name="menu_order_end_date">Дата окончания %s</string>
     <string name="menu_order_asc">(по воз.)</string>
     <string name="menu_order_desc">(по уб.)</string>
-    <string name="exit_toast">Нажмите назад для выхода</string>
+    <string name="exit_msg">Нажмите назад для выхода</string>
     <string name="wrong_link">Cсылка %s не найдена</string>
     <string name="link_already_opened">Ссылка уже открыта</string>
     <!--    TaskDomain statuses-->
