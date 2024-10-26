@@ -1,15 +1,12 @@
 package space.active.taskmanager1c.presentation.screens
 
 import android.app.AlertDialog
-import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -22,11 +19,16 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.BackendException
 import space.active.taskmanager1c.coreutils.CantShowSnackBar
@@ -182,8 +184,8 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             logger.log(
                 TAG,
                 "Navigate to: $directions" +
-                        "\ncurrent fragment: ${currentDestination?.displayName}" +
-                        "\nprevious fragment: ${backDest?.displayName}"
+                        "\ncurrent fragment: ${currentDestination?.label}" +
+                        "\nprevious fragment: ${backDest?.label}"
             )
             findNavController().navigateWithAnim(directions)
         } catch (e: Throwable) {
@@ -210,11 +212,11 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
             val backDest = findNavController().previousBackStackEntry?.destination
             logger.log(
                 TAG,
-                "Navigation back. Previous fragment:${backDest?.displayName}\ncurrent fragment: ${currentDestination?.displayName} "
+                "Navigation back. Previous fragment:${backDest?.label}\ncurrent fragment: ${currentDestination?.label} "
             )
             destination?.let {
                 if (it.id == currentDestination?.id) {
-                    requireActivity().onBackPressed()
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
                 } else {
                     logger.log("onBackClick", "")
                     findNavController().popBackStack()
