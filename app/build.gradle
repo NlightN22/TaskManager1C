@@ -23,14 +23,14 @@ android {
             keyPassword '!releaseTaskmanger23'
         }
     }
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "space.active.taskmanager1c"
         minSdk 29
-        targetSdk 33
-        versionCode 14
-        versionName "1.4-beta"
+        targetSdk 34
+        versionCode 16
+        versionName "1.6-beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

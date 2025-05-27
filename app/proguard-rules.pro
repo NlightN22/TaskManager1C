@@ -29,3 +29,11 @@
 -keep class space.active.taskmanager1c.data.remote.model.messages_dto.* { *; } # not obfuscate some classes
 -keep class space.active.taskmanager1c.data.remote.model.reading_times.* { *; } # not obfuscate some classes
 -keep class space.active.taskmanager1c.data.remote.model.temp_update.* { *; } # not obfuscate some classes
+-dontwarn org.bouncycastle.jsse.BCSSLParameters
+-dontwarn org.bouncycastle.jsse.BCSSLSocket
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.conscrypt.Conscrypt$Version
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE
