@@ -11,13 +11,13 @@ plugins {
 android {
     signingConfigs {
         debug {
-            storeFile file('C:\\Users\\User\\Desktop\\Programming\\keystore\\keystore.jks')
+            storeFile file('C:\\NextCloud\\private\\Programming\\keystore\\keystore.jks')
             storePassword 'testTaskmanger22'
             keyAlias 'taskmanager1c'
             keyPassword '!releaseTaskmanger23'
         }
         release {
-            storeFile file('C:\\Users\\User\\Desktop\\Programming\\keystore\\keystore.jks')
+            storeFile file('C:\\NextCloud\\private\\Programming\\keystore\\keystore.jks')
             storePassword 'testTaskmanger22'
             keyAlias 'taskmanager1c'
             keyPassword '!releaseTaskmanger23'
