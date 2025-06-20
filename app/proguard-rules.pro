@@ -14,7 +14,7 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
--keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable,Signature
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
@@ -22,13 +22,15 @@
 #-dontobfuscate # not obfuscate ALL
 #-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
 
--keep class space.active.taskmanager1c.data.remote.* { *; } # not obfuscate some classes
--keep class space.active.taskmanager1c.data.remote.retrofit.* { *; } # not obfuscate some classes
--keep class space.active.taskmanager1c.data.remote.model.* { *; } # not obfuscate some classes
--keep class space.active.taskmanager1c.data.remote.model.files.* { *; } # not obfuscate some classes
--keep class space.active.taskmanager1c.data.remote.model.messages_dto.* { *; } # not obfuscate some classes
--keep class space.active.taskmanager1c.data.remote.model.reading_times.* { *; } # not obfuscate some classes
--keep class space.active.taskmanager1c.data.remote.model.temp_update.* { *; } # not obfuscate some classes
+-keep class space.active.taskmanager1c.data.remote.* { *; }
+-keep class space.active.taskmanager1c.data.remote.retrofit.* { *; }
+-keep class space.active.taskmanager1c.data.remote.model.* { *; }
+-keep class space.active.taskmanager1c.data.remote.model.files.* { *; }
+-keep class space.active.taskmanager1c.data.remote.model.messages_dto.* { *; }
+-keep class space.active.taskmanager1c.data.remote.model.reading_times.* { *; }
+-keep class space.active.taskmanager1c.data.remote.model.temp_update.* { *; }
+-keep class com.jakewharton.retrofit2.adapter.kotlin.coroutines.** { *; }
+-keep class kotlin.coroutines.Continuation { *; }
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket
 -dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider

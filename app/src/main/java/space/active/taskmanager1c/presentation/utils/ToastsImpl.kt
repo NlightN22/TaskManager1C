@@ -11,13 +11,13 @@ class ToastsImpl(
 ): Toasts {
     override fun invoke(message: String) {
         val toast = Toast.makeText(appContext, message, Toast.LENGTH_SHORT)
-        toast.setGravity(Gravity.CENTER_VERTICAL, 0, yOffset)
+        // toast.setGravity(Gravity.CENTER_VERTICAL, 0, yOffset) TODO delete
         toast.show()
     }
 
     override fun invoke(uiText: UiText) {
         val toast = Toast.makeText(appContext, uiText.getString(appContext), Toast.LENGTH_SHORT)
-        toast.setGravity(Gravity.CENTER_VERTICAL, 0, yOffset)
+        // toast.setGravity(Gravity.CENTER_VERTICAL, 0, yOffset) TODO delete
         toast.show()
     }
     }
