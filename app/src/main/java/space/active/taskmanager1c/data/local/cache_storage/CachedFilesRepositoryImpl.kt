@@ -94,7 +94,7 @@ class CachedFilesRepositoryImpl @Inject constructor(
         uploadedList: List<FileDTO>
     ): List<FileDTO> {
         return if (serverList.isEmpty() && uploadedList.isEmpty()) {
-            emptyList<FileDTO>()
+            emptyList()
         } else if (serverList.isNotEmpty() && uploadedList.isEmpty()) {
             serverList
         } else {
@@ -116,7 +116,7 @@ class CachedFilesRepositoryImpl @Inject constructor(
         loadingList: List<CachedFile>
     ): List<CachedFile> {
         return if (outputList.isEmpty() && loadingList.isEmpty()) {
-            emptyList<CachedFile>()
+            emptyList()
         } else if (outputList.isNotEmpty() && loadingList.isEmpty()) {
             outputList
         } else {
@@ -181,7 +181,7 @@ class CachedFilesRepositoryImpl @Inject constructor(
 
             }
         } catch (e: Throwable) {
-            emit(ErrorRequest<CachedFile>(e))
+            emit(ErrorRequest(e))
         }
     }.flowOn(ioDispatcher)
 
@@ -403,7 +403,7 @@ class CachedFilesRepositoryImpl @Inject constructor(
         cachedFiles: List<File>
     ): List<CachedFile> {
         return if (serverFiles.isEmpty() && cachedFiles.isEmpty()) {
-            emptyList<CachedFile>()
+            emptyList()
         } else if (serverFiles.isNotEmpty() && cachedFiles.isEmpty()) {
             serverFiles.map { it.toNotCachedFile() }
         } else if (serverFiles.isEmpty() && cachedFiles.isNotEmpty()) {
@@ -459,7 +459,7 @@ class CachedFilesRepositoryImpl @Inject constructor(
     private fun getFilesFromServerFlow(
         auth: AuthBasicDto,
         taskId: String
-    ): Flow<List<FileDTO>> = flow<List<FileDTO>> {
+    ): Flow<List<FileDTO>> = flow {
         while (true) {
             wrapRetrofitExceptions(query = "tasks/$taskId/file") {
                 emit(
