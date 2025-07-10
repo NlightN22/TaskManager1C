@@ -138,43 +138,50 @@ class CachedFilesRepositoryImpl @Inject constructor(
         cachePathName: String
     ): Flow<Request<CachedFile>> = flow {
         emit(PendingRequest())
-        if (cachedFile.isCached() || cachedFile.isLoading()) throw DownloadException(cachedFile)
-        val fileId = cachedFile.id
-        val fileName = cachedFile.filename
-        val downloadQuery = "downloadQuery taskId: $cachePathName fileId: $fileId"
-        logger.log(TAG, downloadQuery)
-        wrapLoadingException(cachedFile) {
-            wrapRetrofitExceptions(query = downloadQuery) {
-                val response = retrofitApi.downloadFile(auth.toBasic(), cachePathName, fileId)
-                if (response.isSuccessful) {
-                    val inputStream = response.body()?.byteStream()
-                    inputStream?.let {
-                        val contentLength = response.body()!!.contentLength()
-                        val finalName = fileRepository.saveDownloadedFile(
-                            inputStream,
-                            cachePathName,
-                            fileId,
-                            fileName,
-                            contentLength
-                        )
-                        finalName.collect { saveRequest ->
-                            when (saveRequest) {
-                                is ProgressRequest -> {
-                                    cachedFile.setLoadingProgress(saveRequest.progress)
-                                }
-                                is ErrorRequest -> {}
-                                is PendingRequest -> {}
-                                is SuccessRequest -> {
-                                    logger.log(TAG, "save completed")
-                                    emit(SuccessRequest(cachedFile.setCached(saveRequest.data)))
+        try {
+            if (cachedFile.isCached() || cachedFile.isLoading()) throw DownloadException(cachedFile)
+            val fileId = cachedFile.id
+            val fileName = cachedFile.filename
+            val downloadQuery = "downloadQuery taskId: $cachePathName fileId: $fileId"
+            logger.log(TAG, downloadQuery)
+            wrapLoadingException(cachedFile) {
+                wrapRetrofitExceptions(query = downloadQuery) {
+                    val response = retrofitApi.downloadFile(auth.toBasic(), cachePathName, fileId)
+                    logger.log(TAG, "response code $response.code()")
+                    if (response.isSuccessful) {
+                        val inputStream = response.body()?.byteStream()
+                        inputStream?.let {
+                            val contentLength = response.body()!!.contentLength()
+                            val finalName = fileRepository.saveDownloadedFile(
+                                inputStream,
+                                cachePathName,
+                                fileId,
+                                fileName,
+                                contentLength
+                            )
+                            finalName.collect { saveRequest ->
+                                when (saveRequest) {
+                                    is ProgressRequest -> {
+                                        cachedFile.setLoadingProgress(saveRequest.progress)
+                                    }
+
+                                    is ErrorRequest -> {}
+                                    is PendingRequest -> {}
+                                    is SuccessRequest -> {
+                                        logger.log(TAG, "save completed")
+                                        emit(SuccessRequest(cachedFile.setCached(saveRequest.data)))
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        throw HttpException(response)
                     }
-                } else {
-                    throw HttpException(response)
                 }
+
             }
+        } catch (e: Throwable) {
+            emit(ErrorRequest<CachedFile>(e))
         }
     }.flowOn(ioDispatcher)
 
@@ -204,6 +211,7 @@ class CachedFilesRepositoryImpl @Inject constructor(
                             logger.log(TAG, "uploadFileToServer progress: ${request.progress}")
                             cachedFile.setLoadingProgress(request.progress)
                         }
+
                         is SuccessRequest -> {
                             if (validateUploadResponse(request.data, cachedFile)) {
                                 logger.log(TAG, "uploadFileToServer success: ${request.data}")
@@ -212,6 +220,7 @@ class CachedFilesRepositoryImpl @Inject constructor(
                                 emit(SuccessRequest(uploadedFile))
                             }
                         }
+
                         else -> {}
                     }
                 }

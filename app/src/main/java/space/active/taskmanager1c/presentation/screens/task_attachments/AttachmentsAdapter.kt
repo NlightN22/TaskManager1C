@@ -110,7 +110,7 @@ class AttachmentsAdapter(
         val item = currentList[position]
         holder.itemView.tag = item
         holder.itemBind.apply {
-            Log.d("AttachmentsAdapter", "item ${item}")
+            Log.d("AttachmentsAdapter", "item $item")
             if (!item.loading) {
                 groupLoadingProgress.isVisible = false
                 imageViewItem.visibility = View.VISIBLE
