@@ -37,7 +37,7 @@
                 style="@style/EditTextEditable"
                 android:layout_width="match_parent"
                 android:gravity="top|center"
-                android:inputType="textMultiLine"
+                android:inputType="textMultiLine|textCapSentences"
                 tools:text="" />
         </com.google.android.material.textfield.TextInputLayout>
     </com.google.android.material.card.MaterialCardView>
