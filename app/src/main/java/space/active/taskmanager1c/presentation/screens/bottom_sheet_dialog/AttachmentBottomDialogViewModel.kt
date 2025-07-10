@@ -28,7 +28,7 @@ class AttachmentBottomDialogViewModel @Inject constructor(
 
     private val _saveNewPhotoEvent = MutableSharedFlow<Uri>()
     val saveNewPhotoEvent = _saveNewPhotoEvent.asSharedFlow()
-    private val _selectNewPhotoEvent = MutableSharedFlow<Boolean>()
+    private val _selectNewPhotoEvent = MutableSharedFlow<String>()
     val selectNewPhotoEvent = _selectNewPhotoEvent.asSharedFlow()
     private val _selectNewFileEvent = MutableSharedFlow<String>() // MimeType string
     val selectNewFileEvent = _selectNewFileEvent.asSharedFlow()
@@ -52,7 +52,7 @@ class AttachmentBottomDialogViewModel @Inject constructor(
 
     fun clickSelectNewPhoto() {
         viewModelScope.launch {
-            _selectNewPhotoEvent.emit(true)
+            _selectNewPhotoEvent.emit("image/*")
         }
     }
 

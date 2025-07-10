@@ -15,7 +15,7 @@ class TaskFilesObserver @Inject constructor(
 
     fun observe(inPath: String): Flow<List<File>> = channelFlow {
         val listener =
-            object : FileObserver(inPath, CREATE or DELETE or MOVE_SELF or MOVED_FROM or MOVED_TO) {
+            object : FileObserver(File(inPath), CREATE or DELETE or MOVE_SELF or MOVED_FROM or MOVED_TO) {
                 override fun onEvent(event: Int, path: String?) {
                     if (isActive) {
                         path?.let {

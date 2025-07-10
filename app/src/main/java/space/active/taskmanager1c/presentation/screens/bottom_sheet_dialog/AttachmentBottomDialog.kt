@@ -2,6 +2,7 @@ package space.active.taskmanager1c.presentation.screens.bottom_sheet_dialog
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -30,6 +31,7 @@ import javax.inject.Inject
 
 private const val TAG = "AttachmentBottomDialog"
 typealias AttachmentDialogListener = (requestKey: String, buttonString: String?) -> Unit
+
 
 @AndroidEntryPoint
 class AttachmentBottomDialog : BottomSheetDialogFragment() {
@@ -116,22 +118,31 @@ class AttachmentBottomDialog : BottomSheetDialogFragment() {
         parentFragmentManager.beginTransaction().remove(this).commit()
     }
 
+
+    private val selectMultiplePhotos =
+        registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri> ->
+            uris.forEach { viewModel.saveSelectedExternalFile(it) }
+        }
+
+    private val selectMultipleFiles =
+        registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris: List<Uri> ->
+            uris.forEach { viewModel.saveSelectedExternalFile(it) }
+        }
+
     private fun observers() {
         viewModel.saveNewPhotoEvent.collectOnStart { uri ->
             wrapIntentStartActivity {
                 createPhoto.launch(uri)
             }
         }
-        viewModel.selectNewPhotoEvent.collectOnStart { boolean ->
+        viewModel.selectNewPhotoEvent.collectOnStart { mime ->
             wrapIntentStartActivity {
-                val intent =
-                    Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                selectPhoto.launch(intent)
+                selectMultiplePhotos.launch(mime)
             }
         }
         viewModel.selectNewFileEvent.collectOnStart { mimeType ->
             wrapIntentStartActivity {
-                selectFile.launch(mimeType)
+                selectMultipleFiles.launch(arrayOf(mimeType))
             }
         }
         viewModel.saveFinishedEvent.collectOnStart { result ->
