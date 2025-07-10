@@ -17,12 +17,12 @@ data class TaskInputHandledWithUsers(
         parentColumn = "id",
         entityColumn = "taskId"
     )
-    val coPerformers: List<CoPerformersInTask>,
+    val coPerformers: List<CoPerformersInTask>?,
     @Relation(
         parentColumn = "id",
         entityColumn = "taskId"
     )
-    val observers: List<ObserversInTask>
+    val observers: List<ObserversInTask>?,
 ) {
     fun isNewVersion(old: TaskInputHandledWithUsers): Boolean = this.taskInput.version > old.taskInput.version
 
@@ -56,7 +56,7 @@ data class TaskInputHandledWithUsers(
         with(this.taskInput) {
             return TaskDto(
                 authorId =authorId,
-                coPerformers =coPerformers.map { it.coPerformerId },
+                coPerformers = coPerformers?.map { it.coPerformerId },
                 date = date,
                 description = description,
                 deadline = deadline ?: "",
@@ -65,7 +65,7 @@ data class TaskInputHandledWithUsers(
                 name = name,
                 number = number,
                 objName = objName ?: "",
-                observers = observers.map { it.observerId },
+                observers = observers?.map { it.observerId },
                 performerId = performerId,
                 priority = priority ?: "",
                 status = status,
@@ -78,8 +78,8 @@ data class TaskInputHandledWithUsers(
     fun toUsersDomain(listUsers: List<UserInput>): UsersInTaskDomain = UsersInTaskDomain(
         author = listUsers.toUserDomain(this.taskInput.authorId),
         performer = listUsers.toUserDomain(this.taskInput.performerId),
-        coPerformers = coPerformers.map { listUsers.toUserDomain(it.coPerformerId) },
-        observers = observers.map { listUsers.toUserDomain(it.observerId) }
+        coPerformers = coPerformers?.map { listUsers.toUserDomain(it.coPerformerId) },
+        observers = observers?.map { listUsers.toUserDomain(it.observerId) }
     )
 
     private fun List<UserInput>.toUserDomain(id: String): UserDomain {

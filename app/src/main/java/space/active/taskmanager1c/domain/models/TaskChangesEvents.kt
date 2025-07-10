@@ -17,11 +17,11 @@ sealed class TaskChangesEvents {
     ) : TaskChangesEvents()
 
     data class CoPerformers(
-        val userDomains: List<UserDomain>
+        val userDomains: List<UserDomain> = emptyList()
     ) : TaskChangesEvents()
 
     data class Observers(
-        val userDomains: List<UserDomain>
+        val userDomains: List<UserDomain> = emptyList()
     ) : TaskChangesEvents()
 
     data class Description(

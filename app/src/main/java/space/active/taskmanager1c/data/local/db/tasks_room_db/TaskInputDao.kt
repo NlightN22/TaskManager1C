@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.*
 import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.relations.TaskInputHandledWithUsers
 import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.OutputTask
-import space.active.taskmanager1c.domain.use_case.SetTaskUnreadTag
 
 @Dao
 interface TaskInputDao {
@@ -63,8 +62,8 @@ interface TaskInputDao {
     @Transaction
     suspend fun insertTask(taskInputHandled: TaskInputHandledWithUsers) {
         insertTaskInputHandled(taskInputHandled.taskInput)
-        insertCoPerformersInTask(taskInputHandled.coPerformers)
-        insertObserversInTask(taskInputHandled.observers)
+        insertCoPerformersInTask(taskInputHandled.coPerformers ?: emptyList())
+        insertObserversInTask(taskInputHandled.observers ?: emptyList())
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

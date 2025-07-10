@@ -22,7 +22,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.output_entities.Ou
         UserSettings::class,
         ReadingTimesTaskEntity::class
     ],
-    version = 6,
+    version = 8,
     )
 @TypeConverters(Converters::class)
 abstract class TaskWithUsersDatabase : RoomDatabase() {

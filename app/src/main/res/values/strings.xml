@@ -80,7 +80,7 @@
     <string name="title_dialog_hint">Введите наименование задачи</string>
     <string name="description_dialog_hint">Введите описание задачи</string>
     <string name="title_valid_error">Заголовок не может быть пустым или больше %d символов</string>
-    <string name="author_status_valid_error">Автор может установить только статусы: %s, %s</string>
+    <string name="author_status_valid_error">Автор может установить только статусы: %1$s, %2$s</string>
     <string name="performer_status_valid_error">Испольнитель может установить только статус: %s</string>
     <string name="status_valid_error">Статус может менять только Автор или Исполнитель</string>
     <string name="common_valid_error">Не указан тип изменения для проверки</string>
@@ -101,7 +101,7 @@
     <string name="exception_show_snackbar">Ошибка при отображении сообщения в snackbar: %s</string>
     <string name="exception_parse_server_answer">Неожиданный ответ от сервера. Подробнее в логе</string>
     <string name="exception_connection">Ошибка подключения. Проверьте ваше соединение с сервером</string>
-    <string name="exception_server_answer">Ошибка от сервера %s. %s</string>
+    <string name="exception_server_answer">Ошибка от сервера %1$s. %2$s</string>
     <string name="error_new_task_send_message">Ошибка отправки сообщения. Отсутствует ID задачи</string>
     <string name="exception_not_correct_URL">Некорректный адрес сервера</string>
     <string name="exception_encryption">Ошибка шифрования. Сообщите о проблеме разработчику</string>

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "d867284730651c68ce57bcc35bc8fa2a",
+    "identityHash": "824844845991ad971692a2f3cbae92ef",
     "entities": [
       {
         "tableName": "TaskInputHandled",
@@ -23,8 +23,7 @@
           {
             "fieldPath": "deadline",
             "columnName": "deadline",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "id",
@@ -35,8 +34,7 @@
           {
             "fieldPath": "mainTaskId",
             "columnName": "mainTaskId",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "name",
@@ -53,8 +51,7 @@
           {
             "fieldPath": "objName",
             "columnName": "objName",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "priority",
@@ -122,9 +119,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "InputTaskId",
@@ -142,9 +137,7 @@
           "columnNames": [
             "inputId"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "CoPerformersInTask",
@@ -266,13 +259,11 @@
           "columnNames": [
             "userId"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "OutputTask",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`outputId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `newTask` INTEGER NOT NULL, `myId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT NOT NULL, `date` TEXT NOT NULL, `deadline` TEXT NOT NULL, `description` TEXT NOT NULL, `id` TEXT NOT NULL, `mainTaskId` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT NOT NULL, `observers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `unreaded` INTEGER NOT NULL, `version` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`outputId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `newTask` INTEGER NOT NULL, `myId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `coPerformers` TEXT, `date` TEXT NOT NULL, `deadline` TEXT NOT NULL, `description` TEXT NOT NULL, `id` TEXT NOT NULL, `mainTaskId` TEXT NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `objName` TEXT NOT NULL, `observers` TEXT NOT NULL, `performerId` TEXT NOT NULL, `priority` TEXT NOT NULL, `status` TEXT NOT NULL, `unreaded` INTEGER NOT NULL, `version` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "outputId",
@@ -301,8 +292,7 @@
           {
             "fieldPath": "taskDto.coPerformers",
             "columnName": "coPerformers",
-            "affinity": "TEXT",
-            "notNull": true
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "taskDto.date",
@@ -394,9 +384,7 @@
           "columnNames": [
             "outputId"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "Label",
@@ -414,9 +402,7 @@
           "columnNames": [
             "labelName"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "UserSettings",
@@ -431,26 +417,22 @@
           {
             "fieldPath": "userId",
             "columnName": "userId",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "username",
             "columnName": "username",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "password",
             "columnName": "password",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "serverAddress",
             "columnName": "serverAddress",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "skipStatusAlert",
@@ -464,9 +446,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "ReadingTimesTaskEntity",
@@ -502,15 +482,12 @@
           "columnNames": [
             "mainTaskId"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       }
     ],
-    "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd867284730651c68ce57bcc35bc8fa2a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '824844845991ad971692a2f3cbae92ef')"
     ]
   }
 }

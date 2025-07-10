@@ -388,7 +388,7 @@ class TaskDetailedViewModel @Inject constructor(
                         if (!_enabledFields.value.coPerfomers) {
                             return@launch
                         }
-                        usersIds = task.users.coPerformers.map { it.id }
+                        usersIds = task.users.coPerformers?.map { it.id } ?: emptyList()
                         val dialogItems =
                             listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(CoPerformersDialog(dialogItems))
@@ -397,7 +397,7 @@ class TaskDetailedViewModel @Inject constructor(
                         if (!_enabledFields.value.observers) {
                             return@launch
                         }
-                        usersIds = task.users.observers.map { it.id }
+                        usersIds = task.users.observers?.map { it.id } ?: emptyList()
                         val dialogItems =
                             listUserDomains.toDialogItems(currentSelectedUsersId = usersIds)
                         _showDialogEvent.emit(ObserversDialog(dialogItems))

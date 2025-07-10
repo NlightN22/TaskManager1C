@@ -147,13 +147,15 @@ class TaskDetailedFragment : BaseFragment(R.layout.fragment_task_detailed) {
                     showDatePicker()
                 }
                 is InnerTasksDialog -> {
-                    SingleChooseDialog.show(
-                        parentFragmentManager,
-                        event.listTasks.toDialogListItems(),
-                        false,
-                        true,
-                        REQUEST_INNER_TASK
-                    )
+                    if (event.listTasks !== null) {
+                        SingleChooseDialog.show(
+                            parentFragmentManager,
+                            event.listTasks.toDialogListItems(),
+                            false,
+                            true,
+                            REQUEST_INNER_TASK
+                        )
+                    }
                 }
                 is EditTitleDialog -> {
                     event.dialogState?.let {

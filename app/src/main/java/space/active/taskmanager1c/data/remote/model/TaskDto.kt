@@ -8,7 +8,7 @@ import space.active.taskmanager1c.data.local.db.tasks_room_db.input_entities.rel
 
 data class TaskDto(
     val authorId: String,
-    val coPerformers: List<String>,
+    val coPerformers: List<String>?,
     val date: String,
     val deadline: String,
     val description: String,
@@ -17,7 +17,7 @@ data class TaskDto(
     val name: String,
     val number: String,
     val objName: String,
-    val observers: List<String>,
+    val observers: List<String>?,
     val performerId: String,
     val priority: String,
     val status: String,
@@ -28,8 +28,8 @@ data class TaskDto(
     fun toTaskInputHandledWithUsers(myId: String): TaskInputHandledWithUsers =
         TaskInputHandledWithUsers(
             taskInput = toTaskInputHandled(myId),
-            coPerformers = coPerformers.map { it.toCoPerformer() },
-            observers = observers.map { it.toObservers() }
+            coPerformers = coPerformers?.map { it.toCoPerformer() },
+            observers = observers?.map { it.toObservers() }
         )
 
     private fun String.toCoPerformer(): CoPerformersInTask = CoPerformersInTask(
@@ -69,7 +69,7 @@ data class TaskDto(
 
     private fun definePerformer(myId: String): Boolean {
         if (performerId == myId) return true
-        if (coPerformers.contains(myId)) return true
+        if (coPerformers?.contains(myId) == true) return true
         return false
     }
 

@@ -83,8 +83,8 @@ class TaskListAdapter(
                     taskDomain.users.author.name
                 }
             )
-            isObserved.isVisible = taskDomain.users.observers.isNotEmpty()
-            isCoPerformed.isVisible = taskDomain.users.coPerformers.isNotEmpty()
+            isObserved.isVisible = taskDomain.users.observers?.isNotEmpty() == true
+            isCoPerformed.isVisible = taskDomain.users.coPerformers?.isNotEmpty() == true
             isSending.isVisible = taskDomain.isSending
             listItemShimmer.setSendingState(taskDomain.isSending)
             taskStatus.isVisible = taskDomain.ok

@@ -58,5 +58,5 @@ data class EditDescriptionDialog(
 ) : TaskDetailedDialogs()
 
 data class InnerTasksDialog(
-    val listTasks: List<ClickableTask>
+    val listTasks: List<ClickableTask>?
 ) : TaskDetailedDialogs()

@@ -68,11 +68,12 @@ fun TaskDetailedFragment.renderUnread(viewModel: TaskDetailedViewModel) {
     viewModel.taskUnreadStatus.collectOnCreated { unread ->
         binding.bottomMenu.root.apply {
             val messageItem = menu.findItem(R.id.detailed_messages)
-            if (messageItem.isVisible) {
-                if (unread) {
-                    messageItem.setIcon(R.drawable.ic_messages_bottom_menu_unread)
-                } else {
-                    messageItem.setIcon(R.drawable.ic_messages_bottom_menu)
+            messageItem?.let {
+                if (it.isVisible) {
+                    it.setIcon(
+                        if (unread) R.drawable.ic_messages_bottom_menu_unread
+                        else R.drawable.ic_messages_bottom_menu
+                    )
                 }
             }
         }

@@ -15,7 +15,7 @@ class DefineUserInTask @Inject constructor() {
             if (taskDomain.status != TaskDomain.Status.Finished) {
                 return TaskUserIs.Author()
             }
-        } else if (taskDomain.users.performer == whoAmI || taskDomain.users.coPerformers.contains(whoAmI)) {
+        } else if (taskDomain.users.performer == whoAmI || taskDomain.users.coPerformers?.contains(whoAmI) == true) {
             //if performer in reviewed can only resume taskDomain
             if (taskDomain.status == TaskDomain.Status.Reviewed) {
                 return TaskUserIs.PerformerInReviewed()

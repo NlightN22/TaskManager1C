@@ -107,9 +107,11 @@ class TaskListViewModel @Inject constructor(
                         _listTaskDomain.value = SuccessRequest(inputList)
                         _startUpdateJob.value = true
                     }
+
                     is PendingRequest -> {
                         _listTaskDomain.value = PendingRequest()
                     }
+
                     is ErrorRequest -> {
                         exceptionHandler(request.exception)
                     }
@@ -207,12 +209,15 @@ class TaskListViewModel @Inject constructor(
                     is TaskListOrderTypes.Name -> {
                         orderTypes.copy(desc = !orderTypes.desc)
                     }
+
                     is TaskListOrderTypes.Performer -> {
                         orderTypes.copy(desc = !orderTypes.desc)
                     }
+
                     is TaskListOrderTypes.StartDate -> {
                         orderTypes.copy(desc = !orderTypes.desc)
                     }
+
                     is TaskListOrderTypes.EndDate -> {
                         orderTypes.copy(desc = !orderTypes.desc)
                     }
@@ -250,10 +255,14 @@ class TaskListViewModel @Inject constructor(
         this.users.performer.name.contains(name, true)
 
     private fun TaskDomain.filterByCoPerformer(name: String): Boolean =
-        this.users.coPerformers.any { user -> user.name.contains(name, true) }
+        this.users.coPerformers
+            ?.any { user -> user.name.contains(name, true) }
+            ?: false
 
     private fun TaskDomain.filterByObservers(name: String): Boolean =
-        this.users.observers.any { user -> user.name.contains(name, true) }
+        this.users.observers
+            ?.any { user -> user.name.contains(name, true) }
+            ?: false
 
     private fun TaskDomain.filterByNumber(number: String): Boolean =
         this.number.contains(number, true)

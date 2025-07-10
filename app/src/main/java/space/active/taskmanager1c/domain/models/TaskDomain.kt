@@ -94,7 +94,7 @@ data class TaskDomain(
     fun toTaskDTO(): TaskDto {
         return TaskDto(
             authorId = users.author.id,
-            coPerformers = users.coPerformers.map { it.id },
+            coPerformers = users.coPerformers?.map { it.id },
             date = date.toDTO(),
             description = description,
             deadline = deadline.toDTO(),
@@ -103,7 +103,7 @@ data class TaskDomain(
             name = name,
             number = number,
             objName = objName,
-            observers = users.observers.map { it.id },
+            observers = users.observers?.map { it.id },
             performerId = users.performer.id,
             priority = priority.toDTO(),
             status = status.toStatusDTO(),
@@ -121,8 +121,8 @@ data class TaskDomain(
         deadLine = this.deadline?.toShortDate() ?: "",
         daysEnd = this.getDeadline(),
         performer = this.users.performer.name,
-        coPerfomers = this.users.coPerformers.toText(),
-        observers = this.users.observers.toText(),
+        coPerfomers = this.users.coPerformers?.toText() ?: "",
+        observers = this.users.observers?.toText() ?: "",
         description = this.description,
         taskObject = this.objName,
         status = this.status
