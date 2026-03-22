@@ -2,10 +2,15 @@ package space.active.taskmanager1c.presentation.screens.mainactivity
 
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.os.Build
 import android.os.Bundle
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
@@ -19,7 +24,6 @@ import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.LOGIN_SUCCESSFUL
 import space.active.taskmanager1c.presentation.utils.Toasts
 import javax.inject.Inject
-import androidx.core.view.updatePadding
 
 private const val TAG = "MainActivity"
 
@@ -38,6 +42,15 @@ class MainActivity : AppCompatActivity() {
 
     private val navController by lazy { findNavController(R.id.fragmentContainerView) }
 
+    private val backPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            logger.log(TAG, "OnBackPressedDispatcher callback fired")
+            handleBackPressed()
+        }
+    }
+
+    private var backInvokedCallback: OnBackInvokedCallback? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -51,8 +64,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        setupBackPressHandler()
         listeners()
         observers()
+    }
+
+    override fun onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            backInvokedCallback?.let {
+                onBackInvokedDispatcher.unregisterOnBackInvokedCallback(it)
+            }
+            backInvokedCallback = null
+        }
+        super.onDestroy()
     }
 
     override fun onStart() {
@@ -60,16 +84,52 @@ class MainActivity : AppCompatActivity() {
         handleDeepLinkOnStart()
     }
 
+    private fun setupBackPressHandler() {
+        logger.log(TAG, "setupBackPressHandler register dispatcher callback")
+        onBackPressedDispatcher.addCallback(this, backPressedCallback)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val callback = OnBackInvokedCallback {
+                logger.log(TAG, "OnBackInvokedCallback fired")
+                handleBackPressed()
+            }
+            backInvokedCallback = callback
+
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                callback
+            )
+        }
+    }
+
+    private fun handleBackPressed() {
+        logger.log(TAG, "handleBackPressed")
+
+        val backDestination = navController.previousBackStackEntry?.destination?.id
+        val currentDestination = navController.currentDestination
+
+        logger.log(
+            TAG,
+            "currentFragment ID: ${currentDestination?.id} login ID: ${R.id.loginFragment}"
+        )
+
+        if (currentDestination?.id == R.id.loginFragment) {
+            handleLoginBack(navController)
+        } else {
+            if (backDestination == null) {
+                exitWithTimer()
+            } else {
+                navController.navigateUp()
+            }
+        }
+    }
+
     private fun handleDeepLinkOnStart() {
-        logger.log(TAG, "OnStart: $intent  with activity: $this")
-        /**
-        Флаг 0x13000000 в Intent является комбинацией следующих флагов:
-        FLAG_ACTIVITY_NEW_TASK (0x10000000) - Запуск новой задачи для целевой активности. Если этот флаг не установлен, активность будет запущена в контексте задачи, которая уже существует, если таковая имеется.
-        FLAG_ACTIVITY_SINGLE_TOP (0x20000000) - Если активность уже запущена в вершине стека, то не создавайте новый экземпляр активности, а вместо этого передайте ей новый Intent, содержащий последние изменения.
-        FLAG_ACTIVITY_NO_ANIMATION (0x4000000) - Отключение стандартной анимации для этой операции старта активности.
-         */
-        if ((intent.flags == 0x13000000
-                    || intent.flags == FLAG_ACTIVITY_NEW_TASK) && intent.action == Intent.ACTION_VIEW) {
+        logger.log(TAG, "OnStart: $intent with activity: $this")
+
+        if ((intent.flags == 0x13000000 || intent.flags == FLAG_ACTIVITY_NEW_TASK)
+            && intent.action == Intent.ACTION_VIEW
+        ) {
             handleDeepLink(navController, intent)
             intent.data = null
         }
@@ -80,7 +140,7 @@ class MainActivity : AppCompatActivity() {
         logger.log(TAG, "onNewIntent: $intent with activity: $this")
         intent?.let {
             handleDeepLink(navController, it)
-            intent.data = null
+            it.data = null
         }
     }
 
@@ -90,45 +150,26 @@ class MainActivity : AppCompatActivity() {
     private fun listeners() {
     }
 
-    @Suppress("DEPRECATION")
-    override fun onBackPressed() {
-        logger.log(TAG, "onBackPressed")
-        val backDestination =
-            navController.previousBackStackEntry?.destination?.id
-        val currentDestination = navController.currentDestination
-        logger.log(
-            TAG,
-            "currentFragment ID: ${currentDestination?.id} login ID: ${R.id.loginFragment}"
-        )
-        if (currentDestination!!.id == R.id.loginFragment) {
-            handleLoginBack(navController)
-        } else {
-            if (backDestination == null) {
-                exitWithTimer()
-            } else {
-                super.onBackPressed()
-            }
-        }
-    }
-
-    @Suppress("DEPRECATION")
     private fun handleLoginBack(navController: NavController) {
         val previousState = navController.previousBackStackEntry?.savedStateHandle
         val loginState = previousState?.get<Boolean>(LOGIN_SUCCESSFUL)
-        logger.log(TAG, "previousState loginState: ${loginState}")
-        loginState?.let {
-            if (it) {
-                super.onBackPressed()
-                return
-            }
+
+        logger.log(TAG, "previousState loginState: $loginState")
+
+        if (loginState == true) {
+            navController.navigateUp()
+            return
         }
+
         exitWithTimer()
     }
 
     private var lastPress: Long = 0
+
     private fun exitWithTimer() {
-        val currentTime: Long = System.currentTimeMillis()
-        val delay: Int = 2000
+        val currentTime = System.currentTimeMillis()
+        val delay = 2000
+
         if (currentTime - lastPress > delay) {
             val message = getString(R.string.exit_msg)
 
@@ -143,12 +184,13 @@ class MainActivity : AppCompatActivity() {
                 currentFragment.showSnackBar(UiText.Dynamic(message))
             } else {
                 logger.log(TAG, "not BaseFragment")
-                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT)
+                    .show()
             }
 
-            lastPress = System.currentTimeMillis()
+            lastPress = currentTime
         } else {
-            this.finishAffinity()
+            finishAffinity()
         }
     }
 }

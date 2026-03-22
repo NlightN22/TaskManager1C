@@ -208,19 +208,9 @@ abstract class BaseFragment(fragment: Int) : Fragment(fragment) {
 
     fun onBackClick() {
         try {
-            val destination = findNavController().currentBackStackEntry?.destination
-            val backDest = findNavController().previousBackStackEntry?.destination
-            logger.log(
-                TAG,
-                "Navigation back. Previous fragment:${backDest?.label}\ncurrent fragment: ${currentDestination?.label} "
-            )
-            destination?.let {
-                if (it.id == currentDestination?.id) {
-                    requireActivity().onBackPressedDispatcher.onBackPressed()
-                } else {
-                    logger.log("onBackClick", "")
-                    findNavController().popBackStack()
-                }
+            val navController = findNavController()
+            if (!navController.navigateUp()) {
+                requireActivity().finish()
             }
         } catch (e: Throwable) {
             e.printStackTrace()
