@@ -155,6 +155,10 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                     viewModel.deleteFileFromServer(item)
                     return@setOnMenuItemClickListener true
                 }
+                R.id.attachmentItemCancelUpload -> {
+                    viewModel.cancelUpload(item)
+                    return@setOnMenuItemClickListener true
+                }
             }
             return@setOnMenuItemClickListener false
         }
@@ -164,7 +168,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
     private fun renderOptionsMenu(view: View, item: CachedFile): PopupMenu {
         val popupMenu = PopupMenu(requireContext(), view)
 
-        if (item.cached) {
+        if (item.cached && !item.loading) {
             popupMenu.menu.apply {
                 add(
                     R.menu.options_menu_attachment_item,
@@ -180,7 +184,15 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                 )
             }
         }
-        if (item.notUploaded) {
+
+        if (item.loading) {
+            popupMenu.menu.add(
+                R.menu.options_menu_attachment_item,
+                R.id.attachmentItemCancelUpload,
+                3,
+                R.string.cancel_upload_item
+            )
+        } else if (item.notUploaded) {
             popupMenu.menu.add(
                 R.menu.options_menu_attachment_item,
                 R.id.attachmentItemUpload,
@@ -188,7 +200,8 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                 R.string.upload_item
             )
         }
-        if (!item.cached) {
+
+        if (!item.cached && !item.loading) {
             popupMenu.menu.add(
                 R.menu.options_menu_attachment_item,
                 R.id.attachmentItemDownload,
@@ -196,7 +209,8 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                 R.string.download_item
             )
         }
-        if (!item.notUploaded) {
+
+        if (!item.notUploaded && !item.loading) {
             popupMenu.menu.add(
                 R.menu.options_menu_attachment_item,
                 R.id.attachmentItemDeleteFromServer,
@@ -204,6 +218,7 @@ class AttachmentsFragment : BaseFragment(R.layout.fragment_attachments) {
                 R.string.delete_item_from_server
             )
         }
+
         return popupMenu
     }
 

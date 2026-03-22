@@ -141,11 +141,11 @@ interface RetrofitApi {
     ): Response<ResponseBody>
 
     @POST("tasks/{taskId}/file")
-    suspend fun uploadFile(
+    fun uploadFile(
         @Header("Authorization") auth: String,
         @Path("taskId") taskId: String,
         @Body multipartBody: RequestBody
-    ): FileDTO
+    ): retrofit2.Call<FileDTO>
 
     @POST("tasks/{taskId}/fileCheck")
     suspend fun checkFileName(

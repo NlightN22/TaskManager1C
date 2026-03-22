@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/attachmentItemCancelUpload"
+        android:title="@string/cancel_upload_item"
+        android:tooltipText="@string/cancel_upload_item"
+        />
+    <item
         android:id="@+id/attachmentItemOpen"
         android:title="@string/open_item"
         android:tooltipText="@string/open_item"

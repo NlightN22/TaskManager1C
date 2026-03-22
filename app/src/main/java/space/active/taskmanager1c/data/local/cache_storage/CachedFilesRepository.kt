@@ -39,4 +39,6 @@ interface CachedFilesRepository {
 
     fun deleteCachedFile(cachedFile: CachedFile): Flow<Boolean>
     fun deleteFileFromServer(auth: AuthBasicDto, cachedFile: CachedFile, cacheDirPath: String): Flow<Boolean>
+
+    fun cancelUpload(cachedFile: CachedFile)
 }

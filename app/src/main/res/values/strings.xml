@@ -119,6 +119,8 @@
     <string name="attachments_error_loading">Ошибка загрузки: %s</string>
     <string name="attachments_delete_from_server">Файл удалён с сервера: %s</string>
     <string name="attachments_name_exist">Файл с таким именем существует: %s</string>
+    <string name="attachments_file_exist">Файл %s уже добавлен</string>
+    <string name="attachments_too_large">Файл %s больше чем %s</string>
     <string name="permissions_not_granted">Отсутвует разрешение на: %s</string>
     <string name="permissions_open_deeplinks">Открытие ссылок</string>
 </resources>

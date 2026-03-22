@@ -11,6 +11,7 @@ import space.active.taskmanager1c.R
 import space.active.taskmanager1c.coreutils.UiText
 import space.active.taskmanager1c.coreutils.logger.Logger
 import space.active.taskmanager1c.data.local.cache_storage.CachedFilesRepository
+import space.active.taskmanager1c.data.local.cache_storage.CachedFilesRepositoryImpl
 import space.active.taskmanager1c.domain.repository.SettingsRepository
 import space.active.taskmanager1c.domain.use_case.ExceptionHandler
 import space.active.taskmanager1c.domain.use_case.ShowToast
@@ -30,7 +31,7 @@ class AttachmentBottomDialogViewModel @Inject constructor(
     val saveNewPhotoEvent = _saveNewPhotoEvent.asSharedFlow()
     private val _selectNewPhotoEvent = MutableSharedFlow<String>()
     val selectNewPhotoEvent = _selectNewPhotoEvent.asSharedFlow()
-    private val _selectNewFileEvent = MutableSharedFlow<String>() // MimeType string
+    private val _selectNewFileEvent = MutableSharedFlow<String>()
     val selectNewFileEvent = _selectNewFileEvent.asSharedFlow()
     private val _saveFinishedEvent = MutableSharedFlow<String>()
     val saveFinishedEvent = _saveFinishedEvent.asSharedFlow()
@@ -43,10 +44,8 @@ class AttachmentBottomDialogViewModel @Inject constructor(
 
     fun clickNewPhoto() {
         viewModelScope.launch {
-            // get uri from cached file repository to save new photo
             val newContentUri = cachedFilesRepository.getCacheUriForSave(taskId)
-            // uri must be temp from content resolver
-            _saveNewPhotoEvent.emit(newContentUri) // emit uri where to save
+            _saveNewPhotoEvent.emit(newContentUri)
         }
     }
 
@@ -58,7 +57,7 @@ class AttachmentBottomDialogViewModel @Inject constructor(
 
     fun clickSelectNewFile() {
         viewModelScope.launch {
-            _selectNewFileEvent.emit("*/*") // all file types
+            _selectNewFileEvent.emit("*/*")
         }
     }
 
@@ -69,14 +68,39 @@ class AttachmentBottomDialogViewModel @Inject constructor(
     }
 
     fun saveSelectedExternalFile(uri: Uri) {
-        cachedFilesRepository.saveExternalFileToCache(uri, taskId)
-            .catch { exceptionHandler(it) }
-            .collectInScope { isSuccess ->
-            if (isSuccess) {
-                finishSave("File saved successfully")
-            } else {
-                showToast(UiText.Resource(R.string.bottom_sheet_error_save_file))
-            }
+        viewModelScope.launch {
+            cachedFilesRepository.saveExternalFileToCache(uri, cacheDirPath = taskId)
+                .catch { e ->
+                    when (e) {
+                        is CachedFilesRepositoryImpl.SizeTooHighException -> {
+                            showToast(
+                                UiText.Resource(
+                                    R.string.attachments_too_large,
+                                    e.name,
+                                    (CachedFilesRepositoryImpl.MAX_FILE_SIZE_BYTES / 1024 / 1024).toString()
+                                )
+                            )
+                        }
+
+                        is CachedFilesRepositoryImpl.DuplicateFileException -> {
+                            showToast(
+                                UiText.Resource(
+                                    R.string.attachments_file_exist,
+                                    e.name
+                                )
+                            )
+                        }
+
+                        else -> exceptionHandler(e)
+                    }
+                }
+                .collectInScope { isSuccess ->
+                    if (isSuccess) {
+                        finishSave(result = "File saved successfully")
+                    } else {
+                        showToast(UiText.Resource(R.string.bottom_sheet_error_save_file))
+                    }
+                }
         }
     }
 }

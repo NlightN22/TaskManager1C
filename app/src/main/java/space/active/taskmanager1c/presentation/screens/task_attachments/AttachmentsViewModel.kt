@@ -23,6 +23,7 @@ import javax.inject.Inject
 
 
 private const val TAG = "AttachmentsViewModel"
+private val uploadJobs = mutableMapOf<String, Job>()
 
 @HiltViewModel
 class AttachmentsViewModel @Inject constructor(
@@ -94,7 +95,8 @@ class AttachmentsViewModel @Inject constructor(
 
     fun uploadFileToServer(cachedFile: CachedFile) {
         if (cachedFile.isLoading()) return
-        viewModelScope.launch {
+
+        val job = viewModelScope.launch {
             cachedFilesRepository.uploadFileToServer(
                 getCredentials().toAuthBasicDto(),
                 cachedFile,
@@ -113,25 +115,19 @@ class AttachmentsViewModel @Inject constructor(
                 .collect { request ->
                     when (request) {
                         is SuccessRequest -> {
-                            showToast(
-                                UiText.Resource(
-                                    R.string.attachments_end_loading,
-                                    cachedFile.filename
-                                )
-                            )
-                        }
-                        is PendingRequest -> {
+                            showToast(UiText.Resource(R.string.attachments_end_loading, cachedFile.filename))
                         }
                         is ErrorRequest -> {
-                            showToast(
-                                UiText.Resource(
-                                    R.string.attachments_error_loading,
-                                    cachedFile.filename
-                                )
-                            )
+                            showToast(UiText.Resource(R.string.attachments_error_loading, cachedFile.filename))
                         }
+                        is PendingRequest -> {}
                     }
                 }
+        }
+
+        uploadJobs[cachedFile.id] = job
+        job.invokeOnCompletion {
+            uploadJobs.remove(cachedFile.id)
         }
     }
 
@@ -236,6 +232,20 @@ class AttachmentsViewModel @Inject constructor(
     private fun CachedFile.isDownloaded(): Boolean {
         val list = _listItems.value
         return list is SuccessRequest && list.data.find { it.id == this.id }?.cached ?: true
+    }
+
+    fun cancelUpload(cachedFile: CachedFile, deleteFromCache: Boolean = true) {
+        uploadJobs[cachedFile.id]?.cancel()
+
+        viewModelScope.launch {
+            cachedFilesRepository.cancelUpload(cachedFile)
+
+            if (deleteFromCache) {
+                cachedFilesRepository.deleteCachedFile(cachedFile).collect {
+                    if (!it) showToast(UiText.Resource(R.string.attachments_delete_error))
+                }
+            }
+        }
     }
 
 }
