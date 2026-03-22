@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
@@ -17,6 +19,7 @@ import space.active.taskmanager1c.presentation.screens.BaseFragment
 import space.active.taskmanager1c.presentation.screens.LOGIN_SUCCESSFUL
 import space.active.taskmanager1c.presentation.utils.Toasts
 import javax.inject.Inject
+import androidx.core.view.updatePadding
 
 private const val TAG = "MainActivity"
 
@@ -39,6 +42,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val originalTopPadding = binding.fragmentContainerView.paddingTop
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.fragmentContainerView) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(top = originalTopPadding + bars.top)
+            insets
+        }
+
         listeners()
         observers()
     }
